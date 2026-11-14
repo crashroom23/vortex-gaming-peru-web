@@ -480,3 +480,97 @@ img,svg{max-width:100%}
 @media (max-width: 410px) {
   .storefront-banner-actions .btn { flex: 1 1 100%; }
 }
+
+
+/* Effects adapted from the original VortexGamer WordPress storefront. */
+.storefront-banner::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -26px 0 0;
+  background: radial-gradient(ellipse at 12% 12%, #aa55ff45, transparent 64%),
+    radial-gradient(ellipse at 91% 35%, #288cfa35, transparent 57%);
+  pointer-events: none;
+  animation: wp-vortex-glow 10s ease-in-out infinite alternate;
+}
+.storefront-banner .storefront-banner-title {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #9d55e4;
+  border-radius: clamp(10px, 2vw, 24px);
+  box-shadow: 0 0 45px #9d55e455, 0 20px 60px #0009;
+  animation: wp-vortex-banner-enter .8s ease-out both;
+}
+.storefront-banner-title img { border: 0; border-radius: 0; box-shadow: none; }
+.storefront-banner-title::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 25%, #ffffff24 45%, transparent 62%);
+  transform: translateX(-160%);
+  animation: wp-vortex-shimmer 9s ease-in-out infinite;
+  pointer-events: none;
+}
+.verify-card {
+  transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease;
+}
+.verify-card:focus-within {
+  border-color: #c69aff;
+  box-shadow: 0 12px 38px #a970ff55, 0 0 20px #8d4cf92e;
+}
+.verify-card #uid:focus { box-shadow: 0 0 16px #a970ff44; }
+.card-gem.pack-photo {
+  animation: wp-vortex-float 3.8s ease-in-out infinite;
+  transition: transform .3s, filter .3s;
+}
+.product-card:nth-child(2n) .pack-photo { animation-delay: -.8s; }
+.product-card:nth-child(3n) .pack-photo { animation-delay: -1.7s; }
+@media (hover: hover) {
+  .desktop-nav a:hover {
+    color: #eafffc;
+    text-shadow: 0 0 16px #75f6edaa;
+  }
+  .verify-card:hover {
+    border-color: #c69aff;
+    box-shadow: 0 12px 38px #a970ff55, 0 0 20px #8d4cf92e;
+  }
+  .product-card:hover {
+    transform: translateY(-6px);
+    border-color: #bd8aff;
+    box-shadow: 0 0 28px #a970ff55, 0 18px 35px #0008;
+  }
+  .product-card:hover .pack-photo {
+    transform: scale(1.1) rotate(-5deg);
+    filter: drop-shadow(0 0 10px #a970ff);
+  }
+  .btn-accent:hover:not(:disabled) {
+    filter: brightness(1.12);
+    box-shadow: 0 0 22px #c49aff88;
+  }
+}
+@media (min-width: 601px) and (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .verify-card:hover, .verify-card:focus-within { transform: translateY(-3px); }
+}
+@keyframes wp-vortex-glow {
+  from { opacity: .65; transform: translateY(0); }
+  to { opacity: 1; transform: translateY(18px); }
+}
+@keyframes wp-vortex-banner-enter {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes wp-vortex-float {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -9px; }
+}
+@keyframes wp-vortex-shimmer {
+  0%, 72% { transform: translateX(-160%); }
+  86%, 100% { transform: translateX(160%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .storefront-banner::before, .storefront-banner-title,
+  .storefront-banner-title::after, .card-gem.pack-photo {
+    animation: none;
+  }
+  .product-card:hover, .product-card:hover .pack-photo { transform: none; }
+}
