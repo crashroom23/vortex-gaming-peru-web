@@ -325,3 +325,15 @@ img,svg{max-width:100%}
   .payment-explanation{width:100%;text-align:center}
   .payment-tab{font-size:11px;padding:11px 5px}
 }
+
+/* Region fija: eliminamos selector y le damos todo el ancho al UID */
+.verify-card label[for="uid"]{grid-column:1/-1;grid-row:2}
+.verify-card #uid{grid-column:1/-1;grid-row:3}
+.fixed-region{grid-column:1/-1;grid-row:4;margin-top:6px;color:#b5a8d6;font:750 10px/1.6 Inter,sans-serif;letter-spacing:.8px}
+.fixed-region span{font-size:14px;margin-right:5px}
+.fixed-region strong{color:var(--cyan);font-weight:900}
+.verify-card #verify-btn{grid-row:5}
+.verify-card #simulate-verify{grid-row:6}
+.verify-card #verify-result{grid-row:7}
+.verify-card #verified-status{grid-row:8}
+.verify-card .verify-footnote{grid-row:9}
