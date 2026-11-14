@@ -50,6 +50,59 @@
   let checkoutProduct = null;
   let selectedPaymentMethod = 'yape';
 
+  // Turnstile valida que el formulario lo envió una persona antes de consultar al proveedor.
+  // El sitekey es público; el secreto y la credencial RA permanecen en Cloudflare Pages.
+  let uidValidationConfig = null;
+  let uidTurnstileWidget = null;
+  let uidTurnstileToken = '';
+
+  async function setupUidTurnstile() {
+    try {
+      const response = await fetch('/api/recargas/health', { headers: { Accept: 'application/json' }, cache: 'no-store' });
+      if (!response.ok) return;
+      const config = await response.json();
+      uidValidationConfig = config;
+      if (!config.validationReady || !config.turnstileSiteKey) return;
+
+      const container = $('#uid-turnstile');
+      if (!container) return;
+      container.hidden = false;
+      await new Promise((resolve, reject) => {
+        if (window.turnstile) return resolve();
+        const script = document.createElement('script');
+        script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+        script.async = true;
+        script.onload = resolve;
+        script.onerror = () => reject(new Error('No se pudo cargar el control de seguridad.'));
+        document.head.appendChild(script);
+      });
+      if (!window.turnstile) throw new Error('No se cargó la comprobación de seguridad.');
+      uidTurnstileWidget = window.turnstile.render(container, {
+        sitekey: config.turnstileSiteKey,
+        theme: 'dark',
+        action: 'ff_uid',
+        callback: token => { uidTurnstileToken = token; },
+        'expired-callback': () => { uidTurnstileToken = ''; },
+        'error-callback': () => { uidTurnstileToken = ''; }
+      });
+    } catch (_) {
+      // El formulario sigue accesible para el modo de demostración.
+      const result = $('#verify-result');
+      if (uidValidationConfig?.validationReady && result) {
+        result.hidden = false;
+        result.className = 'verify-result error';
+        result.textContent = 'El control de seguridad no cargó. Comprueba tu conexión o utiliza el modo demostración.';
+      }
+    }
+  }
+
+  function resetUidTurnstile() {
+    uidTurnstileToken = '';
+    if (uidTurnstileWidget !== null && window.turnstile) {
+      try { window.turnstile.reset(uidTurnstileWidget); } catch (_) {}
+    }
+  }
+
   const gemSVG = '<svg class="card-gem" viewBox="0 0 240 185" aria-hidden="true"><use href="#diamond-graphic"></use></svg>';
   const miniGemSVG = '<svg viewBox="0 0 240 185" aria-hidden="true"><use href="#diamond-graphic"></use></svg>';
   const arrowSVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"></use></svg>';
@@ -347,6 +400,12 @@
       result.textContent = 'Escribe un UID válido de 8 a 12 dígitos.';
       return;
     }
+    if (uidValidationConfig?.validationReady && !uidTurnstileToken) {
+      result.hidden = false;
+      result.className = 'verify-result error';
+      result.textContent = 'Completa el control de seguridad antes de verificar el UID.';
+      return;
+    }
     const button = $('#verify-btn');
     button.disabled = true;
     const originalLabel = button.innerHTML;
@@ -360,7 +419,7 @@
       let response = await fetch('/api/recargas/validate', {
         method: 'POST',
         headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-        body: JSON.stringify({ uid })
+        body: JSON.stringify({ uid, turnstileToken: uidTurnstileToken })
       });
       let data = await response.json();
       let verificationSource = 'Recargas América';
@@ -378,13 +437,13 @@
       result.className = 'verify-result ok';
       result.replaceChildren();
       const name = document.createElement('strong');
-      name.textContent = data.player.nickname;
+      name.textContent = data.player.nickname || 'Cuenta validada (nombre no disponible)';
       const details = document.createElement('div');
       details.textContent = 'UID: ' + data.player.uid + ' · Región de tienda: Sur LATAM · ' + verificationSource + (data.player.level == null ? '' : ' · Nivel: ' + data.player.level);
       result.append(name, details);
       playerSession = {
         uid,
-        nickname: String(data.player.nickname),
+        nickname: data.player.nickname || 'Cuenta validada',
         region,
         demo: false
       };
@@ -400,6 +459,7 @@
       result.className = 'verify-result error';
       result.textContent = error.message || 'No fue posible contactar al proveedor.';
     } finally {
+      resetUidTurnstile();
       button.disabled = false;
       button.innerHTML = originalLabel;
     }
@@ -407,4 +467,5 @@
 
   $('#year').textContent = new Date().getFullYear();
   refresh();
+  setupUidTurnstile();
 })();
