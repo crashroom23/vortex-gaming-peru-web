@@ -1,7 +1,7 @@
 // Estado de configuración. Nunca revela credenciales ni saldo de la billetera.
 export function onRequestGet({ env }) {
   const configured = Boolean(env.RA_API_KEY);
-  const enabled = configured && env.RA_VALIDATE_ENABLED === "true" && /^\d+$/.test(String(env.RA_FF_PRECHECK_PRODUCT_ID || ""));
+  const enabled = configured && env.RA_VALIDATE_ENABLED === "true" && Number.isSafeInteger(Number(env.RA_FF_PRECHECK_PRODUCT_ID || 5)) && Number(env.RA_FF_PRECHECK_PRODUCT_ID || 5) > 0;
   return new Response(JSON.stringify({
     ok: true,
     service: "RecargasAmerica",
