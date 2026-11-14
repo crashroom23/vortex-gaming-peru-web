@@ -355,15 +355,32 @@
     result.className = 'verify-result';
     result.textContent = 'Consultando el servidor de verificación…';
     try {
-      const response = await fetch('/api/freefire/verify?' + new URLSearchParams({ uid, region }).toString(), { headers: { Accept: 'application/json' } });
-      const data = await response.json();
-      if (!response.ok || !data.ok) throw new Error(data.message || 'No fue posible verificar el UID.');
+      // Recargas América es el verificador preferido cuando el dueño lo habilite.
+      // Si aún no está configurado, se conserva el verificador independiente anterior.
+      let response = await fetch('/api/recargas/validate', {
+        method: 'POST',
+        headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uid })
+      });
+      let data = await response.json();
+      let verificationSource = 'Recargas América';
+      if (response.status === 503 && data.code === 'NOT_READY') {
+        verificationSource = 'Verificador alternativo';
+        response = await fetch('/api/freefire/verify?' + new URLSearchParams({ uid, region }).toString(), { headers: { Accept: 'application/json' } });
+        data = await response.json();
+        if (!response.ok || !data.ok) throw new Error(data.message || 'No fue posible verificar el UID.');
+      } else {
+        if (!response.ok || !data.ok) throw new Error(data.message || 'No fue posible validar el UID.');
+        if (data.supported !== true || data.verified !== true) {
+          throw new Error(data.message || 'Este UID no pudo verificarse. Utiliza el modo demostración para explorar la web.');
+        }
+      }
       result.className = 'verify-result ok';
       result.replaceChildren();
       const name = document.createElement('strong');
       name.textContent = data.player.nickname;
       const details = document.createElement('div');
-      details.textContent = 'UID: ' + data.player.uid + ' · Región de tienda: Sur LATAM (consulta BR/LATAM)' + (data.player.level == null ? '' : ' · Nivel: ' + data.player.level);
+      details.textContent = 'UID: ' + data.player.uid + ' · Región de tienda: Sur LATAM · ' + verificationSource + (data.player.level == null ? '' : ' · Nivel: ' + data.player.level);
       result.append(name, details);
       playerSession = {
         uid,
