@@ -20,8 +20,10 @@ export async function onRequestPost({ request, env }) {
   }
 
   const productId = Number(env.RA_FF_PRECHECK_PRODUCT_ID || 5);
+  const testUid = String(env.RA_VALIDATE_TEST_UID || "").trim();
   if (!env.RA_API_KEY || env.RA_VALIDATE_ENABLED !== "true" ||
       !env.RA_TURNSTILE_SITE_KEY || !env.RA_TURNSTILE_SECRET ||
+      !/^\\d{8,12}$/.test(testUid) ||
       !Number.isSafeInteger(productId) || productId <= 0) {
     return reply({ ok: false, code: "NOT_READY", message: "La validación de Recargas América todavía no está habilitada." }, 503);
   }
@@ -40,9 +42,8 @@ export async function onRequestPost({ request, env }) {
   if (!/^\d{8,12}$/.test(uid)) {
     return reply({ ok: false, code: "INVALID_UID", message: "El UID de Free Fire debe tener de 8 a 12 dígitos." }, 422);
   }
-  // Permite limitar los tests privados a un único UID hasta instalar cuotas externas.
-  const testUid = String(env.RA_VALIDATE_TEST_UID || "").trim();
-  if (testUid && uid !== testUid) {
+  // En esta fase solo permite el UID de prueba; sin un UID de prueba válido falla cerrado.
+  if (uid !== testUid) {
     return reply({ ok: false, code: "TEST_ONLY", message: "La verificación está limitada al UID autorizado para pruebas." }, 403);
   }
   if (!token || token.length > 2048) {
