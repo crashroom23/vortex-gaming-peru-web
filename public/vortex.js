@@ -46,6 +46,9 @@
   let activeLayer = null;
   let lastFocus = null;
   let toastTimer;
+  let playerSession = null;
+  let checkoutProduct = null;
+  let selectedPaymentMethod = 'yape';
 
   const gemSVG = '<svg class="card-gem" viewBox="0 0 240 185" aria-hidden="true"><use href="#diamond-graphic"></use></svg>';
   const miniGemSVG = '<svg viewBox="0 0 240 185" aria-hidden="true"><use href="#diamond-graphic"></use></svg>';
@@ -66,7 +69,7 @@
       '<h3 class="card-title">', product.amount, ' <span>DIAMANTES</span></h3>',
       '<p class="card-bonus">✦ + ', product.bonus, ' DIAMANTES DE BONO</p>',
       '<div class="card-bottom"><div><div class="card-price-label">PRECIO DEL PAQUETE</div><div class="card-price">', price(product.price), '</div></div></div>',
-      '<div class="card-buttons"><button class="btn btn-accent" type="button" data-action="add" data-id="', product.id, '">AÑADIR AL CARRITO ', arrowSVG, '</button>',
+      '<div class="card-buttons"><button class="btn btn-accent" type="button" data-action="pay" data-id="', product.id, '">PAGAR ', arrowSVG, '</button>',
       '<button class="quick-view" type="button" data-action="detail" data-id="', product.id, '" aria-label="Ver detalles de ', product.amount, ' diamantes">＋</button></div>',
       '</div></article>'
     ].join('');
@@ -127,7 +130,7 @@
       '<div class="panel-item">' +
       '<div class="panel-item-img">' + miniGemSVG + '</div>' +
       '<div class="panel-item-details"><strong>' + product.amount + ' DIAMANTES</strong><small>+ ' + product.bonus + ' DE BONO</small><span>' + price(product.price) + '</span>' +
-      '<div class="card-buttons"><button class="btn btn-accent" data-action="add" data-id="' + product.id + '">AÑADIR AL CARRITO</button></div></div>' +
+      '<div class="card-buttons"><button class="btn btn-accent" data-action="pay" data-id="' + product.id + '">PAGAR</button></div></div>' +
       '<button type="button" class="remove-item" data-action="favorite" data-id="' + product.id + '" aria-label="Quitar de favoritos">×</button></div>'
     ).join('') :
       '<div class="panel-empty"><span class="big-icon">♡</span><strong>NO HAY FAVORITOS</strong><p>Marca el corazón en los productos que quieras guardar.</p></div>';
@@ -199,6 +202,45 @@
     refresh();
   }
 
+  function setPaymentMethod(method) {
+    selectedPaymentMethod = method === 'binance' ? 'binance' : 'yape';
+    $('.payment-tab').forEach(button => {
+      const active = button.dataset.method === selectedPaymentMethod;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+    if (selectedPaymentMethod === 'yape') {
+      $('#payment-name').textContent = 'Yape automático';
+      $('#payment-description').textContent = 'Cuando conectemos una pasarela compatible, mostrará un QR dinámico o el formulario seguro de Yape. Un QR personal no puede confirmar el pago automáticamente.';
+      $('#payment-notice').textContent = checkoutProduct && checkoutProduct.price < 6
+        ? 'Nota: el QR de billeteras móviles de Culqi tiene mínimo S/ 6.00. Para este paquete se evaluará Yape con código de aprobación u otra integración compatible.'
+        : 'El QR dinámico de Yape aparecerá solo después de habilitar y probar la pasarela. No envíes dinero desde esta pantalla.';
+    } else {
+      $('#payment-name').textContent = 'Binance Pay';
+      $('#payment-description').textContent = 'Binance Pay genera un QR o enlace único desde la API Merchant. La conversión a criptomonedas y el importe definitivo se mostrarán únicamente cuando exista una orden real.';
+      $('#payment-notice').textContent = 'Se necesita una cuenta Binance Pay Merchant habilitada, su API y confirmación verificada del pago.';
+    }
+  }
+
+  function requestCheckout(id) {
+    const product = byId.get(id);
+    if (!product) return;
+    const currentUID = $('#uid').value.trim();
+    const region = $('#region').value;
+    if (!playerSession || playerSession.uid !== currentUID || playerSession.region !== region) {
+      notify('Primero escribe y verifica tu UID. Para explorar la pantalla de pagos, usa el botón de prueba.');
+      $('#verificador').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      $('#uid').focus({ preventScroll: true });
+      return;
+    }
+    checkoutProduct = product;
+    $('#checkout-player').textContent = (playerSession.demo ? 'DEMO (sin verificar) · ' : playerSession.nickname + ' · ') + playerSession.uid;
+    $('#checkout-package').textContent = product.amount + ' + ' + product.bonus + ' diamantes';
+    $('#checkout-price').textContent = price(product.price);
+    setPaymentMethod('yape');
+    openLayer('checkout-modal');
+  }
+
   document.addEventListener('click', event => {
     const control = event.target.closest('[data-action]');
     if (control) {
@@ -207,6 +249,7 @@
       if (!product) return;
       switch (control.dataset.action) {
         case 'add': addToCart(id); break;
+        case 'pay': requestCheckout(id); break;
         case 'favorite': toggleFavorite(id); break;
         case 'increase': cart[id] = Math.min(99, (cart[id] || 0) + 1); refresh(); break;
         case 'decrease': if (cart[id] <= 1) delete cart[id]; else cart[id] -= 1; refresh(); break;
@@ -222,6 +265,32 @@
   });
 
   $('#cart-trigger').addEventListener('click', () => openLayer('cart-panel'));
+  $('.payment-tab').forEach(button => button.addEventListener('click', () => setPaymentMethod(button.dataset.method)));
+  $('#simulate-verify').addEventListener('click', () => {
+    const uidInput = $('#uid');
+    const uid = uidInput.value.trim() || '123456789';
+    if (!/^\d{5,15}$/.test(uid)) {
+      notify('Para probar, introduce un UID de 5 a 15 dígitos.');
+      uidInput.focus();
+      return;
+    }
+    if (!uidInput.value.trim()) uidInput.value = uid;
+    playerSession = { uid, region: $('#region').value, nickname: 'JUGADOR DEMO', demo: true };
+    const result = $('#verify-result');
+    result.hidden = false;
+    result.className = 'verify-result';
+    result.textContent = 'MODO DEMO: UID ' + uid + ' NO verificado con Free Fire. Solo podrás visualizar el diseño de pago.';
+    const status = $('#verified-status');
+    status.hidden = false;
+    status.textContent = '✓ MODO DE PRUEBA · SIN VERIFICACIÓN REAL';
+    status.className = 'verified-status is-demo';
+    notify('Vista de demostración activada. Selecciona un paquete y pulsa Pagar.');
+    $('#tienda').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  ['uid', 'region'].forEach(id => document.getElementById(id).addEventListener('input', () => {
+    playerSession = null;
+    $('#verified-status').hidden = true;
+  }));
   $('#favorites-trigger').addEventListener('click', () => openLayer('favorites-panel'));
   $('#account-trigger').addEventListener('click', () => showInfo('MI CUENTA', 'Estamos preparando el registro seguro, inicio de sesión, perfil, saldo e historial. No ingreses ninguna contraseña en esta demostración.'));
   $('#wallet-trigger').addEventListener('click', () => showInfo('BILLETERA VORTEX', 'El plan es permitir recargas de saldo desde S/ 5 por Yape, con comprobante y aprobación administrativa. El saldo y los pagos aún no están habilitados.'));
@@ -296,7 +365,21 @@
       const details = document.createElement('div');
       details.textContent = 'UID: ' + data.player.uid + ' · Región: ' + String(data.player.region).toUpperCase() + (data.player.level == null ? '' : ' · Nivel: ' + data.player.level);
       result.append(name, details);
+      playerSession = {
+        uid,
+        nickname: String(data.player.nickname),
+        region,
+        demo: false
+      };
+      const status = $('#verified-status');
+      status.hidden = false;
+      status.className = 'verified-status is-verified';
+      status.textContent = '✓ UID VERIFICADO · YA PUEDES ELEGIR TU PAQUETE';
+      notify('Jugador verificado. Ahora elige tus diamantes y pulsa Pagar.');
+      $('#tienda').scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (error) {
+      playerSession = null;
+      $('#verified-status').hidden = true;
       result.className = 'verify-result error';
       result.textContent = error.message || 'No fue posible contactar al proveedor.';
     } finally {
