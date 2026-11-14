@@ -104,3 +104,7 @@ Colección original y manual entregados por el propietario. La clave del archivo
 ## Redespliegue de comprobación
 
 Se solicitó un nuevo despliegue automático de Preview después de configurar las variables en Cloudflare. Este cambio de documentación no afecta el código ni habilita compras. Si `/api/recargas/health` sigue indicando `catalogConfigured:false`, revisar que `RA_API_KEY` exista en Settings → Preview → Variables and secrets y guardar allí la clave **rotada**, nunca en Production solamente.
+
+### Aplicar Turnstile al despliegue de prueba
+
+Si `/api/recargas/health` omite `turnstileConfigured`, el despliegue corresponde a una versión anterior a la integración. Despliega el commit más reciente de `preview/gamer-aura-v2` para aplicar la configuración y comprueba que `purchasesEnabled` siga en `false`.
