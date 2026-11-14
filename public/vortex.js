@@ -204,7 +204,7 @@
 
   function setPaymentMethod(method) {
     selectedPaymentMethod = method === 'binance' ? 'binance' : 'yape';
-    $('.payment-tab').forEach(button => {
+    $$('.payment-tab').forEach(button => {
       const active = button.dataset.method === selectedPaymentMethod;
       button.classList.toggle('active', active);
       button.setAttribute('aria-pressed', String(active));
@@ -265,7 +265,7 @@
   });
 
   $('#cart-trigger').addEventListener('click', () => openLayer('cart-panel'));
-  $('.payment-tab').forEach(button => button.addEventListener('click', () => setPaymentMethod(button.dataset.method)));
+  $$('.payment-tab').forEach(button => button.addEventListener('click', () => setPaymentMethod(button.dataset.method)));
   $('#simulate-verify').addEventListener('click', () => {
     const uidInput = $('#uid');
     const uid = uidInput.value.trim() || '123456789';
