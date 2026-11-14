@@ -116,8 +116,7 @@
           <div class="verify-card-head"><div class="verify-logo">◈</div><div><strong>PLAYER CHECK</strong><small>IDENTIFICACIÓN DE CUENTA</small></div><span class="verify-tag">BETA</span></div>
           <label for="uid">UID DE FREE FIRE</label>
           <input id="uid" name="uid" inputmode="numeric" autocomplete="off" placeholder="Ingresa tu UID" maxlength="15" pattern="[0-9]{5,15}" required>
-          <label for="region">REGIÓN DEL SERVIDOR</label>
-          <select id="region" name="region"><option value="br" selected>BR / LATAM (probar Perú)</option><option value="sg">SG</option><option value="ind">IND</option></select>
+          <div class="fixed-region" aria-label="Región de la tienda: Sur LATAM"><span>🌎</span> SERVIDOR DE LA TIENDA: <strong>SUR LATAM</strong></div>
           <button type="submit" id="verify-btn" class="btn btn-accent btn-wide">VERIFICAR UID <svg><use href="#icon-arrow"/></svg></button><button type="button" id="simulate-verify" class="btn btn-ghost btn-wide demo-verify-button">PROBAR FLUJO SIN VERIFICACIÓN REAL</button>
           <div class="verify-result" id="verify-result" role="status" aria-live="polite" hidden></div><div class="verified-status" id="verified-status" hidden></div>
           <p class="verify-footnote">La verificación real requiere una API activa. El modo demo NO verifica tu identidad ni permite pagar.</p>
