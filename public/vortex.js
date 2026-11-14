@@ -269,8 +269,8 @@
   $('#simulate-verify').addEventListener('click', () => {
     const uidInput = $('#uid');
     const uid = uidInput.value.trim() || '123456789';
-    if (!/^\d{5,15}$/.test(uid)) {
-      notify('Para probar, introduce un UID de 5 a 15 dígitos.');
+    if (!/^\d{8,12}$/.test(uid)) {
+      notify('Para probar, introduce un UID de 8 a 12 dígitos.');
       uidInput.focus();
       return;
     }
@@ -341,10 +341,10 @@
     const uid = $('#uid').value.trim();
     const region = 'br';
     const result = $('#verify-result');
-    if (!/^\d{5,15}$/.test(uid)) {
+    if (!/^\d{8,12}$/.test(uid)) {
       result.hidden = false;
       result.className = 'verify-result error';
-      result.textContent = 'Escribe un UID válido de 5 a 15 dígitos.';
+      result.textContent = 'Escribe un UID válido de 8 a 12 dígitos.';
       return;
     }
     const button = $('#verify-btn');
