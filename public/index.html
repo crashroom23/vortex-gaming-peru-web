@@ -53,6 +53,17 @@
     .how article{border:1px solid var(--line);border-radius:16px;padding:18px;background:#ffffff05}
     .num{color:var(--gold);font-weight:950;font-size:13px;letter-spacing:1px}
     .how h3{font-size:16px;margin:9px 0 6px}.how p{font-size:13px;line-height:1.6;color:var(--muted);margin:0}
+    .products{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:25px}
+    .product{position:relative;overflow:hidden;background:linear-gradient(155deg,#201c3b,#141425 72%);border:1px solid #654bb5;border-radius:20px;padding:23px;box-shadow:0 12px 35px #0004}
+    .product .gem{font-size:38px;display:block;margin-bottom:12px}
+    .product .amount{font-size:23px;font-weight:950;color:#fff}
+    .product .bonus{color:#a58cff;font-size:13px;margin-top:7px;font-weight:750}
+    .product .cost{font-size:29px;font-weight:950;color:var(--gold);margin:18px 0}
+    .product button{width:100%}
+    .demo-banner{border:1px solid #655082;border-radius:12px;padding:14px 16px;margin:22px 0 0;background:#211b3b;color:#e4d9ff;font-size:13px;line-height:1.65}
+    .demo-result{margin:20px auto 0;max-width:710px}
+    @media(max-width:760px){.products{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:480px){.products{grid-template-columns:1fr}}
     footer{border-top:1px solid #ffffff12;padding:24px 0 34px;color:var(--muted);font-size:12px;line-height:1.7}
     footer .foot{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap}
     @media(max-width:760px){.hero{grid-template-columns:1fr;padding-top:38px;gap:26px}.preview{max-width:520px;width:100%;margin:auto}.how{grid-template-columns:1fr}.pill{display:none}header{padding:16px 0}h1{letter-spacing:-1.5px}.verify{padding:20px}}
@@ -75,7 +86,7 @@
         <p class="lead">Bienvenido a Vortex Gaming Perú. Verifica el UID y el nombre de tu cuenta de Free Fire antes de continuar con tu compra.</p>
         <div class="hero-actions">
           <a class="btn btn-primary" href="#verificar">Verificar mi UID</a>
-          <a class="btn btn-secondary" href="#como-funciona">Cómo funciona</a>
+          <a class="btn btn-secondary" href="#paquetes">Ver paquetes</a>
         </div>
       </div>
       <aside class="preview" aria-label="Ventajas de Vortex Gaming">
@@ -86,6 +97,24 @@
         <div class="feature"><div class="feature-icon">⚡</div><div><b>Proceso sencillo</b><small>Introduce tu UID y revisa el resultado</small></div></div>
         <div class="feature"><div class="feature-icon">🔒</div><div><b>Clave protegida</b><small>La clave API se guarda en el servidor</small></div></div>
       </aside>
+    </section>
+
+    <section class="section wrap" id="paquetes">
+      <div class="section-heading">
+        <div class="eyebrow">Tienda VortexGamer</div>
+        <h2>Paquetes de diamantes</h2>
+        <p>Elige el paquete que prefieras. Estamos preparando las compras reales.</p>
+      </div>
+      <div class="products">
+        <article class="product"><span class="gem" aria-hidden="true">💎</span><div class="amount">100 diamantes</div><div class="bonus">+ 10 diamantes de bono</div><div class="cost">S/ 3.50</div><button class="btn btn-primary" type="button" data-package="100 + 10 diamantes" data-price="3.50">Seleccionar</button></article>
+        <article class="product"><span class="gem" aria-hidden="true">💎</span><div class="amount">310 diamantes</div><div class="bonus">+ 31 diamantes de bono</div><div class="cost">S/ 9.80</div><button class="btn btn-primary" type="button" data-package="310 + 31 diamantes" data-price="9.80">Seleccionar</button></article>
+        <article class="product"><span class="gem" aria-hidden="true">💎</span><div class="amount">520 diamantes</div><div class="bonus">+ 52 diamantes de bono</div><div class="cost">S/ 15.00</div><button class="btn btn-primary" type="button" data-package="520 + 52 diamantes" data-price="15.00">Seleccionar</button></article>
+        <article class="product"><span class="gem" aria-hidden="true">💎</span><div class="amount">1,060 diamantes</div><div class="bonus">+ 106 diamantes de bono</div><div class="cost">S/ 27.00</div><button class="btn btn-primary" type="button" data-package="1,060 + 106 diamantes" data-price="27.00">Seleccionar</button></article>
+        <article class="product"><span class="gem" aria-hidden="true">💎</span><div class="amount">2,180 diamantes</div><div class="bonus">+ 218 diamantes de bono</div><div class="cost">S/ 52.00</div><button class="btn btn-primary" type="button" data-package="2,180 + 218 diamantes" data-price="52.00">Seleccionar</button></article>
+        <article class="product"><span class="gem" aria-hidden="true">💎</span><div class="amount">5,600 diamantes</div><div class="bonus">+ 560 diamantes de bono</div><div class="cost">S/ 130.00</div><button class="btn btn-primary" type="button" data-package="5,600 + 560 diamantes" data-price="130.00">Seleccionar</button></article>
+      </div>
+      <div class="demo-banner"><strong>Modo demostración:</strong> los precios son los definidos para el catálogo VortexGamer. Los botones todavía no procesan pagos ni envían recargas. Las compras se habilitarán cuando la integración y el sistema de saldo estén probados.</div>
+      <div class="result demo-result" id="package-result" role="status" aria-live="polite" hidden></div>
     </section>
 
     <section id="verificar" class="section wrap">
@@ -124,6 +153,15 @@
 
   <script>
     (() => {
+      document.querySelectorAll("[data-package]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const result = document.getElementById("package-result");
+          result.hidden = false;
+          result.className = "result demo-result";
+          result.textContent = "Seleccionaste " + button.dataset.package + " por S/ " + button.dataset.price + ". Las compras reales aún no están activadas. No se ha realizado ningún cobro.";
+          result.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        });
+      });
       const form = document.getElementById("verify-form");
       const button = document.getElementById("verify-btn");
       const result = document.getElementById("result");
