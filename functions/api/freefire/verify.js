@@ -1,6 +1,6 @@
 // Verificacion del UID con Free Fire Community (NO ejecuta recargas ni pagos).
 // FREE_FIRE_API_KEY se configura como secreto privado de Cloudflare Pages.
-const regions = new Set(["br", "sg", "ind"]);
+// Free Fire Community enruta las cuentas LATAM mediante el código BR.\n// Es una ruta técnica LATAM; no comprueba por sí misma que el jugador sea Sur LATAM.\nconst FIXED_LATAM_REGION = "br";
 const json = (data, status = 200) => new Response(JSON.stringify(data), {
   status,
   headers: {
@@ -13,12 +13,9 @@ const json = (data, status = 200) => new Response(JSON.stringify(data), {
 export async function onRequestGet({ request, env }) {
   const requestUrl = new URL(request.url);
   const uid = (requestUrl.searchParams.get("uid") || "").trim();
-  const region = (requestUrl.searchParams.get("region") || env.FREE_FIRE_REGION || "br").trim().toLowerCase();
+  const region = FIXED_LATAM_REGION; // No se permite seleccionar otra región desde el cliente.
   if (!/^\d{5,15}$/.test(uid)) {
     return json({ ok: false, message: "UID invalido: escribe entre 5 y 15 digitos." }, 400);
-  }
-  if (!regions.has(region)) {
-    return json({ ok: false, message: "Region no valida. Usa br, sg o ind." }, 400);
   }
   if (!env.FREE_FIRE_API_KEY) {
     return json({ ok: false, message: "El administrador aun no ha configurado la API de verificacion." }, 503);
