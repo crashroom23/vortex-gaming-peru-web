@@ -17,7 +17,7 @@ Para el entorno **Preview** configura:
 | Nombre | Tipo | Valor |
 | --- | --- | --- |
 | `RA_API_KEY` | **Secret** (cifrado) | Clave **sandbox** nueva, no la clave de producción enviada en el archivo |
-| `RA_FF_PRECHECK_PRODUCT_ID` | Variable | ID real de un producto Free Fire de `/products/catalog` que admita precheck, **no** un ID inventado |
+| `RA_FF_PRECHECK_PRODUCT_ID` | Variable opcional | `5` (paquete Free Fire 100+10 del catálogo real; predeterminado en el código, pendiente de confirmar soporte de precheck) |
 | `RA_VALIDATE_ENABLED` | Variable | `false` hasta instalar medidas antiabuso y verificar el producto elegido |
 
 Reinicia/redeploy la versión Preview para aplicar variables. **No configurar la clave de producción ni habilitar `RA_VALIDATE_ENABLED` hasta probar antiabuso/controles de cuotas.**
@@ -46,6 +46,26 @@ Se requiere:
 7. Ante `502 PROVIDER_ERROR`, distinguir entre `needs_review:true` (no reintentar) y `REFUNDED_API_ERROR` (saldo devuelto). Para `PROCESSING_PROVIDER` continuar consulta sin repetir la compra.
 8. Verificar restricciones de lista de IPs: las Cloudflare Pages Functions pueden utilizar direcciones de salida variables. Recargas América recomienda un proxy con IP estática si se habilita una lista de IPs.
 9. Evaluar que el monto mínimo de Yape vía QR del proveedor de cobro cubra los paquetes baratos; no prometer QR automático para S/ 3.50 si el método no lo admite.
+
+
+## Catálogo auténtico recuperado (14-11-2026)
+
+La respuesta real de `GET /api/recargas/catalog` confirmó estos productos Free Fire:
+
+| Paquete VortexGamer | Product ID de Recargas América | SKU |
+| --- | ---: | --- |
+| 100 + 10 diamantes | 5 | ADS005 |
+| 310 + 31 diamantes | 6 | ADS006 |
+| 520 + 52 diamantes | 7 | ADS007 |
+| 1060 + 106 diamantes | 8 | ADS008 |
+| 2180 + 218 diamantes | 9 | ADS009 |
+| 5600 + 560 diamantes | 10 | ADS010 |
+
+Este mapeo queda registrado en `public/vortex.js` como `providerProductId` y `providerSku`. No implica comprar automáticamente. Los precios públicos en soles siguen definidos por VortexGamer. **El catálogo público filtrado no contiene precio de costo del proveedor**, así que todavía no se ha comprobado margen ni conversión de divisa.
+
+Para `POST /catalog/validate`, el producto predeterminado es **5** (100 + 10). Se puede sobrescribir con `RA_FF_PRECHECK_PRODUCT_ID`. `RA_VALIDATE_ENABLED` continúa por defecto desactivado; no activar hasta implementar cuotas y medidas antiabuso y confirmar que el producto realmente soporta precheck. No se ha realizado validación real de UID ni orden de compra.
+
+Los otros productos observados (Pase Booyah, tarjeta semanal y mensual) **no se añadieron**: el catálogo de VortexGamer conserva únicamente los seis paquetes elegidos.
 
 ## API utilizada
 
