@@ -22,11 +22,33 @@ Para el entorno **Preview** configura:
 
 Reinicia/redeploy la versión Preview para aplicar variables. **No configurar la clave de producción ni habilitar `RA_VALIDATE_ENABLED` hasta probar antiabuso/controles de cuotas.**
 
+## Fase de prueba de UID con Cloudflare Turnstile
+
+**Estado del código:** ya existe la integración cliente/servidor. **No está habilitada automáticamente**: faltan crear y guardar las credenciales de Turnstile en Cloudflare Preview y escoger el UID específico de prueba.
+
+1. En Cloudflare → **Turnstile** → Add widget, crear un widget para el hostname de la web Preview (por ejemplo `preview-gamer-aura-v2.vortex-gaming-peru-web.pages.dev`). Anotar por separado su **sitekey público** y su **secret privado**.
+2. En Cloudflare → Workers & Pages → `vortex-gaming-peru-web` → Settings → **Preview** → Variables and secrets, mantener `RA_API_KEY` como Secret y crear:
+
+| Nombre | Tipo | Valor |
+| --- | --- | --- |
+| `RA_TURNSTILE_SITE_KEY` | Variable (pública) | Sitekey del widget Cloudflare Turnstile |
+| `RA_TURNSTILE_SECRET` | **Secret** | Secret del mismo widget (nunca en GitHub) |
+| `RA_VALIDATE_TEST_UID` | Variable | UID propio elegido para probar, **8 a 12 dígitos** |
+| `RA_VALIDATE_ENABLED` | Variable | `true` solo cuando todo esté configurado y se quiera hacer una prueba |
+| `RA_FF_PRECHECK_PRODUCT_ID` | Variable opcional | `5` (paquete Free Fire 100 + 10); pendiente de comprobar precheck real |
+
+3. Redeploy de la rama `preview/gamer-aura-v2`. Verificar `/api/recargas/health`: `catalogConfigured:true`, `turnstileConfigured:true`, `validationReady:true`, `purchasesEnabled:false`.
+4. En la web Preview, introducir **solo el UID permitido** en `RA_VALIDATE_TEST_UID`, completar Turnstile y pulsar **Verificar UID**. El servidor valida token, hostname y acción `ff_uid` en **Siteverify** antes de llamar al proveedor con `{ product_id:5, service_user_id:UID }`. Nunca compartir la clave privada.
+5. Si el proveedor responde `supported:false`, el producto no soporta precheck y **no se debe presentar una verificación exitosa**. Si el proveedor responde error o `status:false`, igualmente no se declara verificado el UID.
+6. Para apagar de inmediato: poner `RA_VALIDATE_ENABLED=false` en Preview y redeploy. **No habilitar la verificación pública para todos los jugadores** en esta fase: falta WAF/Rate Limiting duradero en Cloudflare o control de cuota mediante almacenamiento compartido. Turnstile no sustituye las cuotas de solicitudes.
+
+El endpoint responde `503 NOT_READY` si falta la clave de Recargas América, Turnstile, UID de prueba o bandera de activación. Responde `403 TEST_ONLY` para otros UID, y `403 CHALLENGE_REQUIRED` si no incluye token. No contiene llamadas a `/buy/catalog` ni procesamientos de pagos. La clave usada en pruebas no se debe mostrar en capturas o chats.
+
 ## Rutas creadas
 
 - `GET /api/recargas/health`: informa si la API está configurada, sin exponer claves ni saldo.
 - `GET /api/recargas/catalog`: consulta catálogo de Recargas América y retorna solo ID/SKU/nombre/campos requeridos de Free Fire. Oculta los precios mayoristas. Incluye caché de 5 minutos si Cloudflare admite Cache API.
-- `POST /api/recargas/validate`: recibe `{ "uid": "123456789" }` y llama a `POST /catalog/validate`. Se mantiene **desactivado por defecto**. El UID debe tener de 8 a 12 dígitos. Si el proveedor indica `supported:false`, se devuelve `verified:false` y NO se afirma que la cuenta fue verificada.
+- `POST /api/recargas/validate`: recibe `{ "uid": "123456789" }` y llama a `POST /catalog/validate`. Se mantiene **desactivado por defecto** hasta configurar Turnstile, UID de prueba y activación explícita. El UID debe tener de 8 a 12 dígitos. Si el proveedor indica `supported:false`, se devuelve `verified:false` y NO se afirma que la cuenta fue verificada.
 - `/api/recargas/buy`: **siempre responde 403 PURCHASES_DISABLED** y no llama a `POST /buy/catalog`.
 
 La web intenta primero la validación de Recargas América cuando esté habilitada. Si no está configurada, conserva el verificador de Free Fire independiente si dispone de su propia clave. En los demás casos permite únicamente el modo de demostración.
@@ -37,7 +59,7 @@ La web intenta primero la validación de Recargas América cuando esté habilita
 
 Se requiere:
 
-1. Vincular cada uno de los seis paquetes de VortexGamer al **product_id** exacto (y moneda/precio de costo) obtenido del catálogo real. Los ejemplos de Postman no prueban los IDs.
+1. Los seis paquetes ya tienen **product_id** exacto según el catálogo real; falta comprobar **moneda/precio de costo** para determinar márgenes y prevenir ventas con pérdidas.
 2. Integrar Yape y Binance Pay con un proveedor aceptado, creando órdenes únicas en una base de datos Cloudflare D1 y **confirmando el pago en el servidor**. Nunca basarse en un QR personal o en una captura sin validación.
 3. Proteger la validación de UID con cuotas, controles de abuso y opcionalmente Cloudflare Turnstile.
 4. Al recibir confirmación auténtica e idempotente del pago, generar una orden interna única, `Idempotency-Key` nueva y permanente para dicha orden; y solo entonces llamar `POST /buy/catalog`.
