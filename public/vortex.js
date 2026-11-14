@@ -104,7 +104,6 @@
     }
   }
 
-  const gemSVG = '<svg class="card-gem" viewBox="0 0 240 185" aria-hidden="true"><use href="#diamond-graphic"></use></svg>';
   const miniGemSVG = '<svg viewBox="0 0 240 185" aria-hidden="true"><use href="#diamond-graphic"></use></svg>';
   const arrowSVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"></use></svg>';
   const heartSVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-heart"></use></svg>';
@@ -117,7 +116,7 @@
       '<div class="card-media">',
       '<span class="card-badge', isPro ? ' premium' : '', '">', product.tag, '</span>',
       '<button type="button" class="favorite-btn', saved ? ' saved' : '', '" data-action="favorite" data-id="', product.id, '" aria-label="', saved ? 'Quitar de' : 'Añadir a', ' favoritos: ', product.amount, ' diamantes" aria-pressed="', saved, '">', heartSVG, '</button>',
-      gemSVG,
+      '<img class="card-gem pack-photo" src="/images/pack-', product.providerProductId - 4, '.png" alt="" loading="lazy" decoding="async">',
       '</div><div class="card-body">',
       '<span class="card-type">', product.type, ' / FREE FIRE</span>',
       '<h3 class="card-title">', product.amount, ' <span>DIAMANTES</span></h3>',

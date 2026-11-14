@@ -452,3 +452,31 @@ img,svg{max-width:100%}
 @media (prefers-reduced-motion: reduce) {
   .hero-art::before, .hero-copy h1, .hero-copy > p, .hero-ctas { animation: none; }
 }
+
+/* Original WordPress artwork, hosted with the Preview storefront. */
+.storefront-banner { padding: clamp(12px, 2.4vw, 30px) 0 18px; }
+.storefront-banner .storefront-banner-title { margin: 0; }
+.storefront-banner-title img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid #7654b2;
+  border-radius: clamp(10px, 2vw, 22px);
+  box-shadow: 0 18px 55px #08041880;
+}
+.storefront-banner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 16px 0 0;
+  animation: storefront-enter .55s ease-out both;
+}
+.card-gem.pack-photo {
+  width: 88%;
+  height: 96%;
+  object-fit: contain;
+}
+@media (max-width: 410px) {
+  .storefront-banner-actions .btn { flex: 1 1 100%; }
+}
