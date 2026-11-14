@@ -215,3 +215,113 @@ img,svg{max-width:100%}
 
 /* Solo los paneles activos son visibles */
 .side-panel[aria-hidden="true"],.modal[aria-hidden="true"]{display:none}
+
+
+/* V3: secuencia UID -> paquete -> pagar; cabecera hero reducida */
+.hero-layout{min-height:402px}
+.hero-copy{padding:28px 0}
+.hero h1{font-size:clamp(52px,6.3vw,80px);line-height:.89;margin:15px 0}
+.hero-copy>p{font-size:13px;line-height:1.7;margin:14px 0}
+.hero-ctas{margin:19px 0 23px}
+.hero-ctas .btn{min-height:44px;padding:11px 17px;font-size:11px}
+.hero-signals strong{font-size:22px}
+.hero-art{height:357px}
+.hero-diamond{width:min(340px,100%)}
+.hero-graphic-halo{height:310px;width:310px}
+.hero-orbit.orbit-one{width:365px;height:240px}
+.hero-orbit.orbit-two{height:340px;width:250px}
+.art-rings{height:260px;width:260px}
+.floating-top{top:13%;right:2%;font-size:9px;padding:10px}
+.floating-bottom{bottom:13%;left:1%;padding:9px 12px}
+.art-caption{bottom:4%}
+.verify-section{padding:44px 0;background:radial-gradient(ellipse at 16% 42%,#221747,transparent 55%),#100c22}
+.verify-layout{grid-template-columns:.9fr 1.1fr;gap:36px}
+.verify-copy h2{font-size:clamp(40px,4.4vw,56px)}
+.verify-copy>p{font-size:12px;line-height:1.75;max-width:490px}
+.verify-points{display:none}
+.verify-card{display:grid;grid-template-columns:1.1fr .9fr;gap:7px 13px;padding:20px 23px}
+.verify-card-head{grid-column:1/-1;grid-row:1;margin-bottom:6px}
+.verify-card label{margin:8px 0 0}
+.verify-card label[for="uid"]{grid-column:1;grid-row:2}
+.verify-card #uid{grid-column:1;grid-row:3}
+.verify-card label[for="region"]{grid-column:2;grid-row:2}
+.verify-card #region{grid-column:2;grid-row:3}
+.verify-card #verify-btn{grid-column:1/-1;grid-row:4;margin-top:10px}
+.verify-card #simulate-verify{grid-column:1/-1;grid-row:5;margin-top:4px}
+.verify-card #verify-result{grid-column:1/-1;grid-row:6;margin-top:8px}
+.verify-card #verified-status{grid-column:1/-1;grid-row:7}
+.verify-card .verify-footnote{grid-column:1/-1;grid-row:8;margin:4px 0 0}
+.verify-card .demo-verify-button{background:#251b44;border-color:#5c4a8a;color:#dacbff;font-size:10px;padding:10px;min-height:39px}
+.verified-status{border-radius:7px;padding:10px 12px;font:750 10px/1.7 Inter;letter-spacing:.4px}
+.verified-status.is-demo{background:#352544;border:1px solid #9d63b0;color:#eedbff}
+.verified-status.is-verified{background:#10392d;border:1px solid #318c73;color:#a1ffdc}
+.shop-section{padding-top:57px;padding-bottom:58px}
+.card-buttons .btn{font-size:12px}
+#cart-trigger{display:none!important}
+#cart-panel{display:none!important}
+.checkout-modal{width:min(750px,calc(100% - 30px));max-height:min(91dvh,850px);overflow-y:auto;padding:32px 37px 30px;text-align:left}
+.checkout-modal h2{font-size:clamp(32px,4vw,48px);margin:9px 0 14px}
+.checkout-modal h2 span{color:var(--cyan)}
+.checkout-modal .modal-kicker{color:var(--cyan)}
+.checkout-warning{background:#342139;border:1px solid #8e577a;color:#f6dce9!important;padding:11px 14px;border-radius:9px;font-size:11px!important;line-height:1.65!important;margin:12px 0 15px!important}
+.checkout-warning strong{color:#ffd6ee}
+.checkout-order{display:grid;grid-template-columns:1fr 1fr .75fr;gap:10px;background:#120e25;border:1px solid #544071;border-radius:10px;padding:15px;margin:16px 0}
+.checkout-order>div{min-width:0}
+.checkout-order small{display:block;color:#8c81af;font:800 9px Inter;letter-spacing:1px;margin-bottom:7px}
+.checkout-order strong{font:900 16px 'Barlow Condensed',Impact;color:#fff;overflow-wrap:anywhere}
+.checkout-order .checkout-total{border-left:1px solid #493762;padding-left:13px}
+.checkout-order .checkout-total strong{font:900 25px 'Barlow Condensed',Impact;color:var(--cyan)}
+.checkout-methods{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.payment-tab{display:flex;justify-content:center;align-items:center;gap:9px;padding:12px;border-radius:9px;background:#211935;border:1px solid #534375;color:#c5b9d9;font:900 12px Inter}
+.payment-tab span{font-size:23px}
+.payment-tab.active{border-color:#ae84ff;background:linear-gradient(130deg,#4a306f,#262046);color:#fff;box-shadow:inset 0 0 0 1px #8061c455}
+.payment-preview{display:grid;grid-template-columns:158px 1fr;gap:23px;align-items:center;margin-top:15px;background:#14102b;border:1px solid #44335e;border-radius:12px;padding:15px}
+.payment-qr-placeholder{aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;text-align:center;background:repeating-linear-gradient(45deg,#f0edfa,#f0edfa 8px,#e7e3f0 8px,#e7e3f0 16px);color:#433253;border:4px solid #b8adc7;border-radius:8px}
+.payment-qr-placeholder .qr-outline{font-size:62px;line-height:1;color:#9d8cb2}
+.payment-qr-placeholder strong{font:900 11px Inter}
+.payment-qr-placeholder small{font:650 9px Inter}
+.payment-explanation h3{color:white;font:900 28px 'Barlow Condensed',Impact;margin:0 0 8px}
+.payment-explanation p{font-size:12px;line-height:1.8;color:#c1b1d4;margin:0 0 13px}
+.payment-status{display:inline-block;background:#3d293b;color:#f9b1cd;border:1px solid #81546d;padding:7px 9px;border-radius:5px;font:850 9px Inter;letter-spacing:.7px}
+.payment-notice{font:500 11px/1.75 Inter!important;color:#bdadd1!important;margin:13px 0 18px!important}
+#payment-demo-confirm{opacity:.55;cursor:not-allowed;transform:none}
+.checkout-footnote{font:500 10px/1.7 Inter!important;color:#887da1!important;margin:12px 0 0!important}
+@media(max-width:870px){
+  .hero-layout{min-height:365px}
+  .hero h1{font-size:clamp(48px,6.8vw,68px)}
+  .hero-art{height:310px}
+  .hero-diamond{width:285px}
+  .verify-layout{grid-template-columns:1fr;gap:18px}
+  .verify-copy h2{font-size:49px}
+  .verify-copy>p{max-width:none}
+}
+@media(max-width:650px){
+  .hero-layout{min-height:0}
+  .hero-copy{padding:28px 0 0}
+  .hero h1{font-size:clamp(50px,12vw,68px);margin:13px 0}
+  .hero-copy>p{font-size:12px;line-height:1.65;margin:9px 0}
+  .hero-ctas{margin:17px 0 15px}
+  .hero-signals{gap:13px}
+  .hero-signals strong{font-size:19px}
+  .hero-art{height:204px}
+  .hero-diamond{width:205px}
+  .hero-graphic-halo,.hero-orbit.orbit-one,.hero-orbit.orbit-two,.art-rings{width:185px;height:185px}
+  .art-caption,.floating-top,.floating-bottom{display:none}
+  .features-grid{display:none}
+  .verify-section{padding:26px 0}
+  .verify-copy h2{font-size:43px;margin:7px 0}
+  .verify-card{display:block;padding:19px}
+  .verify-card label{margin:13px 0 7px}
+  .verify-card .btn{margin:12px 0 0}
+  .verify-card .demo-verify-button{margin-top:9px}
+  .verify-card .verify-footnote{margin:13px 0 0}
+  .verified-status{margin-top:10px}
+  .shop-section{padding-top:38px}
+  .checkout-modal{padding:26px 18px;max-height:90dvh}
+  .checkout-order{grid-template-columns:1fr 1fr}
+  .checkout-order .checkout-total{grid-column:1/-1;border-left:0;border-top:1px solid #493762;padding:12px 0 0}
+  .payment-preview{grid-template-columns:1fr;justify-items:center;gap:12px;padding:13px}
+  .payment-qr-placeholder{width:148px}
+  .payment-explanation{width:100%;text-align:center}
+  .payment-tab{font-size:11px;padding:11px 5px}
+}
