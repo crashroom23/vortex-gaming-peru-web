@@ -3,7 +3,8 @@ export function onRequestGet({ env }) {
   const configured = Boolean(env.RA_API_KEY);
   const turnstileConfigured = Boolean(env.RA_TURNSTILE_SITE_KEY && env.RA_TURNSTILE_SECRET);
   const productId = Number(env.RA_FF_PRECHECK_PRODUCT_ID || 5);
-  const enabled = configured && turnstileConfigured && env.RA_VALIDATE_ENABLED === "true" &&
+  const testUidConfigured = /^\\d{8,12}$/.test(String(env.RA_VALIDATE_TEST_UID || "").trim());
+  const enabled = configured && turnstileConfigured && testUidConfigured && env.RA_VALIDATE_ENABLED === "true" &&
     Number.isSafeInteger(productId) && productId > 0;
   return new Response(JSON.stringify({
     ok: true,
