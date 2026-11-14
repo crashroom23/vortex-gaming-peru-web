@@ -10,7 +10,8 @@ export async function onRequestPost({ request, env }) {
   if (origin && origin !== new URL(request.url).origin) {
     return reply({ ok: false, code: "BAD_ORIGIN", message: "Origen no autorizado." }, 403);
   }
-  const productId = Number(env.RA_FF_PRECHECK_PRODUCT_ID);
+  // Producto Free Fire 100+10 del catálogo real (id 5). Puede sustituirse por configuración privada.
+  const productId = Number(env.RA_FF_PRECHECK_PRODUCT_ID || 5);
   if (!env.RA_API_KEY || env.RA_VALIDATE_ENABLED !== "true" || !Number.isSafeInteger(productId) || productId <= 0) {
     return reply({ ok: false, code: "NOT_READY", message: "Validación con Recargas América aún no habilitada." }, 503);
   }
