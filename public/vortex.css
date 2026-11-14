@@ -337,3 +337,7 @@ img,svg{max-width:100%}
 .verify-card #verify-result{grid-row:7}
 .verify-card #verified-status{grid-row:8}
 .verify-card .verify-footnote{grid-row:9}
+
+/* Control antiabuso del verificador Free Fire. Visible solo cuando Turnstile esté configurado. */
+.uid-turnstile{margin-top:18px;min-height:65px;max-width:100%;overflow:hidden}
+.uid-turnstile[hidden]{display:none}
