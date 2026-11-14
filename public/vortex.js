@@ -2,12 +2,12 @@
   'use strict';
 
   const PRODUCTS = [
-    { id: 100, amount: '100', bonus: '10', price: 3.50, category: 'starter', tag: 'BONUS +10', type: 'PACK INICIAL' },
-    { id: 310, amount: '310', bonus: '31', price: 9.80, category: 'starter', tag: 'BONUS +31', type: 'PACK POPULAR' },
-    { id: 520, amount: '520', bonus: '52', price: 15.00, category: 'starter', tag: 'BONUS +52', type: 'PACK AVANZADO' },
-    { id: 1060, amount: '1,060', bonus: '106', price: 27.00, category: 'premium', tag: 'PACK PRO', type: 'PACK ÉLITE' },
-    { id: 2180, amount: '2,180', bonus: '218', price: 52.00, category: 'premium', tag: 'PACK PRO', type: 'PACK LEGENDARIO' },
-    { id: 5600, amount: '5,600', bonus: '560', price: 130.00, category: 'premium', tag: 'MAX PACK', type: 'PACK MÁXIMO' }
+    { id: 100, providerProductId: 5, providerSku: 'ADS005', amount: '100', bonus: '10', price: 3.50, category: 'starter', tag: 'BONUS +10', type: 'PACK INICIAL' },
+    { id: 310, providerProductId: 6, providerSku: 'ADS006', amount: '310', bonus: '31', price: 9.80, category: 'starter', tag: 'BONUS +31', type: 'PACK POPULAR' },
+    { id: 520, providerProductId: 7, providerSku: 'ADS007', amount: '520', bonus: '52', price: 15.00, category: 'starter', tag: 'BONUS +52', type: 'PACK AVANZADO' },
+    { id: 1060, providerProductId: 8, providerSku: 'ADS008', amount: '1,060', bonus: '106', price: 27.00, category: 'premium', tag: 'PACK PRO', type: 'PACK ÉLITE' },
+    { id: 2180, providerProductId: 9, providerSku: 'ADS009', amount: '2,180', bonus: '218', price: 52.00, category: 'premium', tag: 'PACK PRO', type: 'PACK LEGENDARIO' },
+    { id: 5600, providerProductId: 10, providerSku: 'ADS010', amount: '5,600', bonus: '560', price: 130.00, category: 'premium', tag: 'MAX PACK', type: 'PACK MÁXIMO' }
   ];
   const byId = new Map(PRODUCTS.map(product => [product.id, product]));
   const $ = selector => document.querySelector(selector);
