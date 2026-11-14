@@ -276,6 +276,123 @@
     }
   }
 
+  // Orders here exercise the Preview checkout without contacting a payment provider.
+  const demoOrderStorage = 'vortex-demo-order:';
+  const demoOrderStates = ['Pendiente de pago', 'Pago confirmado · simulación', 'Recarga entregada · simulación'];
+  const orderSection = document.createElement('section');
+  orderSection.id = 'seguimiento';
+  orderSection.className = 'faq-section shell';
+  orderSection.innerHTML = `
+    <div class="section-intro"><div><h2>ESTADO DE <span>TU PEDIDO</span></h2>
+      <p>Consulta tu pedido de prueba en este navegador.</p></div></div>
+    <form id="demo-order-search">
+      <label for="demo-order-code">Código de pedido</label>
+      <label class="catalog-search"><input id="demo-order-code" type="text" placeholder="VG-…" autocomplete="off" maxlength="39" required></label>
+      <button type="submit" class="btn btn-outline">BUSCAR PEDIDO</button>
+    </form>
+    <div class="verify-result" id="demo-order-result" role="status" hidden></div>
+    <ol id="demo-order-steps" hidden>
+      <li>Pedido creado</li><li>Pago confirmado</li><li>Recarga entregada</li>
+    </ol>
+    <button type="button" class="btn btn-accent" id="demo-order-advance" hidden></button>`;
+  $('#ayuda').before(orderSection);
+  const orderLink = document.createElement('a');
+  orderLink.href = '#seguimiento';
+  orderLink.textContent = 'Seguir pedido';
+  $('.footer a[href="#ayuda"]').before(orderLink);
+
+  const confirmDemoOrder = $('#payment-demo-confirm');
+  confirmDemoOrder.disabled = false;
+  confirmDemoOrder.textContent = 'CREAR PEDIDO DE PRUEBA';
+  let displayedDemoOrder = null;
+
+  function renderDemoOrder(order, message = '') {
+    displayedDemoOrder = order;
+    const result = $('#demo-order-result');
+    const steps = $('#demo-order-steps');
+    const advance = $('#demo-order-advance');
+    result.hidden = false;
+    result.textContent = message;
+    steps.hidden = !order;
+    advance.hidden = !order || order.stage >= demoOrderStates.length - 1;
+    if (!order) return;
+
+    const title = document.createElement('strong');
+    title.textContent = order.code + ' · ' + demoOrderStates[order.stage];
+    const details = document.createElement('div');
+    details.textContent = order.player + ' · UID ' + order.uid + ' · ' + order.package + ' · ' +
+      price(order.total) + ' · ' + order.method;
+    result.replaceChildren(title, details);
+    Array.from(steps.children).forEach((step, index) => {
+      const current = index === order.stage;
+      if (current) step.setAttribute('aria-current', 'step');
+      else step.removeAttribute('aria-current');
+      step.style.fontWeight = current ? 'bold' : '';
+    });
+    advance.textContent = order.stage === 0 ? 'SIMULAR PAGO' : 'SIMULAR ENTREGA';
+  }
+
+  confirmDemoOrder.addEventListener('click', () => {
+    if (!checkoutProduct || !playerSession || playerSession.uid !== $('#uid').value.trim()) {
+      notify('Vuelve a verificar el UID antes de crear el pedido.');
+      return;
+    }
+    const order = {
+      code: 'VG-' + crypto.randomUUID().replaceAll('-', '').toUpperCase(),
+      stage: 0,
+      uid: playerSession.uid,
+      player: playerSession.demo ? 'Jugador de prueba' : playerSession.nickname,
+      package: checkoutProduct.amount + ' + ' + checkoutProduct.bonus + ' diamantes',
+      total: checkoutProduct.price,
+      method: selectedPaymentMethod === 'binance' ? 'Binance Pay' : 'Yape'
+    };
+    try {
+      localStorage.setItem(demoOrderStorage + order.code, JSON.stringify(order));
+    } catch (_) {
+      notify('El navegador no permitió guardar el pedido de prueba.');
+      return;
+    }
+    $('#demo-order-code').value = order.code;
+    renderDemoOrder(order);
+    closeLayer();
+    orderSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    $('#demo-order-code').focus({ preventScroll: true });
+  });
+
+  $('#demo-order-search').addEventListener('submit', event => {
+    event.preventDefault();
+    const code = $('#demo-order-code').value.trim().toUpperCase();
+    try {
+      const order = JSON.parse(localStorage.getItem(demoOrderStorage + code));
+      if (order?.code === code && Number.isInteger(order.stage) && demoOrderStates[order.stage]) {
+        renderDemoOrder(order);
+        return;
+      }
+    } catch (_) {
+      renderDemoOrder(null, 'No se pudo leer el pedido de prueba.');
+      return;
+    }
+    renderDemoOrder(null, 'No encontramos ese pedido de prueba en este navegador.');
+  });
+
+  $('#demo-order-advance').addEventListener('click', () => {
+    const order = displayedDemoOrder;
+    if (!order || order.stage >= demoOrderStates.length - 1) return;
+    try {
+      const key = demoOrderStorage + order.code;
+      const savedOrder = JSON.parse(localStorage.getItem(key));
+      if (savedOrder?.stage !== order.stage) {
+        renderDemoOrder(savedOrder, 'Vuelve a consultar el pedido de prueba.');
+        return;
+      }
+      const nextOrder = { ...order, stage: order.stage + 1 };
+      localStorage.setItem(key, JSON.stringify(nextOrder));
+      renderDemoOrder(nextOrder);
+    } catch (_) {
+      notify('El navegador no permitió guardar el estado del pedido.');
+    }
+  });
+
   function requestCheckout(id) {
     const product = byId.get(id);
     if (!product) return;
