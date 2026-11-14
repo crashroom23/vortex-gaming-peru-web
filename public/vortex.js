@@ -226,7 +226,7 @@
     const product = byId.get(id);
     if (!product) return;
     const currentUID = $('#uid').value.trim();
-    const region = $('#region').value;
+    const region = 'br';
     if (!playerSession || playerSession.uid !== currentUID || playerSession.region !== region) {
       notify('Primero escribe y verifica tu UID. Para explorar la pantalla de pagos, usa el botón de prueba.');
       $('#verificador').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -275,7 +275,7 @@
       return;
     }
     if (!uidInput.value.trim()) uidInput.value = uid;
-    playerSession = { uid, region: $('#region').value, nickname: 'JUGADOR DEMO', demo: true };
+    playerSession = { uid, region: 'br', nickname: 'JUGADOR DEMO', demo: true };
     const result = $('#verify-result');
     result.hidden = false;
     result.className = 'verify-result';
@@ -287,7 +287,7 @@
     notify('Vista de demostración activada. Selecciona un paquete y pulsa Pagar.');
     $('#tienda').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
-  ['uid', 'region'].forEach(id => document.getElementById(id).addEventListener('input', () => {
+  ['uid'].forEach(id => document.getElementById(id).addEventListener('input', () => {
     playerSession = null;
     $('#verified-status').hidden = true;
   }));
@@ -339,7 +339,7 @@
   verifyForm.addEventListener('submit', async event => {
     event.preventDefault();
     const uid = $('#uid').value.trim();
-    const region = $('#region').value;
+    const region = 'br';
     const result = $('#verify-result');
     if (!/^\d{5,15}$/.test(uid)) {
       result.hidden = false;
@@ -363,7 +363,7 @@
       const name = document.createElement('strong');
       name.textContent = data.player.nickname;
       const details = document.createElement('div');
-      details.textContent = 'UID: ' + data.player.uid + ' · Región: ' + String(data.player.region).toUpperCase() + (data.player.level == null ? '' : ' · Nivel: ' + data.player.level);
+      details.textContent = 'UID: ' + data.player.uid + ' · Región de tienda: Sur LATAM (consulta BR/LATAM)' + (data.player.level == null ? '' : ' · Nivel: ' + data.player.level);
       result.append(name, details);
       playerSession = {
         uid,
