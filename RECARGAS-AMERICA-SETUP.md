@@ -58,3 +58,7 @@ Base: `https://panel.recargasamerica.com/api/v1`
 - `GET /catalog/orders/{order_id}` (por implementar con autenticación por pedido)
 
 Colección original y manual entregados por el propietario. La clave del archivo NO se subió al repositorio. Mantener `main` intacta hasta que todas las pruebas estén aprobadas.
+
+## Redespliegue de comprobación
+
+Se solicitó un nuevo despliegue automático de Preview después de configurar las variables en Cloudflare. Este cambio de documentación no afecta el código ni habilita compras. Si `/api/recargas/health` sigue indicando `catalogConfigured:false`, revisar que `RA_API_KEY` exista en Settings → Preview → Variables and secrets y guardar allí la clave **rotada**, nunca en Production solamente.
