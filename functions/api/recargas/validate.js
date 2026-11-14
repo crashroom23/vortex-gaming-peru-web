@@ -23,7 +23,7 @@ export async function onRequestPost({ request, env }) {
   const testUid = String(env.RA_VALIDATE_TEST_UID || "").trim();
   if (!env.RA_API_KEY || env.RA_VALIDATE_ENABLED !== "true" ||
       !env.RA_TURNSTILE_SITE_KEY || !env.RA_TURNSTILE_SECRET ||
-      !/^\\d{8,12}$/.test(testUid) ||
+      !/^\d{8,12}$/.test(testUid) ||
       !Number.isSafeInteger(productId) || productId <= 0) {
     return reply({ ok: false, code: "NOT_READY", message: "La validación de Recargas América todavía no está habilitada." }, 503);
   }
