@@ -3,212 +3,180 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#090914">
-  <meta name="description" content="Vortex Gaming Perú — verifica tu UID de Free Fire antes de comprar diamantes.">
-  <title>Vortex Gaming Perú | Free Fire</title>
-  <style>
-    :root{color-scheme:dark;--bg:#090914;--panel:#141426;--line:#33334f;--gold:#ffd43b;--muted:#b9b9cc;--purple:#8b5cf6}
-    *{box-sizing:border-box}
-    body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#24204a 0%,var(--bg) 48%);color:#fff;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    a{color:inherit}
-    .wrap{width:min(1080px,92vw);margin:auto}
-    header{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:22px 0}
-    .brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:.5px}
-    .logo{display:grid;place-items:center;width:45px;height:45px;border-radius:14px;background:linear-gradient(135deg,var(--gold),#ff8a00);color:#18120a;font-weight:1000;font-size:23px;box-shadow:0 0 28px #ffd43b33}
-    .brand small{display:block;color:var(--muted);font-size:11px;letter-spacing:2px;margin-top:2px}
-    .pill{border:1px solid var(--line);border-radius:99px;padding:8px 12px;color:var(--muted);font-size:12px}
-    .hero{padding:64px 0 46px;display:grid;grid-template-columns:1.1fr .9fr;gap:38px;align-items:center}
-    .eyebrow{color:var(--gold);font-size:12px;font-weight:900;letter-spacing:2px;text-transform:uppercase}
-    h1{font-size:clamp(38px,6vw,66px);line-height:1.02;letter-spacing:-2px;margin:14px 0 18px}
-    h1 span{color:var(--gold)}
-    .lead{max-width:570px;color:var(--muted);font-size:17px;line-height:1.7}
-    .hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
-    .btn{display:inline-flex;justify-content:center;align-items:center;text-decoration:none;border:0;border-radius:12px;padding:13px 18px;font:inherit;font-weight:850;cursor:pointer}
-    .btn-primary{background:var(--gold);color:#1a1407}
-    .btn-secondary{border:1px solid var(--line);background:#ffffff08;color:#fff}
-    .preview{position:relative;border:1px solid #ffffff1c;border-radius:26px;padding:26px;background:linear-gradient(150deg,#201d3c,#11111e);box-shadow:0 24px 80px #0007;overflow:hidden}
-    .preview:before{content:"";position:absolute;width:200px;height:200px;background:#8b5cf633;filter:blur(40px);top:-80px;right:-70px}
-    .preview>*{position:relative}
-    .diamond{font-size:56px;text-align:center;filter:drop-shadow(0 8px 22px #63d9ff55)}
-    .preview h2{text-align:center;margin:8px 0 4px;font-size:25px}
-    .preview p{text-align:center;color:var(--muted);margin:0 0 22px}
-    .feature{display:flex;gap:12px;align-items:center;padding:13px 0;border-top:1px solid #ffffff12}
-    .feature-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:#ffd43b18;color:var(--gold);font-weight:900}
-    .feature b{display:block;font-size:14px}
-    .feature small{display:block;color:var(--muted);margin-top:3px}
-    .section{padding:36px 0 68px}
-    .section-heading{text-align:center;margin-bottom:24px}
-    .section-heading h2{font-size:clamp(27px,4vw,38px);margin:8px 0}
-    .section-heading p{color:var(--muted);margin:0}
-    .verify{max-width:620px;margin:0 auto;padding:26px;border:1px solid var(--line);border-radius:22px;background:linear-gradient(180deg,#19192d,#11111e);box-shadow:0 20px 60px #0005}
-    .verify label{display:block;margin:16px 0 7px;font-weight:750;font-size:14px}
-    input,select{width:100%;min-height:48px;border:1px solid #44445f;border-radius:11px;background:#0a0a15;color:#fff;padding:12px 13px;font:inherit}
-    input:focus,select:focus{outline:2px solid #ffd43b99;border-color:var(--gold)}
-    .verify .btn{width:100%;margin-top:18px;min-height:49px}
-    .result{margin-top:16px;padding:15px;border:1px solid var(--line);border-radius:12px;background:#080812;overflow-wrap:anywhere;line-height:1.6}
-    .result.ok{border-color:#32845b}.result.err{border-color:#a94949}
-    .nickname{font-size:24px;font-weight:950;color:var(--gold)}
-    .note{color:var(--muted);font-size:12px;line-height:1.6;margin:16px 0 0}
-    .how{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:30px}
-    .how article{border:1px solid var(--line);border-radius:16px;padding:18px;background:#ffffff05}
-    .num{color:var(--gold);font-weight:950;font-size:13px;letter-spacing:1px}
-    .how h3{font-size:16px;margin:9px 0 6px}.how p{font-size:13px;line-height:1.6;color:var(--muted);margin:0}
-    .products{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:25px}
-    .product{position:relative;overflow:hidden;background:linear-gradient(155deg,#201c3b,#141425 72%);border:1px solid #654bb5;border-radius:20px;padding:23px;box-shadow:0 12px 35px #0004}
-    .product .gem{font-size:38px;display:block;margin-bottom:12px}
-    .product .amount{font-size:23px;font-weight:950;color:#fff}
-    .product .bonus{color:#a58cff;font-size:13px;margin-top:7px;font-weight:750}
-    .product .cost{font-size:29px;font-weight:950;color:var(--gold);margin:18px 0}
-    .product button{width:100%}
-    .demo-banner{border:1px solid #655082;border-radius:12px;padding:14px 16px;margin:22px 0 0;background:#211b3b;color:#e4d9ff;font-size:13px;line-height:1.65}
-    .demo-result{margin:20px auto 0;max-width:710px}
-    @media(max-width:760px){.products{grid-template-columns:repeat(2,1fr)}}
-    @media(max-width:480px){.products{grid-template-columns:1fr}}
-    footer{border-top:1px solid #ffffff12;padding:24px 0 34px;color:var(--muted);font-size:12px;line-height:1.7}
-    footer .foot{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap}
-    @media(max-width:760px){.hero{grid-template-columns:1fr;padding-top:38px;gap:26px}.preview{max-width:520px;width:100%;margin:auto}.how{grid-template-columns:1fr}.pill{display:none}header{padding:16px 0}h1{letter-spacing:-1.5px}.verify{padding:20px}}
-  </style>
+  <meta name="theme-color" content="#0a0719">
+  <meta name="description" content="VortexGamer Perú — descubre paquetes de diamantes Free Fire con bonus. Tienda en modo demostración.">
+  <title>VortexGamer Perú | Tu próxima victoria empieza aquí</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/vortex.css">
+  <script src="/vortex.js" defer></script>
 </head>
 <body>
-  <header class="wrap">
-    <div class="brand">
-      <div class="logo">V</div>
-      <div>VORTEX GAMING<small>PERÚ · FREE FIRE</small></div>
+  <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
+    <defs>
+      <linearGradient id="gemTop" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e0ffff"/><stop offset=".45" stop-color="#64dfff"/><stop offset="1" stop-color="#3485ff"/></linearGradient>
+      <linearGradient id="gemLeft" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#50bbff"/><stop offset="1" stop-color="#174ac7"/></linearGradient>
+      <linearGradient id="gemRight" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#7efaff"/><stop offset="1" stop-color="#2550d1"/></linearGradient>
+      <filter id="gemGlow" x="-70%" y="-70%" width="240%" height="240%"><feGaussianBlur stdDeviation="6"/></filter>
+      <symbol id="diamond-graphic" viewBox="0 0 240 185">
+        <ellipse cx="120" cy="90" rx="90" ry="65" fill="#34bcff" opacity=".25" filter="url(#gemGlow)"/>
+        <path d="M49 61 81 25h78l32 36-71 97Z" fill="#2496fc"/>
+        <path d="m49 61 71 97-39-97Z" fill="url(#gemLeft)"/>
+        <path d="m191 61-71 97 39-97Z" fill="url(#gemRight)"/>
+        <path d="m81 25-32 36h142l-32-36Z" fill="url(#gemTop)"/>
+        <path d="m81 61 39 97 39-97Z" fill="#43cfff"/>
+        <path d="m81 61 39-36 39 36Z" fill="#c9ffff"/>
+        <path d="m81 25 39 0-39 36Z" fill="#8ff7ff" opacity=".8"/>
+        <path d="m159 25-39 0 39 36Z" fill="#6ad5ff" opacity=".9"/>
+        <path d="M49 61h142m-110 0 39 97m39-97-39 97" fill="none" stroke="#e8ffff" stroke-opacity=".30" stroke-width="2"/>
+      </symbol>
+      <symbol id="icon-bag" viewBox="0 0 24 24"><path d="M5 8h14l1 12H4L5 8Zm4 0V6a3 3 0 0 1 6 0v2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"/></symbol>
+      <symbol id="icon-heart" viewBox="0 0 24 24"><path d="M20.8 8.5c0 4.2-8.8 10.1-8.8 10.1S3.2 12.7 3.2 8.5a4.4 4.4 0 0 1 8.8-.3 4.4 4.4 0 0 1 8.8.3Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+      <symbol id="icon-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c.4-4.5 2.6-6.5 7-6.5s6.6 2 7 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+      <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="10.7" cy="10.7" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m15.6 15.6 5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+      <symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    </defs>
+  </svg>
+
+  <div class="top-strip"><span class="pulse-dot"></span> NUEVA EXPERIENCIA VORTEXGAMER <span class="strip-divider">/</span> COMPRA DE DIAMANTES EN PREPARACIÓN <span class="top-strip-right">PERÚ <span class="flag">🇵🇪</span></span></div>
+
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="#inicio" aria-label="VortexGamer inicio">
+        <span class="brand-mark">V<span class="brand-slash">/</span></span>
+        <span class="brand-text"><strong>VORTEX<span>GAMER</span></strong><small>POWER YOUR GAME</small></span>
+      </a>
+      <nav class="desktop-nav" aria-label="Navegación principal">
+        <a class="active" href="#inicio">INICIO</a>
+        <a href="#tienda">RECARGAS</a>
+        <a href="#verificador">VERIFICAR UID</a>
+        <a href="#ayuda">AYUDA</a>
+      </nav>
+      <div class="header-actions">
+        <button type="button" class="header-icon" id="favorites-trigger" aria-label="Ver favoritos"><svg><use href="#icon-heart"/></svg><span class="mini-count" id="favorites-count" hidden>0</span></button>
+        <button type="button" class="header-icon" id="cart-trigger" aria-label="Abrir carrito"><svg><use href="#icon-bag"/></svg><span class="mini-count" id="cart-count" hidden>0</span></button>
+        <button type="button" class="account-btn" id="account-trigger"><svg><use href="#icon-user"/></svg><span>MI CUENTA</span></button>
+        <button type="button" class="menu-toggle" id="menu-trigger" aria-label="Abrir menú" aria-expanded="false">☰</button>
+      </div>
     </div>
-    <div class="pill">Tu espacio gamer</div>
+    <nav id="mobile-nav" class="mobile-nav" aria-label="Navegación móvil" hidden>
+      <a href="#inicio">Inicio</a><a href="#tienda">Recargas</a><a href="#verificador">Verificar UID</a><a href="#ayuda">Ayuda</a>
+    </nav>
   </header>
 
   <main>
-    <section class="hero wrap">
-      <div>
-        <div class="eyebrow">Recargas Free Fire</div>
-        <h1>Tu juego.<br><span>Tu estilo.</span><br>Tu Vortex.</h1>
-        <p class="lead">Bienvenido a Vortex Gaming Perú. Verifica el UID y el nombre de tu cuenta de Free Fire antes de continuar con tu compra.</p>
-        <div class="hero-actions">
-          <a class="btn btn-primary" href="#verificar">Verificar mi UID</a>
-          <a class="btn btn-secondary" href="#paquetes">Ver paquetes</a>
+    <section class="hero" id="inicio">
+      <div class="hero-grid"></div>
+      <div class="hero-ambient hero-ambient-a"></div>
+      <div class="hero-ambient hero-ambient-b"></div>
+      <div class="shell hero-layout">
+        <div class="hero-copy">
+          <div class="hero-kicker"><span class="kicker-line"></span> EL UNIVERSO DE LAS RECARGAS <span class="kicker-star">✦</span></div>
+          <h1>EL PODER DE<br><span class="gradient-heading">TU PRÓXIMA</span><br>VICTORIA<span class="period">.</span></h1>
+          <p>Potencia tus partidas con diamantes de Free Fire. Elige tu paquete, revisa los bonos y prepárate para jugar a otro nivel.</p>
+          <div class="hero-ctas">
+            <a class="btn btn-accent" href="#tienda">EXPLORAR PAQUETES <svg><use href="#icon-arrow"/></svg></a>
+            <a class="btn btn-ghost" href="#verificador">VERIFICAR MI UID</a>
+          </div>
+          <div class="hero-signals">
+            <div><strong>06</strong><span>PAQUETES</span></div><i></i>
+            <div><strong>S/ 3.50</strong><span>DESDE</span></div><i></i>
+            <div><strong>100%</strong><span>ESTILO GAMER</span></div>
+          </div>
+        </div>
+        <div class="hero-art" aria-label="Ilustración de diamantes de videojuego">
+          <div class="hero-orbit orbit-one"></div><div class="hero-orbit orbit-two"></div><div class="art-rings"></div>
+          <div class="hero-graphic-halo"></div>
+          <svg class="hero-diamond" viewBox="0 0 240 185" aria-hidden="true"><use href="#diamond-graphic"/></svg>
+          <div class="diamond-shine diamond-shine-one">✦</div><div class="diamond-shine diamond-shine-two">✧</div>
+          <div class="art-floating floating-top"><span class="floating-icon">✦</span><span>RECOMPENSA<br><strong>+ BONUS</strong></span></div>
+          <div class="art-floating floating-bottom"><span class="floating-level">LVL UP</span><strong>VORTEX MODE</strong><span>ACTIVADO</span></div>
+          <div class="art-caption">FREE FIRE <span>/</span> VORTEX EDITION</div>
         </div>
       </div>
-      <aside class="preview" aria-label="Ventajas de Vortex Gaming">
-        <div class="diamond">💎</div>
-        <h2>Diamantes Free Fire</h2>
-        <p>Confirma tu cuenta antes de comprar</p>
-        <div class="feature"><div class="feature-icon">✓</div><div><b>Verificación de UID</b><small>Consulta el nombre del jugador</small></div></div>
-        <div class="feature"><div class="feature-icon">⚡</div><div><b>Proceso sencillo</b><small>Introduce tu UID y revisa el resultado</small></div></div>
-        <div class="feature"><div class="feature-icon">🔒</div><div><b>Clave protegida</b><small>La clave API se guarda en el servidor</small></div></div>
-      </aside>
+      <div class="hero-bottom-line"><div class="shell"><span>LEVEL UP YOUR GAME</span><span>01 / 03</span></div></div>
     </section>
 
-    <section class="section wrap" id="paquetes">
-      <div class="section-heading">
-        <div class="eyebrow">Tienda VortexGamer</div>
-        <h2>Paquetes de diamantes</h2>
-        <p>Elige el paquete que prefieras. Estamos preparando las compras reales.</p>
+    <div class="features-bar"><div class="shell features-grid">
+      <div><span class="feature-symbol">✧</span><span><strong>BONOS INCLUIDOS</strong><small>Más diamantes en cada paquete</small></span></div>
+      <div><span class="feature-symbol">◈</span><span><strong>PRECIOS EN SOLES</strong><small>Catálogo para Perú</small></span></div>
+      <div><span class="feature-symbol">⌁</span><span><strong>UID DE JUGADOR</strong><small>Consulta de cuenta disponible al configurar la API</small></span></div>
+    </div></div>
+
+    <section class="shop-section shell" id="tienda">
+      <div class="section-intro">
+        <div><div class="section-kicker">/ 01 — ARSENAL DIGITAL</div><h2>ELIGE TU <span>PODER</span></h2><p>Seis paquetes. Tu siguiente partida empieza aquí.</p></div>
+        <div class="shop-badge"><span class="pulse-dot"></span> CATÁLOGO VORTEX</div>
       </div>
-      <div class="products">
-        <article class="product"><span class="gem" aria-hidden="true">💎</span><div class="amount">100 diamantes</div><div class="bonus">+ 10 diamantes de bono</div><div class="cost">S/ 3.50</div><button class="btn btn-primary" type="button" data-package="100 + 10 diamantes" data-price="3.50">Seleccionar</button></article>
-        <article class="product"><span class="gem" aria-hidden="true">💎</span><div class="amount">310 diamantes</div><div class="bonus">+ 31 diamantes de bono</div><div class="cost">S/ 9.80</div><button class="btn btn-primary" type="button" data-package="310 + 31 diamantes" data-price="9.80">Seleccionar</button></article>
-        <article class="product"><span class="gem" aria-hidden="true">💎</span><div class="amount">520 diamantes</div><div class="bonus">+ 52 diamantes de bono</div><div class="cost">S/ 15.00</div><button class="btn btn-primary" type="button" data-package="520 + 52 diamantes" data-price="15.00">Seleccionar</button></article>
-        <article class="product"><span class="gem" aria-hidden="true">💎</span><div class="amount">1,060 diamantes</div><div class="bonus">+ 106 diamantes de bono</div><div class="cost">S/ 27.00</div><button class="btn btn-primary" type="button" data-package="1,060 + 106 diamantes" data-price="27.00">Seleccionar</button></article>
-        <article class="product"><span class="gem" aria-hidden="true">💎</span><div class="amount">2,180 diamantes</div><div class="bonus">+ 218 diamantes de bono</div><div class="cost">S/ 52.00</div><button class="btn btn-primary" type="button" data-package="2,180 + 218 diamantes" data-price="52.00">Seleccionar</button></article>
-        <article class="product"><span class="gem" aria-hidden="true">💎</span><div class="amount">5,600 diamantes</div><div class="bonus">+ 560 diamantes de bono</div><div class="cost">S/ 130.00</div><button class="btn btn-primary" type="button" data-package="5,600 + 560 diamantes" data-price="130.00">Seleccionar</button></article>
+      <div class="catalog-controls">
+        <div class="tabs" role="group" aria-label="Filtrar paquetes">
+          <button type="button" class="tab active" data-filter="all" aria-pressed="true">TODOS <span>06</span></button>
+          <button type="button" class="tab" data-filter="starter" aria-pressed="false">INICIO</button>
+          <button type="button" class="tab" data-filter="premium" aria-pressed="false">PRO</button>
+          <button type="button" class="tab" data-filter="favorites" aria-pressed="false">FAVORITOS ♥</button>
+        </div>
+        <label class="catalog-search"><svg><use href="#icon-search"/></svg><input id="catalog-search" type="search" placeholder="Buscar diamantes..." autocomplete="off" aria-label="Buscar paquete de diamantes"><kbd>/</kbd></label>
       </div>
-      <div class="demo-banner"><strong>Modo demostración:</strong> los precios son los definidos para el catálogo VortexGamer. Los botones todavía no procesan pagos ni envían recargas. Las compras se habilitarán cuando la integración y el sistema de saldo estén probados.</div>
-      <div class="result demo-result" id="package-result" role="status" aria-live="polite" hidden></div>
+      <div class="products-grid" id="products-grid" aria-live="polite"></div>
+      <div class="empty-state" id="empty-state" hidden><div>◇</div><strong>No encontramos paquetes</strong><p>Prueba con otro número de diamantes o cambia el filtro.</p><button type="button" class="btn btn-ghost" id="reset-search">VER TODOS</button></div>
+      <div class="shop-note"><span>ℹ</span><p><strong>VERSIÓN DEMOSTRACIÓN.</strong> Puedes explorar el catálogo, guardar favoritos y armar tu carrito. No se procesan pagos ni se realizan recargas reales.</p></div>
     </section>
 
-    <section id="verificar" class="section wrap">
-      <div class="section-heading">
-        <div class="eyebrow">Antes de comprar</div>
-        <h2>Verifica tu cuenta</h2>
-        <p>Escribe tu UID para consultar el nombre asociado.</p>
+    <section class="mid-banner shell" aria-label="Información VortexGamer">
+      <div class="mid-banner-title"><span>◈</span><div><small>VORTEX // NEXT LEVEL</small><h3>¿LISTO PARA SUBIR DE NIVEL?</h3></div></div>
+      <p>Pronto podrás recargar saldo por Yape, consultar pedidos y comprar con tu cuenta de VortexGamer.</p>
+      <button class="btn btn-outline" type="button" id="wallet-trigger">CONOCER MI BILLETERA <svg><use href="#icon-arrow"/></svg></button>
+    </section>
+
+    <section class="verify-section" id="verificador">
+      <div class="shell verify-layout">
+        <div class="verify-copy">
+          <div class="section-kicker">/ 02 — IDENTIDAD GAMER</div>
+          <h2>CONFIRMA TU<br><span>JUGADOR</span></h2>
+          <p>Introduce tu UID para intentar consultar el nombre de tu cuenta. Esta función necesita que la API del proveedor esté configurada y sea compatible con tu región.</p>
+          <div class="verify-points"><span>01 <strong>Escribe el UID</strong></span><span>02 <strong>Selecciona región</strong></span><span>03 <strong>Revisa el resultado</strong></span></div>
+        </div>
+        <form class="verify-card" id="verify-form">
+          <div class="verify-card-head"><div class="verify-logo">◈</div><div><strong>PLAYER CHECK</strong><small>IDENTIFICACIÓN DE CUENTA</small></div><span class="verify-tag">BETA</span></div>
+          <label for="uid">UID DE FREE FIRE</label>
+          <input id="uid" name="uid" inputmode="numeric" autocomplete="off" placeholder="Ingresa tu UID" maxlength="15" pattern="[0-9]{5,15}" required>
+          <label for="region">REGIÓN DEL SERVIDOR</label>
+          <select id="region" name="region"><option value="br" selected>BR / LATAM (probar Perú)</option><option value="sg">SG</option><option value="ind">IND</option></select>
+          <button type="submit" id="verify-btn" class="btn btn-accent btn-wide">VERIFICAR JUGADOR <svg><use href="#icon-arrow"/></svg></button>
+          <div class="verify-result" id="verify-result" role="status" aria-live="polite" hidden></div>
+          <p class="verify-footnote">La verificación no garantiza disponibilidad de recargas ni realiza ninguna compra.</p>
+        </form>
       </div>
-      <form class="verify" id="verify-form">
-        <label for="uid">UID de Free Fire</label>
-        <input id="uid" name="uid" type="text" inputmode="numeric" autocomplete="off" minlength="5" maxlength="15" pattern="[0-9]{5,15}" placeholder="Ej. 123456789" required>
-        <label for="region">Región del servidor</label>
-        <select id="region" name="region">
-          <option value="br" selected>BR / LATAM (opción para probar Perú)</option>
-          <option value="sg">SG</option>
-          <option value="ind">IND</option>
-        </select>
-        <button class="btn btn-primary" id="verify-btn" type="submit">Verificar jugador</button>
-        <div class="result" id="result" role="status" aria-live="polite" hidden></div>
-        <p class="note">La región BR/LATAM está seleccionada inicialmente, pero debes probarla con una cuenta peruana real. La verificación no confirma el pago ni realiza la recarga.</p>
-      </form>
-      <div id="como-funciona" class="how">
-        <article><div class="num">PASO 01</div><h3>Introduce tu UID</h3><p>Escribe los números de tu identificador de Free Fire, sin espacios.</p></article>
-        <article><div class="num">PASO 02</div><h3>Verifica el nombre</h3><p>La página consulta la API configurada en el servidor y muestra el resultado.</p></article>
-        <article><div class="num">PASO 03</div><h3>Confirma antes de comprar</h3><p>Comprueba que el nombre sea el de la cuenta correcta antes de seguir con el pedido.</p></article>
+    </section>
+
+    <section class="faq-section shell" id="ayuda">
+      <div class="section-intro"><div><div class="section-kicker">/ 03 — CENTRO DE AYUDA</div><h2>PREGUNTAS <span>RÁPIDAS</span></h2></div></div>
+      <div class="faq-grid">
+        <details><summary>¿Ya puedo comprar diamantes?<span>+</span></summary><p>Todavía no. Esta es una vista previa del diseño. No procesamos pedidos ni pagos hasta conectar y probar el proveedor de recargas.</p></details>
+        <details><summary>¿Cómo funcionará el saldo con Yape?<span>+</span></summary><p>El plan es permitir solicitudes de recarga de saldo desde S/ 5, adjuntar comprobantes y aprobarlos desde un panel de administración. Aún no está implementado.</p></details>
+        <details><summary>¿El UID se verifica automáticamente?<span>+</span></summary><p>La consulta funciona cuando el administrador configura una clave válida del proveedor de verificación; puede variar según la región de Free Fire.</p></details>
+        <details><summary>¿Qué pasará con mis favoritos?<span>+</span></summary><p>Por ahora se guardan únicamente en este navegador para explorar el diseño. No están vinculados a una cuenta de usuario.</p></details>
       </div>
     </section>
   </main>
 
-  <footer>
-    <div class="wrap foot">
-      <div><strong>VORTEX GAMING PERÚ</strong><br>Recargas y servicios para jugadores.</div>
-      <div>Free Fire es una marca de sus respectivos titulares. Esta página no está afiliada ni respaldada por Garena.<br>© <span id="year"></span> Vortex Gaming Perú.</div>
-    </div>
-  </footer>
+  <footer class="footer"><div class="shell footer-top"><div><a class="brand" href="#inicio"><span class="brand-mark">V<span class="brand-slash">/</span></span><span class="brand-text"><strong>VORTEX<span>GAMER</span></strong><small>POWER YOUR GAME</small></span></a><p>Un nuevo universo para tus recargas digitales.</p></div><div><strong>NAVEGACIÓN</strong><a href="#tienda">Paquetes</a><a href="#verificador">Verificar jugador</a><a href="#ayuda">Ayuda</a></div><div><strong>ESTADO</strong><span>◉ Catálogo en demostración</span><span>◉ Pagos desactivados</span><span>◉ Integración en desarrollo</span></div></div><div class="shell footer-bottom"><span>© <span id="year"></span> VortexGamer Perú.</span><span>Free Fire es una marca de sus titulares. Sitio no afiliado ni respaldado por Garena.</span></div></footer>
 
-  <script>
-    (() => {
-      document.querySelectorAll("[data-package]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const result = document.getElementById("package-result");
-          result.hidden = false;
-          result.className = "result demo-result";
-          result.textContent = "Seleccionaste " + button.dataset.package + " por S/ " + button.dataset.price + ". Las compras reales aún no están activadas. No se ha realizado ningún cobro.";
-          result.scrollIntoView({ behavior: "smooth", block: "nearest" });
-        });
-      });
-      const form = document.getElementById("verify-form");
-      const button = document.getElementById("verify-btn");
-      const result = document.getElementById("result");
-      document.getElementById("year").textContent = new Date().getFullYear();
-
-      form.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const uid = document.getElementById("uid").value.trim();
-        const region = document.getElementById("region").value;
-        if (!/^\d{5,15}$/.test(uid)) {
-          showError("Introduce un UID válido de 5 a 15 dígitos.");
-          return;
-        }
-        button.disabled = true;
-        button.textContent = "Consultando...";
-        result.hidden = false;
-        result.className = "result";
-        result.textContent = "Consultando el nombre del jugador…";
-        try {
-          const params = new URLSearchParams({ uid, region });
-          const response = await fetch(`/api/freefire/verify?${params.toString()}`, {
-            headers: { "Accept": "application/json" }
-          });
-          const data = await response.json();
-          if (!response.ok || !data.ok) throw new Error(data.message || "No se pudo verificar el UID.");
-          result.className = "result ok";
-          result.replaceChildren();
-          const nickname = document.createElement("div");
-          nickname.className = "nickname";
-          nickname.textContent = data.player.nickname;
-          const details = document.createElement("div");
-          details.textContent = `UID: ${data.player.uid} · Región: ${String(data.player.region).toUpperCase()}${data.player.level == null ? "" : ` · Nivel: ${data.player.level}`}`;
-          result.append(nickname, details);
-        } catch (error) {
-          showError(error.message || "Ocurrió un error. Inténtalo más tarde.");
-        } finally {
-          button.disabled = false;
-          button.textContent = "Verificar jugador";
-        }
-      });
-
-      function showError(message) {
-        result.hidden = false;
-        result.className = "result err";
-        result.textContent = message;
-      }
-    })();
-  </script>
+  <div class="shade" id="overlay" hidden></div>
+  <aside class="side-panel" id="cart-panel" role="dialog" aria-modal="true" aria-labelledby="cart-title" aria-hidden="true" inert>
+    <div class="panel-head"><div><span>MI SELECCIÓN</span><h2 id="cart-title">TU CARRITO <span id="drawer-count">0</span></h2></div><button type="button" class="close-button" data-close aria-label="Cerrar carrito">×</button></div>
+    <div class="panel-items" id="cart-items"></div>
+    <div class="panel-bottom"><div class="subtotal"><span>SUBTOTAL</span><strong id="cart-total">S/ 0.00</strong></div><p>Vista de prueba: agregar productos no genera órdenes ni pagos.</p><button type="button" class="btn btn-accent btn-wide" id="demo-checkout">CONTINUAR <svg><use href="#icon-arrow"/></svg></button><button type="button" class="clear-cart" id="clear-cart">VACIAR CARRITO</button></div>
+  </aside>
+  <aside class="side-panel" id="favorites-panel" role="dialog" aria-modal="true" aria-labelledby="favorites-title" aria-hidden="true" inert>
+    <div class="panel-head"><div><span>TUS ELEGIDOS</span><h2 id="favorites-title">FAVORITOS ♥</h2></div><button type="button" class="close-button" data-close aria-label="Cerrar favoritos">×</button></div>
+    <div class="panel-items" id="favorites-items"></div>
+    <div class="panel-bottom"><p>Los favoritos se guardan solo en este navegador.</p><button type="button" class="btn btn-outline btn-wide" data-close>SEGUIR EXPLORANDO</button></div>
+  </aside>
+  <div class="modal" id="info-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true" inert>
+    <button type="button" class="close-button modal-close" data-close aria-label="Cerrar">×</button><div class="modal-emblem">◈</div><span class="modal-kicker">PRÓXIMAMENTE EN VORTEX</span><h2 id="modal-title">NUEVA FUNCIÓN</h2><p id="modal-description"></p><button type="button" class="btn btn-accent btn-wide" data-close>ENTENDIDO</button>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 </body>
 </html>
