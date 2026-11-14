@@ -80,6 +80,7 @@
       uidTurnstileWidget = window.turnstile.render(container, {
         sitekey: config.turnstileSiteKey,
         theme: 'dark',
+        appearance: 'interaction-only',
         action: 'ff_uid',
         callback: token => { uidTurnstileToken = token; },
         'expired-callback': () => { uidTurnstileToken = ''; },
@@ -437,7 +438,7 @@
       result.className = 'verify-result ok';
       result.replaceChildren();
       const name = document.createElement('strong');
-      name.textContent = data.player.nickname || 'Cuenta validada (nombre no disponible)';
+      name.textContent = data.player.nickname ? 'Jugador: ' + data.player.nickname : 'Nombre del jugador no disponible';
       const details = document.createElement('div');
       details.textContent = 'UID: ' + data.player.uid + ' · Región de tienda: Sur LATAM · ' + verificationSource + (data.player.level == null ? '' : ' · Nivel: ' + data.player.level);
       result.append(name, details);
@@ -452,7 +453,6 @@
       status.className = 'verified-status is-verified';
       status.textContent = '✓ UID VERIFICADO · YA PUEDES ELEGIR TU PAQUETE';
       notify('Jugador verificado. Ahora elige tus diamantes y pulsa Pagar.');
-      $('#tienda').scrollIntoView({ behavior: 'smooth', block: 'start' });
     } catch (error) {
       playerSession = null;
       $('#verified-status').hidden = true;
