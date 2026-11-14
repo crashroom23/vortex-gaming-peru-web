@@ -55,7 +55,7 @@
       </nav>
       <div class="header-actions">
         <button type="button" class="header-icon" id="favorites-trigger" aria-label="Ver favoritos"><svg><use href="#icon-heart"/></svg><span class="mini-count" id="favorites-count" hidden>0</span></button>
-        <button type="button" class="header-icon" id="cart-trigger" aria-label="Abrir carrito"><svg><use href="#icon-bag"/></svg><span class="mini-count" id="cart-count" hidden>0</span></button>
+        <button type="button" class="header-icon" id="cart-trigger" aria-label="Abrir carrito" hidden><svg><use href="#icon-bag"/></svg><span class="mini-count" id="cart-count" hidden>0</span></button>
         <button type="button" class="account-btn" id="account-trigger"><svg><use href="#icon-user"/></svg><span>MI CUENTA</span></button>
         <button type="button" class="menu-toggle" id="menu-trigger" aria-label="Abrir menú" aria-expanded="false">☰</button>
       </div>
@@ -76,8 +76,8 @@
           <h1>EL PODER DE<br><span class="gradient-heading">TU PRÓXIMA</span><br>VICTORIA<span class="period">.</span></h1>
           <p>Potencia tus partidas con diamantes de Free Fire. Elige tu paquete, revisa los bonos y prepárate para jugar a otro nivel.</p>
           <div class="hero-ctas">
-            <a class="btn btn-accent" href="#tienda">EXPLORAR PAQUETES <svg><use href="#icon-arrow"/></svg></a>
-            <a class="btn btn-ghost" href="#verificador">VERIFICAR MI UID</a>
+            <a class="btn btn-accent" href="#verificador">VERIFICAR MI UID <svg><use href="#icon-arrow"/></svg></a>
+            <a class="btn btn-ghost" href="#tienda">EXPLORAR PAQUETES</a>
           </div>
           <div class="hero-signals">
             <div><strong>06</strong><span>PAQUETES</span></div><i></i>
@@ -104,9 +104,30 @@
       <div><span class="feature-symbol">⌁</span><span><strong>UID DE JUGADOR</strong><small>Consulta de cuenta disponible al configurar la API</small></span></div>
     </div></div>
 
+    <section class="verify-section" id="verificador">
+      <div class="shell verify-layout">
+        <div class="verify-copy">
+          <div class="section-kicker">PASO 01 / VERIFICAR UID</div>
+          <h2>PRIMERO, TU <span>JUGADOR</span></h2>
+          <p>Escribe tu UID y verifica el nombre de tu cuenta antes de escoger un paquete. Si la API todavía no está conectada, puedes probar el diseño en modo demostración.</p>
+          <div class="verify-points"><span>01 <strong>Escribe el UID</strong></span><span>02 <strong>Selecciona región</strong></span><span>03 <strong>Revisa el resultado</strong></span></div>
+        </div>
+        <form class="verify-card" id="verify-form">
+          <div class="verify-card-head"><div class="verify-logo">◈</div><div><strong>PLAYER CHECK</strong><small>IDENTIFICACIÓN DE CUENTA</small></div><span class="verify-tag">BETA</span></div>
+          <label for="uid">UID DE FREE FIRE</label>
+          <input id="uid" name="uid" inputmode="numeric" autocomplete="off" placeholder="Ingresa tu UID" maxlength="15" pattern="[0-9]{5,15}" required>
+          <label for="region">REGIÓN DEL SERVIDOR</label>
+          <select id="region" name="region"><option value="br" selected>BR / LATAM (probar Perú)</option><option value="sg">SG</option><option value="ind">IND</option></select>
+          <button type="submit" id="verify-btn" class="btn btn-accent btn-wide">VERIFICAR UID <svg><use href="#icon-arrow"/></svg></button><button type="button" id="simulate-verify" class="btn btn-ghost btn-wide demo-verify-button">PROBAR FLUJO SIN VERIFICACIÓN REAL</button>
+          <div class="verify-result" id="verify-result" role="status" aria-live="polite" hidden></div><div class="verified-status" id="verified-status" hidden></div>
+          <p class="verify-footnote">La verificación real requiere una API activa. El modo demo NO verifica tu identidad ni permite pagar.</p>
+        </form>
+      </div>
+    </section>
+
     <section class="shop-section shell" id="tienda">
       <div class="section-intro">
-        <div><div class="section-kicker">/ 01 — ARSENAL DIGITAL</div><h2>ELIGE TU <span>PODER</span></h2><p>Seis paquetes. Tu siguiente partida empieza aquí.</p></div>
+        <div><div class="section-kicker">PASO 02 / ELIGE TU PAQUETE</div><h2>ELIGE TU <span>PODER</span></h2><p>Después de verificar tu UID, selecciona el paquete y pulsa <strong>Pagar</strong>. La pantalla de pagos todavía es una demostración.</p></div>
         <div class="shop-badge"><span class="pulse-dot"></span> CATÁLOGO VORTEX</div>
       </div>
       <div class="catalog-controls">
@@ -120,41 +141,20 @@
       </div>
       <div class="products-grid" id="products-grid" aria-live="polite"></div>
       <div class="empty-state" id="empty-state" hidden><div>◇</div><strong>No encontramos paquetes</strong><p>Prueba con otro número de diamantes o cambia el filtro.</p><button type="button" class="btn btn-ghost" id="reset-search">VER TODOS</button></div>
-      <div class="shop-note"><span>ℹ</span><p><strong>VERSIÓN DEMOSTRACIÓN.</strong> Puedes explorar el catálogo, guardar favoritos y armar tu carrito. No se procesan pagos ni se realizan recargas reales.</p></div>
+      <div class="shop-note"><span>ℹ</span><p><strong>MODO PRUEBA.</strong> La ventana de pago es una vista previa. No aparecen QR cobrables ni se procesan pagos reales por Yape o Binance hasta integrar la pasarela.</p></div>
     </section>
 
     <section class="mid-banner shell" aria-label="Información VortexGamer">
-      <div class="mid-banner-title"><span>◈</span><div><small>VORTEX // NEXT LEVEL</small><h3>¿LISTO PARA SUBIR DE NIVEL?</h3></div></div>
-      <p>Pronto podrás recargar saldo por Yape, consultar pedidos y comprar con tu cuenta de VortexGamer.</p>
+      <div class="mid-banner-title"><span>◈</span><div><small>VORTEX // NEXT LEVEL</small><h3>¿YA ELEGISTE TUS DIAMANTES?</h3></div></div>
+      <p>Elige tu UID, verifica el jugador y pulsa Pagar para abrir la ventana con Yape o Binance Pay.</p>
       <button class="btn btn-outline" type="button" id="wallet-trigger">CONOCER MI BILLETERA <svg><use href="#icon-arrow"/></svg></button>
-    </section>
-
-    <section class="verify-section" id="verificador">
-      <div class="shell verify-layout">
-        <div class="verify-copy">
-          <div class="section-kicker">/ 02 — IDENTIDAD GAMER</div>
-          <h2>CONFIRMA TU<br><span>JUGADOR</span></h2>
-          <p>Introduce tu UID para intentar consultar el nombre de tu cuenta. Esta función necesita que la API del proveedor esté configurada y sea compatible con tu región.</p>
-          <div class="verify-points"><span>01 <strong>Escribe el UID</strong></span><span>02 <strong>Selecciona región</strong></span><span>03 <strong>Revisa el resultado</strong></span></div>
-        </div>
-        <form class="verify-card" id="verify-form">
-          <div class="verify-card-head"><div class="verify-logo">◈</div><div><strong>PLAYER CHECK</strong><small>IDENTIFICACIÓN DE CUENTA</small></div><span class="verify-tag">BETA</span></div>
-          <label for="uid">UID DE FREE FIRE</label>
-          <input id="uid" name="uid" inputmode="numeric" autocomplete="off" placeholder="Ingresa tu UID" maxlength="15" pattern="[0-9]{5,15}" required>
-          <label for="region">REGIÓN DEL SERVIDOR</label>
-          <select id="region" name="region"><option value="br" selected>BR / LATAM (probar Perú)</option><option value="sg">SG</option><option value="ind">IND</option></select>
-          <button type="submit" id="verify-btn" class="btn btn-accent btn-wide">VERIFICAR JUGADOR <svg><use href="#icon-arrow"/></svg></button>
-          <div class="verify-result" id="verify-result" role="status" aria-live="polite" hidden></div>
-          <p class="verify-footnote">La verificación no garantiza disponibilidad de recargas ni realiza ninguna compra.</p>
-        </form>
-      </div>
     </section>
 
     <section class="faq-section shell" id="ayuda">
       <div class="section-intro"><div><div class="section-kicker">/ 03 — CENTRO DE AYUDA</div><h2>PREGUNTAS <span>RÁPIDAS</span></h2></div></div>
       <div class="faq-grid">
-        <details><summary>¿Ya puedo comprar diamantes?<span>+</span></summary><p>Todavía no. Esta es una vista previa del diseño. No procesamos pedidos ni pagos hasta conectar y probar el proveedor de recargas.</p></details>
-        <details><summary>¿Cómo funcionará el saldo con Yape?<span>+</span></summary><p>El plan es permitir solicitudes de recarga de saldo desde S/ 5, adjuntar comprobantes y aprobarlos desde un panel de administración. Aún no está implementado.</p></details>
+        <details><summary>¿Ya puedo comprar diamantes?<span>+</span></summary><p>Todavía no. La ventana Yape y Binance es una vista previa. No procesamos pedidos ni pagos hasta conectar y probar el proveedor de recargas.</p></details>
+        <details><summary>¿Cómo se confirmarán los pagos por Yape?<span>+</span></summary><p>Para confirmarlos automáticamente usaremos una pasarela compatible con Yape y su confirmación segura. Un QR personal por sí solo no informa a la web de que el cliente pagó.</p></details>
         <details><summary>¿El UID se verifica automáticamente?<span>+</span></summary><p>La consulta funciona cuando el administrador configura una clave válida del proveedor de verificación; puede variar según la región de Free Fire.</p></details>
         <details><summary>¿Qué pasará con mis favoritos?<span>+</span></summary><p>Por ahora se guardan únicamente en este navegador para explorar el diseño. No están vinculados a una cuenta de usuario.</p></details>
       </div>
@@ -177,6 +177,30 @@
   <div class="modal" id="info-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true" inert>
     <button type="button" class="close-button modal-close" data-close aria-label="Cerrar">×</button><div class="modal-emblem">◈</div><span class="modal-kicker">PRÓXIMAMENTE EN VORTEX</span><h2 id="modal-title">NUEVA FUNCIÓN</h2><p id="modal-description"></p><button type="button" class="btn btn-accent btn-wide" data-close>ENTENDIDO</button>
   </div>
+  
+  <div class="modal checkout-modal" id="checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkout-title" aria-hidden="true" inert>
+    <button type="button" class="close-button modal-close" data-close aria-label="Cerrar ventana de pago">×</button>
+    <span class="modal-kicker">PASO 03 / MÉTODO DE PAGO</span>
+    <h2 id="checkout-title">FINALIZAR <span>COMPRA</span></h2>
+    <p class="checkout-warning"><strong>VISTA PREVIA:</strong> no hay cobros ni QR activos. No transfieras dinero desde esta ventana.</p>
+    <div class="checkout-order">
+      <div><small>JUGADOR / UID</small><strong id="checkout-player">—</strong></div>
+      <div><small>PAQUETE</small><strong id="checkout-package">—</strong></div>
+      <div class="checkout-total"><small>TOTAL EN SOLES</small><strong id="checkout-price">S/ 0.00</strong></div>
+    </div>
+    <div class="checkout-methods" role="group" aria-label="Selecciona método de pago">
+      <button type="button" class="payment-tab active" data-method="yape" aria-pressed="true"><span>🟣</span> YAPE</button>
+      <button type="button" class="payment-tab" data-method="binance" aria-pressed="false"><span>◈</span> BINANCE PAY</button>
+    </div>
+    <div class="payment-preview" id="payment-preview">
+      <div class="payment-qr-placeholder" aria-hidden="true"><span class="qr-outline">▦</span><strong>QR NO DISPONIBLE</strong><small>Integración pendiente</small></div>
+      <div class="payment-explanation"><h3 id="payment-name">Yape automático</h3><p id="payment-description">El QR dinámico se generará desde una pasarela autorizada, cuando se habiliten los cobros reales.</p><span class="payment-status">● SIN COBROS ACTIVOS</span></div>
+    </div>
+    <p class="payment-notice" id="payment-notice"></p>
+    <button type="button" class="btn btn-accent btn-wide" id="payment-demo-confirm" disabled>CONFIRMAR PAGO — PRÓXIMAMENTE</button>
+    <p class="checkout-footnote">Ningún pago se confirmará automáticamente sin una respuesta verificada del proveedor y registro seguro en el servidor.</p>
+  </div>
+
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 </body>
 </html>
