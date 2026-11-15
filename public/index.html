@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/vortex.css?v=actividad">
+  <link rel="stylesheet" href="/vortex.css?v=catalogo-compacto">
   <script src="/vortex.js?v=actividad-400" defer></script>
 </head>
 <body>
@@ -85,21 +85,16 @@
       <div><span class="feature-symbol">⌁</span><span><strong>UID DE JUGADOR</strong><small>Consulta de cuenta disponible al configurar la API</small></span></div>
     </div></div>
 
+    <div class="recharge-area">
     <section class="verify-section" id="verificador">
       <div class="shell verify-layout">
-        <div class="verify-copy">
-          <div class="section-kicker">PASO 01 / VERIFICAR UID</div>
-          <h2>PRIMERO, TU <span>JUGADOR</span></h2>
-          <p>Escribe tu UID y verifica el nombre de tu cuenta antes de escoger un paquete. Si la API todavía no está conectada, puedes probar el diseño en modo demostración.</p>
-          <div class="verify-points"><span>01 <strong>Escribe el UID</strong></span><span>02 <strong>Selecciona región</strong></span><span>03 <strong>Revisa el resultado</strong></span></div>
-        </div>
         <form class="verify-card" id="verify-form">
-          <div class="verify-card-head"><div class="verify-logo">◈</div><div><strong>PLAYER CHECK</strong><small>IDENTIFICACIÓN DE CUENTA</small></div><span class="verify-tag">BETA</span></div>
+          <div class="verify-card-head"><div class="verify-logo" aria-hidden="true">◈</div><h2>Verifica tu ID de Free Fire</h2></div>
           <label for="uid">UID DE FREE FIRE</label>
           <input id="uid" name="uid" inputmode="numeric" autocomplete="off" placeholder="Ingresa tu UID" minlength="8" maxlength="12" pattern="[0-9]{8,12}" required>
           <div class="fixed-region" aria-label="Región de la tienda: Sur LATAM"><span>🌎</span> SERVIDOR DE LA TIENDA: <strong>SUR LATAM</strong></div>
           <div id="uid-turnstile" class="uid-turnstile" hidden aria-label="Comprobación de seguridad"></div>
-          <button type="submit" id="verify-btn" class="btn btn-accent btn-wide">VERIFICAR UID <svg><use href="#icon-arrow"/></svg></button><button type="button" id="simulate-verify" class="btn btn-ghost btn-wide demo-verify-button">PROBAR FLUJO SIN VERIFICACIÓN REAL</button>
+          <button type="submit" id="verify-btn" class="btn btn-accent btn-wide">VERIFICAR UID <svg><use href="#icon-arrow"/></svg></button><button type="button" id="simulate-verify" class="btn btn-ghost btn-wide demo-verify-button">Probar flujo demo</button>
           <div class="verify-result" id="verify-result" role="status" aria-live="polite" hidden></div><div class="verified-status" id="verified-status" hidden></div>
           <p class="verify-footnote">La verificación real requiere una API activa. El modo demo NO verifica tu identidad ni permite pagar.</p>
         </form>
@@ -108,12 +103,11 @@
 
     <section class="shop-section shell" id="tienda">
       <div class="section-intro">
-        <div><div class="section-kicker">PASO 02 / ELIGE TU PAQUETE</div><h2>ELIGE TU <span>PODER</span></h2><p>Después de verificar tu UID, selecciona el paquete y pulsa <strong>Pagar</strong>. La pantalla de pagos todavía es una demostración.</p></div>
-        <div class="shop-badge"><span class="pulse-dot"></span> CATÁLOGO VORTEX</div>
+        <div><h2>Catálogo de <span>recargas</span></h2><p>Elige los diamantes que quieres enviar a tu cuenta.</p></div>
       </div>
       <div class="catalog-controls">
         <div class="tabs" role="group" aria-label="Filtrar paquetes">
-          <button type="button" class="tab active" data-filter="all" aria-pressed="true">TODOS <span>06</span></button>
+          <button type="button" class="tab active" data-filter="all" aria-pressed="true">FREE FIRE <span>06</span></button>
           <button type="button" class="tab" data-filter="starter" aria-pressed="false">INICIO</button>
           <button type="button" class="tab" data-filter="premium" aria-pressed="false">PRO</button>
           <button type="button" class="tab" data-filter="favorites" aria-pressed="false">FAVORITOS ♥</button>
@@ -124,6 +118,8 @@
       <div class="empty-state" id="empty-state" hidden><div>◇</div><strong>No encontramos paquetes</strong><p>Prueba con otro número de diamantes o cambia el filtro.</p><button type="button" class="btn btn-ghost" id="reset-search">VER TODOS</button></div>
       <div class="shop-note"><span>ℹ</span><p><strong>MODO PRUEBA.</strong> La ventana de pago es una vista previa. No aparecen QR cobrables ni se procesan pagos reales por Yape o Binance hasta integrar la pasarela.</p></div>
     </section>
+
+    </div>
 
     <section class="mid-banner shell" aria-label="Información VortexGamer">
       <div class="mid-banner-title"><span>◈</span><div><small>VORTEX // NEXT LEVEL</small><h3>¿YA ELEGISTE TUS DIAMANTES?</h3></div></div>
