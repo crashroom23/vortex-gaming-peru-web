@@ -576,11 +576,12 @@ img,svg{max-width:100%}
 }
 
 
-/* Compact hero keeps the complete original artwork in view. */
-.storefront-banner { padding: clamp(10px, 1.5vw, 20px) 0 14px; }
-.storefront-banner > .shell { width: min(calc(100% - 32px), 880px); }
+/* Full-width hero preserves the complete artwork at its original aspect ratio. */
+.storefront-banner { padding: 0 0 14px; }
+.storefront-banner > .shell { width: 100%; max-width: none; }
 .storefront-banner .storefront-banner-title {
-  border-radius: clamp(12px, 1.5vw, 20px);
+  border-radius: 0;
+  border-width: 0 0 1px;
   border-color: #aa68ff;
   box-shadow: 0 0 24px #8e4ae94d, 0 12px 34px #05001199;
   animation: none;
