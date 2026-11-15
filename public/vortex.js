@@ -283,7 +283,7 @@
   orderSection.className = 'faq-section shell';
   orderSection.innerHTML = `
     <div class="section-intro"><div><h2>ESTADO DE <span>TU PEDIDO</span></h2>
-      <p>Consulta tu pedido de prueba en este navegador.</p></div></div>
+      <p>Consulta tu pedido de prueba desde cualquier dispositivo.</p></div></div>
     <form id="demo-order-search">
       <label for="demo-order-code">Código de pedido</label>
       <label class="catalog-search"><input id="demo-order-code" type="text" placeholder="VG-…" autocomplete="off" maxlength="39" required></label>
@@ -293,7 +293,9 @@
     <ol id="demo-order-steps" hidden>
       <li>Pedido creado</li><li>Pago confirmado</li><li>Recarga entregada</li>
     </ol>
-    <button type="button" class="btn btn-accent" id="demo-order-advance" hidden></button>`;
+    <button type="button" class="btn btn-accent" id="demo-order-advance" hidden></button>
+    <button type="button" class="btn btn-outline" id="demo-order-receipt" hidden>VER / DESCARGAR COMPROBANTE</button>
+    <div id="demo-order-receipt-preview" class="verify-result" hidden></div>`;
   $('#ayuda').before(orderSection);
   const orderLink = document.createElement('a');
   orderLink.href = '#seguimiento';
@@ -314,6 +316,8 @@
     result.textContent = message;
     steps.hidden = !order;
     advance.hidden = !order || order.stage >= demoOrderStates.length - 1;
+    $('#demo-order-receipt').hidden = !order || order.stage < 1;
+    $('#demo-order-receipt-preview').hidden = true;
     if (!order) return;
 
     const title = document.createElement('strong');
@@ -331,65 +335,122 @@
     advance.textContent = order.stage === 0 ? 'SIMULAR PAGO' : 'SIMULAR ENTREGA';
   }
 
-  confirmDemoOrder.addEventListener('click', () => {
+  async function requestDemoOrder(method, data) {
+    const url = '/api/preview-orders' + (method === 'GET' ? '?code=' + encodeURIComponent(data.code) : '');
+    const response = await fetch(url, method === 'GET' ? undefined : {
+      method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.message);
+    return result.order;
+  }
+
+  let draftOrder = null;
+  let updatingOrder = false;
+  confirmDemoOrder.addEventListener('click', async () => {
+    if (updatingOrder) return;
     if (!checkoutProduct || !playerSession || playerSession.uid !== $('#uid').value.trim()) {
       notify('Vuelve a verificar el UID antes de crear el pedido.');
       return;
     }
-    const order = {
-      code: 'VG-' + crypto.randomUUID().replaceAll('-', '').toUpperCase(),
-      stage: 0,
-      uid: playerSession.uid,
-      player: playerSession.demo ? 'Jugador de prueba' : playerSession.nickname,
-      package: checkoutProduct.amount + ' + ' + checkoutProduct.bonus + ' diamantes',
-      total: checkoutProduct.price,
-      method: selectedPaymentMethod === 'binance' ? 'Binance Pay' : 'Yape'
-    };
-    try {
-      localStorage.setItem(demoOrderStorage + order.code, JSON.stringify(order));
-    } catch (_) {
-      notify('El navegador no permitió guardar el pedido de prueba.');
-      return;
+    const selection = checkoutProduct.id + ':' + playerSession.uid + ':' + selectedPaymentMethod;
+    if (draftOrder?.selection !== selection) {
+      draftOrder = {selection, code:'VG-' + crypto.randomUUID().replaceAll('-', '').toUpperCase()};
     }
-    $('#demo-order-code').value = order.code;
-    renderDemoOrder(order);
-    closeLayer();
-    orderSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    $('#demo-order-code').focus({ preventScroll: true });
+    updatingOrder = true;
+    confirmDemoOrder.disabled = true;
+    try {
+      const order = await requestDemoOrder('POST', {
+        code:draftOrder.code, uid:playerSession.uid, productId:checkoutProduct.id,
+        player:playerSession.demo ? 'Jugador de prueba' : playerSession.nickname,
+        paymentMethod:selectedPaymentMethod
+      });
+      draftOrder = null;
+      $('#demo-order-code').value = order.code;
+      renderDemoOrder(order);
+      closeLayer();
+      orderSection.scrollIntoView({behavior:'smooth',block:'start'});
+      $('#demo-order-code').focus({preventScroll:true});
+    } catch (error) {
+      notify(error.message || 'No se pudo guardar el pedido de prueba.');
+    } finally {
+      updatingOrder = false;
+      confirmDemoOrder.disabled = false;
+    }
   });
 
-  $('#demo-order-search').addEventListener('submit', event => {
+  $('#demo-order-search').addEventListener('submit', async event => {
     event.preventDefault();
+    if (updatingOrder) return;
     const code = $('#demo-order-code').value.trim().toUpperCase();
+    updatingOrder = true;
     try {
-      const order = JSON.parse(localStorage.getItem(demoOrderStorage + code));
-      if (order?.code === code && Number.isInteger(order.stage) && demoOrderStates[order.stage]) {
-        renderDemoOrder(order);
-        return;
-      }
-    } catch (_) {
-      renderDemoOrder(null, 'No se pudo leer el pedido de prueba.');
-      return;
+      renderDemoOrder(await requestDemoOrder('GET', {code}));
+    } catch (error) {
+      try {
+        const legacy = JSON.parse(localStorage.getItem(demoOrderStorage + code));
+        if (legacy?.code === code && Number.isInteger(legacy.stage) && demoOrderStates[legacy.stage]) {
+          renderDemoOrder({...legacy, legacy:true});
+          return;
+        }
+      } catch (_) {}
+      renderDemoOrder(null, error.message || 'No se pudo consultar el pedido.');
+    } finally {
+      updatingOrder = false;
     }
-    renderDemoOrder(null, 'No encontramos ese pedido de prueba en este navegador.');
   });
 
-  $('#demo-order-advance').addEventListener('click', () => {
+  $('#demo-order-advance').addEventListener('click', async event => {
     const order = displayedDemoOrder;
-    if (!order || order.stage >= demoOrderStates.length - 1) return;
+    if (updatingOrder || !order || order.stage >= demoOrderStates.length - 1) return;
+    updatingOrder = true;
+    const button = event.currentTarget;
+    button.disabled = true;
     try {
-      const key = demoOrderStorage + order.code;
-      const savedOrder = JSON.parse(localStorage.getItem(key));
-      if (savedOrder?.stage !== order.stage) {
-        renderDemoOrder(savedOrder, 'Vuelve a consultar el pedido de prueba.');
-        return;
+      if (order.legacy) {
+        const key = demoOrderStorage + order.code;
+        const saved = JSON.parse(localStorage.getItem(key));
+        if (!saved) throw new Error('No encontramos ese pedido de prueba.');
+        const next = {...saved, stage:saved.stage === order.stage ? saved.stage + 1 : saved.stage};
+        localStorage.setItem(key, JSON.stringify(next));
+        renderDemoOrder({...next, legacy:true});
+      } else {
+        renderDemoOrder(await requestDemoOrder('PATCH', {code:order.code, stage:order.stage}));
       }
-      const nextOrder = { ...order, stage: order.stage + 1 };
-      localStorage.setItem(key, JSON.stringify(nextOrder));
-      renderDemoOrder(nextOrder);
-    } catch (_) {
-      notify('El navegador no permitió guardar el estado del pedido.');
+    } catch (error) {
+      notify(error.message || 'No se pudo guardar el estado del pedido.');
+    } finally {
+      updatingOrder = false;
+      button.disabled = false;
     }
+  });
+
+  $('#demo-order-receipt').addEventListener('click', () => {
+    const order = displayedDemoOrder;
+    if (!order || order.stage < 1) return;
+    const date = order.createdAt ? new Intl.DateTimeFormat('es-PE', {
+      dateStyle:'medium', timeStyle:'short', timeZone:'America/Lima'
+    }).format(new Date(order.createdAt)) : 'No disponible';
+    const lines = [
+      'VORTEXGAMER · COMPROBANTE DE PRUEBA', 'Operación simulada',
+      'Pedido: ' + order.code, 'Jugador: ' + order.player, 'UID: ' + order.uid,
+      'Paquete: ' + order.package, 'Importe: ' + price(order.total), 'Fecha del pedido: ' + date,
+      'Método simulado: ' + order.method, 'Estado: ' + demoOrderStates[order.stage]
+    ];
+    const preview = $('#demo-order-receipt-preview');
+    preview.replaceChildren();
+    for (const line of lines) {
+      const row = document.createElement('div');
+      row.textContent = line;
+      preview.append(row);
+    }
+    const download = document.createElement('a');
+    download.className = 'btn btn-outline';
+    download.textContent = 'Descargar comprobante (.txt)';
+    download.download = order.code + '.txt';
+    download.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(lines.join('\n'));
+    preview.append(download);
+    preview.hidden = false;
   });
 
   function requestCheckout(id) {

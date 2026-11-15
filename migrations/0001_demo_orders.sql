@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS demo_orders (code TEXT PRIMARY KEY, uid TEXT NOT NULL, player TEXT NOT NULL, product_id INTEGER NOT NULL, payment_method TEXT NOT NULL CHECK(payment_method IN ('yape','binance')), stage INTEGER NOT NULL DEFAULT 0 CHECK(stage BETWEEN 0 AND 2), created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')));

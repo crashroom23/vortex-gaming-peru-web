@@ -1,0 +1,50 @@
+const prices = new Map([[100,[10,350]],[310,[31,980]],[520,[52,1500]],[1060,[106,2700]],[2180,[218,5200]],[5600,[560,13000]]]);
+const host = 'preview-gamer-aura-v2.vortex-gaming-peru-web.pages.dev';
+const reply = (body, status = 200) => Response.json(body, {status, headers:{'Cache-Control':'no-store'}});
+export async function onRequest({request, env}) {
+  const url = new URL(request.url);
+  const origin = request.headers.get('origin');
+  if (url.hostname !== host) return reply({message:'Ruta no disponible.'},404);
+  if (origin && origin !== url.origin) return reply({message:'Origen no permitido.'},403);
+  const db = env.ORDERS_DB;
+  if (!db) return reply({message:'El registro de pedidos de prueba aún no está disponible.'},503);
+  const method = request.method;
+  if (!['GET','POST','PATCH'].includes(method)) return reply({message:'Método no permitido.'},405);
+  let body;
+  if (method !== 'GET') {
+    try {
+      if (!request.headers.get('content-type')?.startsWith('application/json')) return reply({message:'Formato no válido.'},415);
+      const raw = await request.text();
+      if (raw.length > 2048) return reply({message:'Solicitud demasiado grande.'},413);
+      body = JSON.parse(raw);
+    } catch (_) { return reply({message:'Solicitud no válida.'},400); }
+  }
+  const code = method === 'GET' ? url.searchParams.get('code') : body?.code;
+  if (typeof code !== 'string' || !/^VG-[A-F0-9]{32}$/.test(code)) return reply({message:'Código de pedido no válido.'},400);
+  try {
+    if (method === 'POST') {
+      const {uid, productId, paymentMethod} = body;
+      if (typeof uid !== 'string' || !/^\d{8,12}$/.test(uid) || !prices.has(productId) ||
+          !['yape','binance'].includes(paymentMethod)) return reply({message:'Revisa el UID, paquete y método.'},400);
+      const player = typeof body.player === 'string' ? body.player.trim().slice(0,100) : '';
+      await db.prepare('INSERT INTO demo_orders (code,uid,player,product_id,payment_method) VALUES (?,?,?,?,?) ON CONFLICT(code) DO NOTHING')
+        .bind(code,uid,player || 'Jugador de prueba',productId,paymentMethod).run();
+    }
+    if (method === 'PATCH') {
+      if (body.stage !== 0 && body.stage !== 1) return reply({message:'Etapa no válida.'},400);
+      await db.prepare('UPDATE demo_orders SET stage = stage + 1 WHERE code = ? AND stage = ?').bind(code,body.stage).run();
+    }
+    const row = await db.prepare('SELECT * FROM demo_orders WHERE code = ?').bind(code).first();
+    if (!row) return reply({message:'No encontramos ese pedido de prueba.'},404);
+    if (method === 'POST' && (row.uid !== body.uid || row.product_id !== body.productId || row.payment_method !== body.paymentMethod)) {
+      return reply({message:'El código ya pertenece a otro pedido.'},409);
+    }
+    // Values are fixed for this set of demonstration packages.
+    const [bonus,cents] = prices.get(row.product_id);
+    return reply({order:{
+      code:row.code, uid:row.uid, player:row.player, stage:row.stage, createdAt:row.created_at,
+      package:row.product_id.toLocaleString('en-US') + ' + ' + bonus + ' diamantes',
+      total:cents / 100, method:row.payment_method === 'yape' ? 'Yape' : 'Binance Pay'
+    }});
+  } catch (_) { return reply({message:'No se pudo acceder a los pedidos de prueba.'},503); }
+}
