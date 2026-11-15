@@ -581,6 +581,50 @@
     }
   });
 
+  const sampleNames = [
+    'KIRAツ', 'NOVA亗', 'RAYO⚡', 'LUNA彡', 'AKIRA✦', 'ZETAシ',
+    'NEON亗', 'YUKIツ', 'KAZE✧', 'DRACO彡', 'RYU⚡', 'NIX✦'
+  ];
+  const activity = document.createElement('section');
+  activity.className = 'activity-ticker';
+  activity.setAttribute('aria-label', 'Ejemplos de actividad de recargas');
+  activity.innerHTML = `
+    <div class="activity-ticker-controls">
+      <span>ACTIVIDAD DE EJEMPLO</span>
+      <button type="button" class="activity-toggle">Pausar</button>
+    </div>
+    <div class="activity-window"><div class="activity-track"></div></div>`;
+
+  const samples = document.createElement('ul');
+  samples.className = 'activity-items';
+  const formatter = new Intl.NumberFormat('es-PE');
+  const selectedNames = [...sampleNames];
+  for (let i = 0; i < 8; i += 1) {
+    const [nickname] = selectedNames.splice(Math.floor(Math.random() * selectedNames.length), 1);
+    const product = PRODUCTS[Math.floor(Math.random() * PRODUCTS.length)];
+    const item = document.createElement('li');
+    item.className = 'activity-pill';
+    item.innerHTML = '<span class="activity-dot" aria-hidden="true"></span><span class="activity-game">FREE FIRE</span>';
+    const player = document.createElement('strong');
+    player.className = 'activity-player';
+    player.textContent = nickname;
+    const diamonds = document.createElement('strong');
+    diamonds.textContent = formatter.format(product.id) + ' + ' + product.bonus +
+      ' diamantes (' + formatter.format(product.id + Number(product.bonus)) + ' 💎)';
+    item.append(player, ' · ', diamonds);
+    samples.append(item);
+  }
+
+  const duplicate = samples.cloneNode(true);
+  duplicate.setAttribute('aria-hidden', 'true');
+  activity.querySelector('.activity-track').append(samples, duplicate);
+  const activityToggle = activity.querySelector('.activity-toggle');
+  activityToggle.addEventListener('click', () => {
+    const paused = activity.classList.toggle('is-paused');
+    activityToggle.textContent = paused ? 'Reanudar' : 'Pausar';
+  });
+  $('.features-bar').before(activity);
+
   $('#year').textContent = new Date().getFullYear();
   refresh();
   setupUidTurnstile();
