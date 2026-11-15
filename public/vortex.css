@@ -600,3 +600,93 @@ img,svg{max-width:100%}
   .storefront-banner-actions { width: 100%; gap: 6px; }
   .storefront-banner-actions .btn { flex: 1 1 135px; min-width: 0; font-size: 10px; }
 }
+
+
+/* Sample activity strip. */
+.activity-ticker {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  border-block: 1px solid #493161;
+  background: radial-gradient(ellipse at center, #2e1a48, #100b20 80%);
+  color: #eee2ff;
+}
+.activity-ticker-controls {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  flex: none;
+  gap: 2px;
+  padding: 5px 13px;
+  border-inline-end: 1px solid #493161;
+  background: #1b112d;
+  color: #dfc9fc;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .55px;
+}
+.activity-toggle {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #c4a2ff;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.activity-window { min-width: 0; flex: 1; overflow: hidden; }
+.activity-track {
+  display: flex;
+  width: max-content;
+  animation: activity-slide 62s linear infinite;
+}
+.activity-ticker.is-paused .activity-track { animation-play-state: paused; }
+@media (hover: hover) {
+  .activity-window:hover .activity-track { animation-play-state: paused; }
+}
+.activity-items {
+  display: flex;
+  gap: 22px;
+  margin: 0;
+  padding: 8px 22px 8px 0;
+  list-style: none;
+}
+.activity-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 13px;
+  border: 1px solid #573b75;
+  border-radius: 999px;
+  background: #1b142c;
+  white-space: nowrap;
+  font-size: 12px;
+}
+.activity-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #65f6bc;
+  box-shadow: 0 0 9px #65f6bc8a;
+}
+.activity-game {
+  padding: 3px 7px;
+  border: 1px solid #a36b32;
+  border-radius: 999px;
+  background: #47301f;
+  color: #ffe6bd;
+  font-size: 9px;
+  font-weight: 850;
+}
+.activity-player { color: #d5bcff; }
+@keyframes activity-slide { to { transform: translateX(-50%); } }
+@media (max-width: 520px) {
+  .activity-ticker-controls { padding-inline: 7px; max-width: 100px; }
+  .activity-items { gap: 12px; padding-inline-end: 12px; }
+  .activity-pill { font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .activity-track { animation: none; }
+  .activity-window { overflow-x: auto; }
+  .activity-items[aria-hidden="true"], .activity-toggle { display: none; }
+}
