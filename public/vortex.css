@@ -574,3 +574,28 @@ img,svg{max-width:100%}
   }
   .product-card:hover, .product-card:hover .pack-photo { transform: none; }
 }
+
+
+/* Compact hero keeps the complete original artwork in view. */
+.storefront-banner { padding: clamp(10px, 1.5vw, 20px) 0 14px; }
+.storefront-banner > .shell { width: min(calc(100% - 32px), 880px); }
+.storefront-banner .storefront-banner-title {
+  border-radius: clamp(12px, 1.5vw, 20px);
+  border-color: #aa68ff;
+  box-shadow: 0 0 24px #8e4ae94d, 0 12px 34px #05001199;
+  animation: none;
+}
+.storefront-banner-actions {
+  width: fit-content;
+  max-width: 100%;
+  margin: 10px auto 0;
+  padding: 6px;
+  border: 1px solid #7955ae80;
+  border-radius: 14px;
+  background: linear-gradient(110deg, #29173f, #110d26);
+}
+.storefront-banner-actions .btn { min-height: 42px; padding: 10px 14px; }
+@media (max-width: 410px) {
+  .storefront-banner-actions { width: 100%; gap: 6px; }
+  .storefront-banner-actions .btn { flex: 1 1 135px; min-width: 0; font-size: 10px; }
+}

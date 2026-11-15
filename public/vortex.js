@@ -116,7 +116,7 @@
       '<div class="card-media">',
       '<span class="card-badge', isPro ? ' premium' : '', '">', product.tag, '</span>',
       '<button type="button" class="favorite-btn', saved ? ' saved' : '', '" data-action="favorite" data-id="', product.id, '" aria-label="', saved ? 'Quitar de' : 'Añadir a', ' favoritos: ', product.amount, ' diamantes" aria-pressed="', saved, '">', heartSVG, '</button>',
-      '<img class="card-gem pack-photo" src="/images/pack-', product.providerProductId - 4, '.png" alt="" loading="lazy" decoding="async">',
+      '<img class="card-gem pack-photo" src="/images/pack-', product.providerProductId - 4, '.png?v=original" alt="" loading="lazy" decoding="async">',
       '</div><div class="card-body">',
       '<span class="card-type">', product.type, ' / FREE FIRE</span>',
       '<h3 class="card-title">', product.amount, ' <span>DIAMANTES</span></h3>',
