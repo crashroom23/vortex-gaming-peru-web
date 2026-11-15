@@ -585,6 +585,17 @@
     'KIRAツ', 'NOVA亗', 'RAYO⚡', 'LUNA彡', 'AKIRA✦', 'ZETAシ',
     'NEON亗', 'YUKIツ', 'KAZE✧', 'DRACO彡', 'RYU⚡', 'NIX✦'
   ];
+  const nicknameRoots = [
+    'Ghost', 'Sombra', 'Fénix', 'Demon', 'Lobo', 'Kenshi', 'Ninja', 'Ragnar', 'Venom', 'Zafiro',
+    'Raven', 'Kitsune', 'Tigre', 'Skull', 'Blade', 'Onyx', 'Zero', 'Kronos', 'Lynx', 'Chaos'
+  ];
+  const nicknameStyles = [
+    name => '亗' + name, name => name + 'ツ', name => '꧁' + name + '꧂', name => name + '〆',
+    name => 'x' + name + 'x', name => name + '彡', name => 'ᴳᵀ' + name, name => name + '⚡',
+    name => 'SR・' + name, name => name + '⁹⁹', name => '『' + name + '』', name => name + 'ᴳᵒᵈ',
+    name => 'FF・' + name, name => name + '✦', name => '么' + name, name => name + 'ᵖʳᵒ',
+    name => 'RZ_' + name, name => name + '᭄', name => 'ᴮᴼˢˢ' + name, name => name + '×7'
+  ];
   const activity = document.createElement('section');
   activity.className = 'activity-ticker';
   activity.setAttribute('aria-label', 'Ejemplos de actividad de recargas');
@@ -598,10 +609,21 @@
   const samples = document.createElement('ul');
   samples.className = 'activity-items';
   const formatter = new Intl.NumberFormat('es-PE');
-  const selectedNames = [...sampleNames];
-  for (let i = 0; i < 8; i += 1) {
+  const selectedNames = [
+    ...sampleNames,
+    ...nicknameRoots.flatMap(name => nicknameStyles.map(style => style(name)))
+  ];
+  const sampleAmounts = PRODUCTS.flatMap(product => [1, 2, 3].map(quantity => ({
+    base: product.id * quantity,
+    bonus: Number(product.bonus) * quantity
+  })));
+  const cardsPerVisit = 24;
+  let previousAmount;
+  for (let i = 0; i < cardsPerVisit; i += 1) {
     const [nickname] = selectedNames.splice(Math.floor(Math.random() * selectedNames.length), 1);
-    const product = PRODUCTS[Math.floor(Math.random() * PRODUCTS.length)];
+    const choices = sampleAmounts.filter(amount => amount !== previousAmount);
+    const amount = choices[Math.floor(Math.random() * choices.length)];
+    previousAmount = amount;
     const item = document.createElement('li');
     item.className = 'activity-pill';
     item.innerHTML = '<span class="activity-dot" aria-hidden="true"></span><span class="activity-game">FREE FIRE</span>';
@@ -609,15 +631,17 @@
     player.className = 'activity-player';
     player.textContent = nickname;
     const diamonds = document.createElement('strong');
-    diamonds.textContent = formatter.format(product.id) + ' + ' + product.bonus +
-      ' diamantes (' + formatter.format(product.id + Number(product.bonus)) + ' 💎)';
+    diamonds.textContent = formatter.format(amount.base) + ' + ' + formatter.format(amount.bonus) +
+      ' diamantes (' + formatter.format(amount.base + amount.bonus) + ' 💎)';
     item.append(player, ' · ', diamonds);
     samples.append(item);
   }
 
   const duplicate = samples.cloneNode(true);
   duplicate.setAttribute('aria-hidden', 'true');
-  activity.querySelector('.activity-track').append(samples, duplicate);
+  const activityTrack = activity.querySelector('.activity-track');
+  activityTrack.style.animationDuration = cardsPerVisit * 7.75 + 's';
+  activityTrack.append(samples, duplicate);
   const activityToggle = activity.querySelector('.activity-toggle');
   activityToggle.addEventListener('click', () => {
     const paused = activity.classList.toggle('is-paused');
