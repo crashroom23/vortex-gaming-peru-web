@@ -1,7 +1,7 @@
 // Consulta perfiles públicos. Esta ruta no ejecuta recargas ni pagos.
 const FIXED_LATAM_REGION = "br";
 const FREE_FIRE_MANIA = "https://www.freefiremania.com.br";
-const PROFILE_TIMEOUT_MS = 5000;
+const PROFILE_TIMEOUT_MS = 9000;
 
 const json = (data, status = 200) => new Response(JSON.stringify(data), {
   status,
@@ -18,14 +18,18 @@ async function findPublicProfile(uid) {
   try {
     const response = await fetch(url, {
       redirect: "manual",
-      headers: { Accept: "text/html" },
+      headers: {
+        Accept: "text/html",
+        "Accept-Language": "es-419,es;q=0.9",
+        "User-Agent": "VortexGamer/1.0"
+      },
       signal: AbortSignal.timeout(PROFILE_TIMEOUT_MS)
     });
     if (response.status === 404 || (response.status >= 300 && response.status < 400)) {
       return { code: "PROFILE_NOT_FOUND" };
     }
     if (!response.ok || !response.headers.get("content-type")?.includes("text/html")) {
-      return { code: "PROFILE_UNAVAILABLE" };
+      return { code: "PROFILE_UNAVAILABLE", upstreamStatus: response.status };
     }
 
     const html = await response.text();
@@ -48,8 +52,8 @@ async function findPublicProfile(uid) {
     if (!region) return { code: "PROFILE_UNAVAILABLE" };
     if (region !== "SAC") return { code: "REGION_UNSUPPORTED" };
     return { player: { uid, nickname, region, level: Number(metadata[1]) } };
-  } catch {
-    return { code: "PROFILE_UNAVAILABLE" };
+  } catch (error) {
+    return { code: error.name === "TimeoutError" ? "PROFILE_TIMEOUT" : "PROFILE_UNAVAILABLE" };
   }
 }
 
@@ -68,10 +72,11 @@ export async function onRequestGet({ request, env }) {
     return json({ ok: false, code: profile.code, message: "Este perfil pertenece a otra región. La tienda atiende Sur LATAM." }, 422);
   }
   if (!env.FREE_FIRE_API_KEY) {
-    const unavailable = profile.code === "PROFILE_UNAVAILABLE";
+    const unavailable = profile.code !== "PROFILE_NOT_FOUND";
     return json({
       ok: false,
       code: profile.code,
+      upstreamStatus: profile.upstreamStatus,
       message: unavailable
         ? "La consulta de perfiles no está disponible. Inténtalo en unos momentos."
         : "No pudimos confirmar el ID con una ficha pública. Revisa el número o inténtalo después."
