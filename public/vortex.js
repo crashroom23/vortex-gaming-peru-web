@@ -606,6 +606,7 @@
         response = await fetch('/api/freefire/verify?' + new URLSearchParams({ uid, region }).toString(), { headers: { Accept: 'application/json' } });
         data = await response.json();
         if (!response.ok || !data.ok) throw new Error(data.message || 'No fue posible verificar el UID.');
+        verificationSource = data.source || verificationSource;
       } else {
         if (!response.ok || !data.ok) throw new Error(data.message || 'No fue posible validar el UID.');
         if (data.supported !== true || data.verified !== true) {
