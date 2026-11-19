@@ -542,7 +542,7 @@
     [30002, {id: 30002, title: 'Tarjeta semanal', price: 6.5}],
     [30004, {id: 30004, title: 'Tarjeta mensual', price: 28}]
   ]);
-  $('[data-card-purchase]').forEach(button => {
+  $$('[data-card-purchase]').forEach(button => {
     button.addEventListener('click', () => {
       if (offerSettings?.tarjetas?.visible === false) return;
       requestCheckout(individualCards.get(Number(button.dataset.cardPurchase)));
