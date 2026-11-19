@@ -583,9 +583,15 @@ img,svg{max-width:100%}
   border-radius: 0;
   border-width: 0 0 1px;
   border-color: #aa68ff;
+  background: radial-gradient(ellipse at center, #32135d, #10091e 75%);
   box-shadow: 0 0 24px #8e4ae94d, 0 12px 34px #05001199;
   animation: none;
 }
+.storefront-banner-title img {
+  width: min(100%, clamp(640px, 50vw, 800px));
+  margin-inline: auto;
+}
+
 .storefront-banner-actions {
   width: fit-content;
   max-width: 100%;
