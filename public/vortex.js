@@ -496,8 +496,7 @@
     preview.hidden = false;
   });
 
-  function requestCheckout(id) {
-    const product = byId.get(id);
+  function requestCheckout(product) {
     if (!product || product.visible === false || document.documentElement.dataset.draft === 'true') return;
     const currentUID = $('#uid').value.trim();
     const region = 'br';
@@ -509,7 +508,7 @@
     }
     checkoutProduct = product;
     $('#checkout-player').textContent = (playerSession.demo ? 'DEMO (sin verificar) · ' : playerSession.nickname + ' · ') + playerSession.uid;
-    $('#checkout-package').textContent = product.amount + ' + ' + product.bonus + ' diamantes';
+    $('#checkout-package').textContent = product.title ?? (product.amount + ' + ' + product.bonus + ' diamantes');
     $('#checkout-price').textContent = price(product.price);
     setPaymentMethod('yape');
     openLayer('checkout-modal');
@@ -523,7 +522,7 @@
       if (!product) return;
       switch (control.dataset.action) {
         case 'add': addToCart(id); break;
-        case 'pay': requestCheckout(id); break;
+        case 'pay': requestCheckout(product); break;
         case 'favorite': toggleFavorite(id); break;
         case 'increase': cart[id] = Math.min(99, (cart[id] || 0) + 1); refresh(); break;
         case 'decrease': if (cart[id] <= 1) delete cart[id]; else cart[id] -= 1; refresh(); break;
@@ -538,6 +537,15 @@
     if (event.target.closest('[data-close]')) closeLayer();
   });
 
+  $('#buy-card-offer').addEventListener('click', () => {
+    const offer = offerSettings?.tarjetas;
+    requestCheckout({
+      id: 30003,
+      title: offer?.title ?? 'Oferta de 3 tarjetas',
+      price: (offer?.cents ?? 4000) / 100,
+      visible: offer?.visible ?? true
+    });
+  });
   $('#cart-trigger').addEventListener('click', () => openLayer('cart-panel'));
   $$('.payment-tab').forEach(button => button.addEventListener('click', () => setPaymentMethod(button.dataset.method)));
   $('#simulate-verify').addEventListener('click', () => {
