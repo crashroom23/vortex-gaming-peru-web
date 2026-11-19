@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/vortex.css?v=botones-interactivos">
-  <script src="/vortex.js?v=pedidos-d1" defer></script>
+  <link rel="stylesheet" href="/vortex.css?v=resumen-yape">
+  <script src="/vortex.js?v=resumen-yape" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -158,12 +158,12 @@
   <div class="modal checkout-modal" id="checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkout-title" aria-hidden="true" inert>
     <button type="button" class="close-button modal-close" data-close aria-label="Cerrar ventana de pago">×</button>
     <span class="modal-kicker">PASO 03 / MÉTODO DE PAGO</span>
-    <h2 id="checkout-title">FINALIZAR <span>COMPRA</span></h2>
-    <p class="checkout-warning"><strong>VISTA PREVIA:</strong> no hay cobros ni QR activos. No transfieras dinero desde esta ventana.</p>
+    <h2 id="checkout-title">RESUMEN <span>DE ORDEN</span></h2>
+    <p class="checkout-warning" id="checkout-warning"><strong>VISTA PREVIA:</strong> no hay cobros ni QR activos. No transfieras dinero desde esta ventana.</p>
     <div class="checkout-order">
-      <div><small>JUGADOR / UID</small><strong id="checkout-player">—</strong></div>
+      <div><small>CUENTA</small><strong id="checkout-player">—</strong></div>
       <div><small>PAQUETE</small><strong id="checkout-package">—</strong></div>
-      <div class="checkout-total"><small>TOTAL EN SOLES</small><strong id="checkout-price">S/ 0.00</strong></div>
+      <div class="checkout-total"><small>TOTAL A PAGAR</small><strong id="checkout-price">S/ 0.00</strong></div>
     </div>
     <div class="checkout-methods" role="group" aria-label="Selecciona método de pago">
       <button type="button" class="payment-tab active" data-method="yape" aria-pressed="true"><span>🟣</span> YAPE</button>
@@ -173,6 +173,15 @@
       <div class="payment-qr-placeholder" aria-hidden="true"><span class="qr-outline">▦</span><strong>QR NO DISPONIBLE</strong><small>Integración pendiente</small></div>
       <div class="payment-explanation"><h3 id="payment-name">Yape automático</h3><p id="payment-description">El QR dinámico se generará desde una pasarela autorizada, cuando se habiliten los cobros reales.</p><span class="payment-status">● SIN COBROS ACTIVOS</span></div>
     </div>
+    <section id="yape-manual" class="manual-payment" data-qr="" data-whatsapp="" hidden>
+      <img id="yape-qr" alt="Código QR de Yape de VortexGamer" width="224" height="224" hidden>
+      <p id="manual-payment-help">El QR se mostrará cuando esté configurado.</p>
+      <dl class="manual-order-details">
+        <div><dt>Número de orden</dt><dd id="manual-order-code">—</dd></div>
+        <div><dt>ID de Free Fire</dt><dd id="manual-order-uid">—</dd></div>
+      </dl>
+      <button type="button" class="btn btn-accent btn-wide" id="manual-payment-confirm" disabled>Ya pagué · Enviar por WhatsApp</button>
+    </section>
     <p class="payment-notice" id="payment-notice"></p>
     <button type="button" class="btn btn-accent btn-wide" id="payment-demo-confirm" disabled>CONFIRMAR PAGO — PRÓXIMAMENTE</button>
     <p class="checkout-footnote">Ningún pago se confirmará automáticamente sin una respuesta verificada del proveedor y registro seguro en el servidor.</p>
