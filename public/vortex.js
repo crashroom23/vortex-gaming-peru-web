@@ -695,7 +695,85 @@
     $('#verified-status').hidden = true;
   }));
   $('#favorites-trigger').addEventListener('click', () => openLayer('favorites-panel'));
-  $('#account-trigger').addEventListener('click', () => showInfo('MI CUENTA', 'Estamos preparando el registro seguro, inicio de sesión, perfil, saldo e historial. No ingreses ninguna contraseña en esta demostración.'));
+  const accountForm = $('#account-form');
+  const accountMessage = $('#account-message');
+  const accountPassword = $('#account-password');
+  const accountSubmit = $('#account-submit');
+  const accountMode = $('#account-mode');
+  const accountLogout = $('#account-logout');
+  let accountAction = 'login';
+
+  function setAccountMode(action) {
+    accountAction = action;
+    accountPassword.value = '';
+    accountPassword.autocomplete = action === 'register' ? 'new-password' : 'current-password';
+    accountSubmit.textContent = action === 'register' ? 'Registrarme' : 'Iniciar sesión';
+    accountMode.textContent = action === 'register' ? 'Ya tengo cuenta' : 'Crear una cuenta';
+    accountMessage.textContent = action === 'register' ? 'Elige un usuario y una contraseña de al menos 12 caracteres.' : '';
+  }
+
+  async function accountRequest(method, data) {
+    const options = {method, credentials: 'same-origin', cache: 'no-store'};
+    if (data) {
+      options.headers = {'Content-Type': 'application/json'};
+      options.body = JSON.stringify(data);
+    }
+    const response = await fetch('/api/account', options);
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.message);
+    return result;
+  }
+
+  function renderAccount(username) {
+    accountForm.hidden = Boolean(username);
+    accountLogout.hidden = !username;
+    $('#account-preview-note').hidden = Boolean(username);
+    accountMessage.textContent = username ? 'Sesión iniciada como ' + username + '.' : '';
+  }
+
+  let accountBusy = false;
+  async function updateAccount(method, data) {
+    if (accountBusy) return;
+    accountBusy = true;
+    accountSubmit.disabled = accountMode.disabled = accountLogout.disabled = true;
+    accountMessage.textContent = 'Cargando…';
+    try {
+      const {username} = await accountRequest(method, data);
+      renderAccount(username);
+    } catch (error) {
+      accountMessage.textContent = error instanceof SyntaxError ?
+        'El acceso a cuentas no está disponible en este momento.' : error.message;
+    } finally {
+      accountPassword.value = '';
+      accountBusy = false;
+      accountSubmit.disabled = accountMode.disabled = accountLogout.disabled = false;
+    }
+  }
+
+  $('#account-trigger').addEventListener('click', () => {
+    openLayer('account-modal');
+    if (accountBusy) return;
+    setAccountMode('login');
+    accountForm.hidden = accountLogout.hidden = true;
+    void updateAccount('GET');
+  });
+  accountMode.addEventListener('click', () => {
+    setAccountMode(accountAction === 'login' ? 'register' : 'login');
+    $('#account-username').focus();
+  });
+  accountForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    void updateAccount('POST', {
+      action: accountAction,
+      username: $('#account-username').value,
+      password: accountPassword.value
+    });
+  });
+  accountLogout.addEventListener('click', () => {
+    accountForm.reset();
+    setAccountMode('login');
+    void updateAccount('DELETE');
+  });
   $('#wallet-trigger').addEventListener('click', () => showInfo('BILLETERA VORTEX', 'El plan es permitir recargas de saldo desde S/ 5 por Yape, con comprobante y aprobación administrativa. El saldo y los pagos aún no están habilitados.'));
   $('#overlay').addEventListener('click', () => closeLayer());
   $('#demo-checkout').addEventListener('click', () => showInfo('COMPRAS EN PREPARACIÓN', 'Tu selección es una simulación. No se generó ningún pedido ni se cobró dinero. El proceso se habilitará cuando integremos y probemos el sistema de pagos, saldo y recargas.'));

@@ -1014,3 +1014,23 @@ main > [hidden] { display: none !important; }
 .pass-reference { margin: 12px 0; }
 .catalog-offer .pass-reference img { display: block; width: min(100%, 480px); }
 .pass-reference figcaption { margin-top: 4px; color: #d1bee8; }
+
+.account-modal form {
+  display: grid;
+  gap: .65rem;
+  text-align: left;
+}
+
+.account-modal [hidden] {
+  display: none;
+}
+
+.account-modal input {
+  width: 100%;
+  padding: .7rem .8rem;
+  border: 1px solid #625479;
+  border-radius: .5rem;
+  background: #161125;
+  color: #fff;
+  font: inherit;
+}
