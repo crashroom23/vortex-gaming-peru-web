@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/vortex.css?v=ilustraciones-tarjetas">
-  <script src="/vortex.js?v=catalogo-activo" defer></script>
+  <link rel="stylesheet" href="/vortex.css?v=fragmentos">
+  <script src="/vortex.js?v=fragmentos" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -143,6 +143,24 @@
         </button>
       </div>
       <div class="products-grid" id="products-grid" aria-live="polite"></div>
+      <section id="fragment-catalog" aria-labelledby="fragment-heading" hidden>
+        <h3 id="fragment-heading">Evolutivos</h3>
+        <p>Toca y elige la cantidad</p>
+        <div class="fragment-types">
+          <button type="button" data-fragment-kind="cajas" aria-controls="fragment-options" aria-expanded="false">
+            <strong>Cajas</strong><small>Evolutivas</small><span class="fragment-icon" aria-hidden="true">🧊</span>
+            <span class="fragment-summary"></span>
+          </button>
+          <button type="button" data-fragment-kind="tokens" aria-controls="fragment-options" aria-expanded="false">
+            <strong>Tokens</strong><small>Evolutivos</small><span class="fragment-icon" aria-hidden="true">⚛</span>
+            <span class="fragment-summary"></span>
+          </button>
+        </div>
+        <div id="fragment-options" hidden>
+          <header><h4 id="fragment-question"></h4><button type="button" id="close-fragments" aria-label="Cerrar cantidades">×</button></header>
+          <div class="fragment-quantities"></div>
+        </div>
+      </section>
       <article class="catalog-offer" data-offer="nivel" hidden>
         <img src="/images/oferta-nivel.webp" alt="" width="650" height="650" loading="lazy">
         <div><h3>Aumento de nivel</h3><p>Hasta 1,400 diamantes según tu nivel</p><strong>S/ 14.00</strong><p>Compra en preparación.</p></div>

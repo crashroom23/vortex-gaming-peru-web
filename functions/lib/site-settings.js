@@ -5,12 +5,41 @@ export const bannerDefaults = {
   nivel:{title:'Aumento de nivel',image:'/images/oferta-nivel.webp',category:'nivel'},
   tarjetas:{title:'Oferta de 3 tarjetas',image:'/images/oferta-tarjetas.webp',category:'tarjetas'}
 };
+export const fragmentDefaults = {
+  cajas: [
+    {quantity:10, cents:800},
+    {quantity:20, cents:1500},
+    {quantity:30, cents:2500},
+    {quantity:40, cents:3000},
+    {quantity:50, cents:4000},
+    {quantity:100, cents:8000},
+    {quantity:150, cents:11000},
+    {quantity:200, cents:14000},
+    {quantity:250, cents:17000},
+    {quantity:300, cents:20000}
+  ],
+  tokens: [
+    {quantity:50, cents:1000},
+    {quantity:90, cents:1500},
+    {quantity:100, cents:2000},
+    {quantity:200, cents:3500},
+    {quantity:300, cents:4800},
+    {quantity:400, cents:7000},
+    {quantity:500, cents:8000},
+    {quantity:600, cents:9000},
+    {quantity:700, cents:10000},
+    {quantity:800, cents:11000},
+    {quantity:900, cents:12000},
+    {quantity:1200, cents:15000}
+  ]
+};
 export const defaults = {
   heading:'Catálogo de recargas', description:'Elige una categoría de Free Fire.',
   accent:'#a06aff', activity:true, copy:{},
   banners:Object.values(bannerDefaults).map(item => ({...item,visible:true})),
   products:Object.fromEntries(Object.entries(priceDefaults).map(([id,cents]) => [id,{cents,image:'',visible:true}])),
   offers:{nivel:{title:'Aumento de nivel',description:'Hasta 1,400 diamantes según tu nivel',cents:1400,visible:true},tarjetas:{title:'Oferta de 3 tarjetas',description:'Mensual, semanal y semanal básica',cents:4000,visible:true}},
+  fragments:fragmentDefaults,
   payment:{whatsapp:'',qr:''}
 };
 
@@ -19,7 +48,7 @@ export async function readSettings(db) {
   const table = await db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='site_settings'").first();
   if (!table) return {revision:0, settings:defaults};
   const entry = await db.prepare('SELECT revision, value FROM site_settings WHERE id=1').first();
-  return entry ? {revision:entry.revision,settings:JSON.parse(entry.value)} : {revision:0,settings:defaults};
+  return entry ? {revision:entry.revision,settings:{fragments:fragmentDefaults,...JSON.parse(entry.value)}} : {revision:0,settings:defaults};
 }
 
 function validText(value,max) {
@@ -54,8 +83,18 @@ function validLayout(layout) {
   }
   return coreSections.every(id => ids.has(id));
 }
+function validFragments(fragments) {
+  if (fragments === undefined) return true;
+  return fragments && ['cajas','tokens'].every(kind => {
+    const options = fragments[kind];
+    return Array.isArray(options) && options.length <= 60 &&
+      options.every(option => option && Number.isSafeInteger(option.quantity) &&
+        option.quantity >= 1 && option.quantity <= 99999 && validPrice(option.cents)) &&
+      new Set(options.map(option => option.quantity)).size === options.length;
+  });
+}
 export function validSettings(s) {
-  return s && validLayout(s.layout) && validText(s.heading,80) && validText(s.description,180) &&
+  return s && validFragments(s.fragments) && validLayout(s.layout) && validText(s.heading,80) && validText(s.description,180) &&
     (s.copy === undefined || (s.copy && typeof s.copy === 'object' && !Array.isArray(s.copy) &&
       Object.entries(s.copy).every(([key,value]) => copyKeys.has(key) && validText(value,180)))) &&
     /^#[0-9a-f]{6}$/i.test(s.accent) && typeof s.activity === 'boolean' &&

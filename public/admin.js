@@ -3,7 +3,7 @@ const $ = selector => document.querySelector(selector);
 const status = $('#status');
 const fields = $('#fields');
 const categoryLabels = {diamantes:'Diamantes',fragmentos:'Fragmentos',pase:'Pase',tarjetas:'Tarjetas',nivel:'Aumento de nivel'};
-const tabs = {banners:'Banners',products:'Diamantes',offers:'Ofertas',design:'Diseño',payment:'Pagos'};
+const tabs = {banners:'Banners',products:'Diamantes',fragments:'Fragmentos',offers:'Ofertas',design:'Diseño',payment:'Pagos'};
 let key = '';
 let revision = 0;
 let settings;
@@ -37,20 +37,20 @@ function group(title) {
   fields.append(box);
   return box;
 }
-function field(box,label,item,property,{type='text',max=180,options}={}) {
+function field(box,label,item,property,{type='text',max=180,options,integer=false}={}) {
   const wrapper = element('label',label);
   const input = element(options ? 'select' : 'input');
   if (options) {
     for (const [value,text] of Object.entries(options)) input.add(new Option(text,value));
   } else {
     input.type = type;
-    if (type === 'number') { input.step = '.01'; input.min = '.01'; input.max = '99999.99'; input.required = true; }
+    if (type === 'number') { input.step = integer ? '1' : '.01'; input.min = integer ? '1' : '.01'; input.max = integer ? '99999' : '99999.99'; input.required = true; }
     if (type === 'text') input.maxLength = max;
   }
   if (type === 'checkbox') input.checked = item[property];
-  else input.value = type === 'number' ? (item[property]/100).toFixed(2) : item[property];
+  else input.value = type === 'number' ? (integer ? item[property] : (item[property]/100).toFixed(2)) : item[property];
   input.addEventListener('input',() => {
-    item[property] = type === 'checkbox' ? input.checked : type === 'number' ? Math.round(input.valueAsNumber*100) : input.value;
+    item[property] = type === 'checkbox' ? input.checked : type === 'number' ? (integer ? input.valueAsNumber : Math.round(input.valueAsNumber*100)) : input.value;
   });
   wrapper.append(input);
   box.append(wrapper);
@@ -133,6 +133,26 @@ function render() {
       imageField(box,'Reemplazar imagen',product,'image');
     }
   }
+  if (section === 'fragments') {
+    for (const [kind,label] of [['cajas','Cajas evolutivas'],['tokens','Tokens evolutivos']]) {
+      const box = group(label);
+      const options = settings.fragments[kind];
+      options.forEach((option,index) => {
+        const row = element('div');
+        row.className = 'fragment-editor-row';
+        field(row,'Cantidad',option,'quantity',{type:'number',integer:true});
+        field(row,'Precio en soles',option,'cents',{type:'number'});
+        row.append(action('Quitar opción',() => { options.splice(index,1); render(); }));
+        box.append(row);
+      });
+      if (options.length < 60) box.append(action('Agregar opción',() => {
+        let quantity = 1;
+        while (options.some(option => option.quantity === quantity)) quantity++;
+        options.push({quantity,cents:100});
+        render();
+      }));
+    }
+  }
   if (section === 'offers') {
     for(const [id,offer] of Object.entries(settings.offers)) {
       const box=group(categoryLabels[id]);
@@ -185,6 +205,11 @@ $('#editor').addEventListener('submit',async event => {
   busy=true;
   $('#publish').disabled=true;
   try {
+    for (const options of Object.values(settings.fragments)) {
+      if (new Set(options.map(option => option.quantity)).size !== options.length) {
+        throw new Error('En Fragmentos, usa una cantidad distinta para cada opción de Cajas o Tokens.');
+      }
+    }
     ({revision}=await request('PUT',{revision,settings}));
     status.textContent='Cambios publicados en la tienda de pruebas.';
   } catch(error) { status.textContent=error.message || 'No se pudo publicar.'; }

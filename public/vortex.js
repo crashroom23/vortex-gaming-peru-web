@@ -128,6 +128,82 @@
     ].join('');
   }
 
+  const fragmentIds = {cajas:1000000,tokens:2000000};
+  let fragments = {
+    cajas: [
+      {quantity:10, cents:800},
+      {quantity:20, cents:1500},
+      {quantity:30, cents:2500},
+      {quantity:40, cents:3000},
+      {quantity:50, cents:4000},
+      {quantity:100, cents:8000},
+      {quantity:150, cents:11000},
+      {quantity:200, cents:14000},
+      {quantity:250, cents:17000},
+      {quantity:300, cents:20000}
+    ],
+    tokens: [
+      {quantity:50, cents:1000},
+      {quantity:90, cents:1500},
+      {quantity:100, cents:2000},
+      {quantity:200, cents:3500},
+      {quantity:300, cents:4800},
+      {quantity:400, cents:7000},
+      {quantity:500, cents:8000},
+      {quantity:600, cents:9000},
+      {quantity:700, cents:10000},
+      {quantity:800, cents:11000},
+      {quantity:900, cents:12000},
+      {quantity:1200, cents:15000}
+    ]
+  };
+  let openFragment = null;
+
+  function renderFragmentOptions() {
+    const panel = $('#fragment-options');
+    panel.hidden = !openFragment;
+    const quantityGrid = $('.fragment-quantities');
+    quantityGrid.replaceChildren();
+    for (const button of $$('[data-fragment-kind]')) {
+      const kind = button.dataset.fragmentKind;
+      const options = [...fragments[kind]].sort((a,b) => a.quantity - b.quantity);
+      const featured = (kind === 'tokens' && options.find(option => option.quantity === 200)) || options[0];
+      button.disabled = !featured;
+      button.setAttribute('aria-expanded', String(openFragment === kind));
+      button.querySelector('.fragment-summary').textContent = featured
+        ? (kind === 'cajas' ? 'Desde ' : featured.quantity + ' tokens · ') + price(featured.cents / 100)
+        : 'Sin opciones disponibles';
+      if (openFragment !== kind) continue;
+      $('#fragment-question').textContent = kind === 'cajas' ? '¿Cuántas cajas?' : '¿Cuántos tokens?';
+      for (const option of options) {
+        const choice = document.createElement('button');
+        choice.type = 'button';
+        const amount = document.createElement('strong');
+        amount.textContent = option.quantity;
+        const cost = document.createElement('span');
+        cost.textContent = price(option.cents / 100);
+        choice.append(amount,cost);
+        choice.addEventListener('click', () => requestCheckout({
+          id: fragmentIds[kind] + option.quantity,
+          title: option.quantity + ' ' + kind + (kind === 'cajas' ? ' evolutivas' : ' evolutivos'),
+          price: option.cents / 100
+        }));
+        quantityGrid.append(choice);
+      }
+    }
+  }
+
+  $$('[data-fragment-kind]').forEach(button => button.addEventListener('click', () => {
+    openFragment = openFragment === button.dataset.fragmentKind ? null : button.dataset.fragmentKind;
+    renderFragmentOptions();
+  }));
+  $('#close-fragments').addEventListener('click', () => {
+    const trigger = $('[data-fragment-kind="' + openFragment + '"]');
+    openFragment = null;
+    renderFragmentOptions();
+    trigger?.focus();
+  });
+
   function renderProducts() {
     const products = currentCategory === 'diamantes' ? PRODUCTS.filter(product => product.visible !== false) : [];
     const grid = $('#products-grid');
@@ -135,7 +211,10 @@
     grid.hidden = products.length === 0;
     const offers = $$('[data-offer]');
     offers.forEach(offer => { offer.hidden = offer.dataset.offer !== currentCategory || offerSettings?.[offer.dataset.offer]?.visible === false; });
-    $('#empty-state').hidden = products.length > 0 || offers.some(offer => !offer.hidden);
+    const fragmentCatalog = $('#fragment-catalog');
+    fragmentCatalog.hidden = currentCategory !== 'fragmentos';
+    if (!fragmentCatalog.hidden) renderFragmentOptions();
+    $('#empty-state').hidden = !fragmentCatalog.hidden || products.length > 0 || offers.some(offer => !offer.hidden);
     $$('.catalog-category').forEach(button => {
       const selected = button.dataset.category === currentCategory;
       button.classList.toggle('active', selected);
@@ -867,6 +946,7 @@
     activity.hidden = !settings.activity;
     activity.dataset.settingHidden = String(!settings.activity);
     offerSettings = settings.offers;
+    if (settings.fragments) fragments = settings.fragments;
     for (const [key,selector] of Object.entries(editableCopy)) {
       const node = $(selector);
       if (!node) continue;

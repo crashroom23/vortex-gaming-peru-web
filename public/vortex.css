@@ -979,3 +979,23 @@ main > [hidden] { display: none !important; }
 .individual-card h4 { margin: 0; font-size: 1.15rem; text-transform: uppercase; }
 .individual-card .btn { width: 100%; }
 .individual-card-image { display: block; width: min(100%, 230px); height: auto; aspect-ratio: 724 / 480; object-fit: contain; }
+
+#fragment-catalog { margin-block: 18px; text-align: center; }
+#fragment-heading { margin: 0; font-size: 1.6rem; font-style: italic; color: #ffca49; text-transform: uppercase; }
+#fragment-catalog > p { margin: 3px 0 12px; }
+.fragment-types, .fragment-quantities { display: grid; gap: 8px; grid-template-columns: repeat(2,minmax(0,1fr)); }
+.fragment-types > button, .fragment-quantities > button, #close-fragments { font: inherit; color: inherit; cursor: pointer; }
+.fragment-types > button { display: grid; justify-items: center; gap: 4px; min-width: 0; border: 1px solid #7651ad; border-radius: 15px; padding: 12px 8px 8px; background: linear-gradient(145deg,#482381,#21103f); }
+.fragment-types > button[aria-expanded="true"] { border-color: #ffca49; box-shadow: 0 0 0 2px #ffca4949; }
+.fragment-types > button:disabled { opacity: .6; cursor: default; }
+.fragment-types strong { font-size: 1.35rem; text-transform: uppercase; }
+.fragment-icon { display: grid; place-items: center; height: 78px; font-size: 3rem; line-height: 1; color: #69ffed; text-shadow: 0 0 12px #00d4df; }
+.fragment-summary { width: 100%; border-radius: 9px; padding: 6px 4px; background: linear-gradient(#813cea,#5924b0); font-weight: 800; }
+#fragment-options { margin-top: 10px; border: 1px solid #7651ad; border-radius: 15px; padding: 12px; background: #10091d; }
+#fragment-options > header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+#fragment-question { margin: 0; }
+#close-fragments { border: 1px solid #7651ad; border-radius: 50%; background: transparent; width: 32px; height: 32px; }
+.fragment-quantities > button { display: grid; justify-items: center; border: 1px solid #493660; border-radius: 10px; padding: 8px 4px; background: #21162e; }
+.fragment-quantities > button:is(:hover,:focus-visible) { background: #ffca49; color: #170e25; }
+.fragment-quantities > button span { font-size: .85rem; }
+@media (min-width: 560px) { .fragment-quantities { grid-template-columns: repeat(4,minmax(0,1fr)); } }

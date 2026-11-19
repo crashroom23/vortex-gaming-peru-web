@@ -6,6 +6,13 @@ const individualCards = new Map([
   [30002, {title:'Tarjeta semanal', cents:650}],
   [30004, {title:'Tarjeta mensual', cents:2800}]
 ]);
+function decodeFragment(id) {
+  if (!Number.isSafeInteger(id)) return null;
+  const group = Math.floor(id / 1000000);
+  const quantity = id % 1000000;
+  if (![1,2].includes(group) || quantity < 1 || quantity > 99999) return null;
+  return {kind:group === 1 ? 'cajas' : 'tokens', quantity};
+}
 const host = 'preview-gamer-aura-v2.vortex-gaming-peru-web.pages.dev';
 const reply = (body, status = 200) => Response.json(body, {status, headers:{'Cache-Control':'no-store'}});
 export async function onRequest({request, env}) {
@@ -32,17 +39,19 @@ export async function onRequest({request, env}) {
     await db.prepare('CREATE TABLE IF NOT EXISTS demo_order_prices (code TEXT PRIMARY KEY, cents INTEGER NOT NULL)').run();
     if (method === 'POST') {
       const {uid, productId, paymentMethod} = body;
-      if (typeof uid !== 'string' || !/^\d{8,12}$/.test(uid) || (!prices.has(productId) && productId !== cardOfferId && !individualCards.has(productId)) ||
+      const fragment = decodeFragment(productId);
+      if (typeof uid !== 'string' || !/^\d{8,12}$/.test(uid) || (!prices.has(productId) && productId !== cardOfferId && !individualCards.has(productId) && !fragment) ||
           !['yape','binance'].includes(paymentMethod)) return reply({message:'Revisa el UID, paquete y método.'},400);
       const player = typeof body.player === 'string' ? body.player.trim().slice(0,100) : '';
       const existing = await db.prepare('SELECT code FROM demo_orders WHERE code=?').bind(code).first();
       if (!existing) {
         const {settings} = await readSettings(db);
         const individualCard = individualCards.get(productId);
-        const packageSettings = individualCard
+        const fragmentOption = fragment && settings.fragments[fragment.kind].find(option => option.quantity === fragment.quantity);
+        const packageSettings = fragment ? fragmentOption && {...fragmentOption,visible:true} : individualCard
           ? {cents:individualCard.cents, visible:settings.offers.tarjetas.visible}
           : productId === cardOfferId ? settings.offers.tarjetas : settings.products[productId];
-        if (!packageSettings.visible || (body.cents !== undefined && body.cents !== packageSettings.cents))
+        if (!packageSettings?.visible || (body.cents !== undefined && body.cents !== packageSettings.cents))
           return reply({message:'El paquete o precio cambió. Recarga la página y vuelve a elegir.'},409);
         await db.batch([
           db.prepare('INSERT INTO demo_order_prices (code,cents) SELECT ?,? WHERE NOT EXISTS (SELECT 1 FROM demo_orders WHERE code=?) ON CONFLICT(code) DO NOTHING')
@@ -65,9 +74,11 @@ export async function onRequest({request, env}) {
     const isCardOffer = row.product_id === cardOfferId;
     const individualCard = individualCards.get(row.product_id);
     const [bonus,originalCents] = prices.get(row.product_id) ?? [0, individualCard?.cents ?? 4000];
-    const packageName = individualCard?.title ?? (isCardOffer
+    const fragment = decodeFragment(row.product_id);
+    const fragmentName = fragment && (fragment.quantity + ' ' + fragment.kind + (fragment.kind === 'cajas' ? ' evolutivas' : ' evolutivos'));
+    const packageName = fragmentName || (individualCard?.title ?? (isCardOffer
       ? 'Oferta de 3 tarjetas'
-      : row.product_id.toLocaleString('en-US') + ' + ' + bonus + ' diamantes');
+      : row.product_id.toLocaleString('en-US') + ' + ' + bonus + ' diamantes'));
     const cents = storedPrice?.cents ?? originalCents;
     return reply({order:{
       code:row.code, uid:row.uid, player:row.player, stage:row.stage, createdAt:row.created_at,
