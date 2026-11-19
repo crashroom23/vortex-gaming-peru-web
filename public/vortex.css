@@ -811,3 +811,35 @@ img,svg{max-width:100%}
     to { opacity: 1; transform: translate(-50%, -50%); }
   }
 }
+
+/* Manual Yape order summary */
+#checkout-modal [hidden] { display: none; }
+.checkout-order { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.checkout-order .checkout-total {
+  grid-column: 1 / -1;
+  border: 0;
+  border-radius: 10px;
+  padding: 9px;
+  background: #f8f3ff;
+  text-align: center;
+}
+.checkout-order .checkout-total small,
+.checkout-order .checkout-total strong { color: #35165d; }
+.manual-payment { margin: 14px 0 10px; text-align: center; }
+.manual-payment img {
+  display: block;
+  width: min(224px, 100%);
+  height: auto;
+  margin: 0 auto;
+  border-radius: 12px;
+}
+.manual-order-details { display: grid; gap: 7px; text-align: left; }
+.manual-order-details div {
+  padding: 9px 12px;
+  border: 1px solid #534375;
+  border-radius: 8px;
+  background: #161024;
+}
+.manual-order-details dt { margin-bottom: 4px; font-size: 12px; color: #d6c4f3; }
+.manual-order-details dd { margin: 0; font-weight: 700; overflow-wrap: anywhere; }
+#manual-payment-confirm:disabled { opacity: .68; cursor: not-allowed; }
