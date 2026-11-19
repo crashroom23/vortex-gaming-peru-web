@@ -263,16 +263,14 @@
       button.setAttribute('aria-pressed', String(active));
     });
     if (selectedPaymentMethod === 'yape') {
-      $('#payment-name').textContent = 'Yape automático';
-      $('#payment-description').textContent = 'Cuando conectemos una pasarela compatible, mostrará un QR dinámico o el formulario seguro de Yape. Un QR personal no puede confirmar el pago automáticamente.';
-      $('#payment-notice').textContent = checkoutProduct && checkoutProduct.price < 6
-        ? 'Nota: el QR de billeteras móviles de Culqi tiene mínimo S/ 6.00. Para este paquete se evaluará Yape con código de aprobación u otra integración compatible.'
-        : 'El QR dinámico de Yape aparecerá solo después de habilitar y probar la pasarela. No envíes dinero desde esta pantalla.';
+      $('#payment-name').textContent = 'Yape manual';
+      $('#payment-notice').textContent = '';
     } else {
       $('#payment-name').textContent = 'Binance Pay';
       $('#payment-description').textContent = 'Binance Pay genera un QR o enlace único desde la API Merchant. La conversión a criptomonedas y el importe definitivo se mostrarán únicamente cuando exista una orden real.';
       $('#payment-notice').textContent = 'Se necesita una cuenta Binance Pay Merchant habilitada, su API y confirmación verificada del pago.';
     }
+    renderManualPayment();
   }
 
   // Orders here exercise the Preview checkout without contacting a payment provider.
@@ -347,21 +345,71 @@
 
   let draftOrder = null;
   let updatingOrder = false;
+  const manualPayment = $('#yape-manual');
+  const manualConfirm = $('#manual-payment-confirm');
+  const yapeQr = $('#yape-qr');
+  const whatsappNumber = manualPayment.dataset.whatsapp;
+  const yapeQrPath = manualPayment.dataset.qr;
+  let qrReady = false;
+
+  function draftForCheckout() {
+    const selection = checkoutProduct.id + ':' + playerSession.uid + ':' + selectedPaymentMethod;
+    if (draftOrder?.selection !== selection) {
+      draftOrder = {selection, code:'VG-' + crypto.randomUUID().replaceAll('-', '').toUpperCase()};
+    }
+    return draftOrder;
+  }
+
+  function renderManualPayment() {
+    const isYape = selectedPaymentMethod === 'yape';
+    const ready = isYape && qrReady && /^[1-9]\d{7,14}$/.test(whatsappNumber) && playerSession && !playerSession.demo;
+    manualPayment.hidden = !isYape;
+    $('#payment-preview').hidden = isYape;
+    $('#checkout-warning').hidden = ready;
+    confirmDemoOrder.hidden = ready;
+    yapeQr.hidden = !ready;
+    manualConfirm.disabled = !ready;
+    $('#manual-payment-help').textContent = ready
+      ? 'Escanea el QR y paga el monto exacto. Luego abre WhatsApp y adjunta tu comprobante.'
+      : 'QR y envío por WhatsApp no disponibles en esta prueba.';
+    if (!isYape || !checkoutProduct || !playerSession) return;
+
+    $('#manual-order-code').textContent = draftForCheckout().code;
+    $('#manual-order-uid').textContent = playerSession.uid;
+    manualConfirm.textContent = 'Ya pagué ' + price(checkoutProduct.price) + ' · Enviar por WhatsApp';
+  }
+
+  if (yapeQrPath) {
+    yapeQr.addEventListener('load', () => { qrReady = true; renderManualPayment(); });
+    yapeQr.addEventListener('error', () => { qrReady = false; renderManualPayment(); });
+    yapeQr.src = yapeQrPath;
+  }
+
+  manualConfirm.addEventListener('click', () => {
+    if (manualConfirm.disabled || !checkoutProduct || playerSession?.uid !== $('#uid').value.trim()) return;
+    const {code} = draftForCheckout();
+    const message = [
+      'Hola, reporto un pago por Yape para una recarga de VortexGamer.',
+      'ID de Free Fire: ' + playerSession.uid,
+      'Monto pagado: ' + price(checkoutProduct.price),
+      'Número de orden: ' + code,
+      'Paquete: ' + $('#checkout-package').textContent,
+      'Adjunto mi comprobante para que verifiquen el pago.'
+    ].join('\n');
+    window.open('https://wa.me/' + whatsappNumber + '?text=' + encodeURIComponent(message), '_blank', 'noopener,noreferrer');
+  });
   confirmDemoOrder.addEventListener('click', async () => {
     if (updatingOrder) return;
     if (!checkoutProduct || !playerSession || playerSession.uid !== $('#uid').value.trim()) {
       notify('Vuelve a verificar el UID antes de crear el pedido.');
       return;
     }
-    const selection = checkoutProduct.id + ':' + playerSession.uid + ':' + selectedPaymentMethod;
-    if (draftOrder?.selection !== selection) {
-      draftOrder = {selection, code:'VG-' + crypto.randomUUID().replaceAll('-', '').toUpperCase()};
-    }
+    const draft = draftForCheckout();
     updatingOrder = true;
     confirmDemoOrder.disabled = true;
     try {
       const order = await requestDemoOrder('POST', {
-        code:draftOrder.code, uid:playerSession.uid, productId:checkoutProduct.id,
+        code:draft.code, uid:playerSession.uid, productId:checkoutProduct.id,
         player:playerSession.demo ? 'Jugador de prueba' : playerSession.nickname,
         paymentMethod:selectedPaymentMethod
       });
