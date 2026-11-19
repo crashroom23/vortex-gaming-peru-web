@@ -989,7 +989,7 @@ main > [hidden] { display: none !important; }
 .fragment-types > button[aria-expanded="true"] { border-color: #ffca49; box-shadow: 0 0 0 2px #ffca4949; }
 .fragment-types > button:disabled { opacity: .6; cursor: default; }
 .fragment-types strong { font-size: 1.35rem; text-transform: uppercase; }
-.fragment-icon { display: grid; place-items: center; height: 78px; font-size: 3rem; line-height: 1; color: #69ffed; text-shadow: 0 0 12px #00d4df; }
+.fragment-icon { display: block; width: min(100%, 116px); height: 104px; object-fit: contain; }
 .fragment-summary { width: 100%; border-radius: 9px; padding: 6px 4px; background: linear-gradient(#813cea,#5924b0); font-weight: 800; }
 #fragment-options { margin-top: 10px; border: 1px solid #7651ad; border-radius: 15px; padding: 12px; background: #10091d; }
 #fragment-options > header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
