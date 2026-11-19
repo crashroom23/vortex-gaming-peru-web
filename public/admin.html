@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>Administración · VortexGamer</title>
-<link rel="stylesheet" href="/admin.css?v=1">
-<script src="/admin.js?v=1" defer></script>
+<link rel="stylesheet" href="/admin.css?v=visual-directo">
+<script src="/admin.js?v=visual-directo" defer></script>
 </head>
 <body>
 <header><a href="/">← VortexGamer</a><h1>Administración</h1></header>
@@ -20,9 +20,14 @@
   <form id="editor">
     <nav aria-label="Secciones del editor"></nav>
     <div id="fields"></div>
-    <footer><button id="preview" type="button">Vista previa</button><button id="publish">Publicar cambios</button><button id="logout" type="button">Salir</button></footer>
+    <footer><button id="preview" type="button">Editar en vista previa</button><button id="publish">Publicar cambios</button><button id="logout" type="button">Salir</button></footer>
   </form>
 </section>
+<dialog id="inline-editor" aria-labelledby="inline-title">
+  <h2 id="inline-title">Editar elemento</h2>
+  <div id="inline-fields"></div>
+  <button id="inline-close" type="button">Listo</button>
+</dialog>
 </main>
 </body>
 </html>

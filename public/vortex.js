@@ -112,7 +112,7 @@
     const saved = favorites.has(product.id);
     const isPro = product.category === 'premium';
     return [
-      '<article class="product-card', isPro ? ' featured' : '', '">',
+      '<article class="product-card', isPro ? ' featured' : '', '" data-inline-product="', product.id, '">',
       '<div class="card-media">',
       '<span class="card-badge', isPro ? ' premium' : '', '">', product.tag, '</span>',
       '<button type="button" class="favorite-btn', saved ? ' saved' : '', '" data-action="favorite" data-id="', product.id, '" aria-label="', saved ? 'Quitar de' : 'Añadir a', ' favoritos: ', product.amount, ' diamantes" aria-pressed="', saved, '">', heartSVG, '</button>',
@@ -752,12 +752,44 @@
   $('.features-bar').before(activity);
 
   $('#year').textContent = new Date().getFullYear();
+  const editableCopy = {
+  "verifyTitle": ".verify-card-head h2",
+  "catalogHeading": "#catalog-heading",
+  "catalogDescription": "#catalog-description",
+  "midTitle": ".mid-banner h3",
+  "midLabel": ".mid-banner-title small",
+  "midBody": ".mid-banner > p",
+  "walletLabel": "#wallet-trigger",
+  "footer": ".footer-top > div:first-child > p",
+  "faqTitle": ".faq-section#ayuda h2",
+  "diamantesTitle": "[data-category=\"diamantes\"] strong",
+  "diamantesDesc": "[data-category=\"diamantes\"] small",
+  "fragmentosTitle": "[data-category=\"fragmentos\"] strong",
+  "fragmentosDesc": "[data-category=\"fragmentos\"] small",
+  "paseTitle": "[data-category=\"pase\"] strong",
+  "paseDesc": "[data-category=\"pase\"] small",
+  "tarjetasTitle": "[data-category=\"tarjetas\"] strong",
+  "tarjetasDesc": "[data-category=\"tarjetas\"] small",
+  "nivelTitle": "[data-category=\"nivel\"] strong",
+  "nivelDesc": "[data-category=\"nivel\"] small"
+};
+
   function applyStoreSettings(settings) {
     $('#catalog-heading').textContent = settings.heading;
     $('#catalog-description').textContent = settings.description;
     document.documentElement.style.setProperty('--store-accent', settings.accent);
     activity.hidden = !settings.activity;
     offerSettings = settings.offers;
+    for (const [key,selector] of Object.entries(editableCopy)) {
+      const node = $(selector);
+      if (!node) continue;
+      if (settings.copy?.[key] && key !== 'catalogHeading' && key !== 'catalogDescription') {
+        const icon = node.querySelector('svg');
+        node.textContent = settings.copy[key];
+        if (icon) node.append(icon);
+      }
+      node.dataset.inlineCopy = key;
+    }
     for (const product of PRODUCTS) {
       const options = settings.products[product.id];
       product.price = options.cents / 100;
@@ -770,10 +802,13 @@
       article.querySelector('h3').textContent = offer.title;
       article.querySelector('p').textContent = offer.description;
       article.querySelector('strong').textContent = price(offer.cents / 100);
+      article.querySelector('img').src = offer.image || '/images/oferta-' + id + '.webp';
     }
-    const art = settings.banners.filter(banner => banner.visible).map((banner,index) => {
+    const art = settings.banners.map((banner,index) => ({banner,index}))
+      .filter(({banner}) => banner.visible).map(({banner,index},position) => {
       const link = document.createElement('a');
-      link.className = index === 0 ? 'storefront-promo managed-main-banner' : 'storefront-promo';
+      link.dataset.inlineBanner = index;
+      link.className = position === 0 ? 'storefront-promo managed-main-banner' : 'storefront-promo';
       link.href = '#paquetes-' + banner.category;
       const image = document.createElement('img');
       image.src = banner.image;

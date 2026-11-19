@@ -7,7 +7,7 @@ export const bannerDefaults = {
 };
 export const defaults = {
   heading:'Catálogo de recargas', description:'Elige una categoría de Free Fire.',
-  accent:'#a06aff', activity:true,
+  accent:'#a06aff', activity:true, copy:{},
   banners:Object.values(bannerDefaults).map(item => ({...item,visible:true})),
   products:Object.fromEntries(Object.entries(priceDefaults).map(([id,cents]) => [id,{cents,image:'',visible:true}])),
   offers:{nivel:{title:'Aumento de nivel',description:'Hasta 1,400 diamantes según tu nivel',cents:1400,visible:true},tarjetas:{title:'Oferta de 3 tarjetas',description:'Mensual, semanal y semanal básica',cents:4000,visible:true}},
@@ -33,8 +33,11 @@ function validImage(value) {
 function validPrice(value) {
   return Number.isSafeInteger(value) && value > 0 && value <= 9999999;
 }
+const copyKeys = new Set(["verifyTitle","midTitle","midLabel","midBody","walletLabel","footer","faqTitle","diamantesTitle","diamantesDesc","fragmentosTitle","fragmentosDesc","paseTitle","paseDesc","tarjetasTitle","tarjetasDesc","nivelTitle","nivelDesc"]);
 export function validSettings(s) {
   return s && validText(s.heading,80) && validText(s.description,180) &&
+    (s.copy === undefined || (s.copy && typeof s.copy === 'object' && !Array.isArray(s.copy) &&
+      Object.entries(s.copy).every(([key,value]) => copyKeys.has(key) && validText(value,180)))) &&
     /^#[0-9a-f]{6}$/i.test(s.accent) && typeof s.activity === 'boolean' &&
     Array.isArray(s.banners) && s.banners.length <= 8 &&
     s.banners.every(b => b && validText(b.title,70) && !!b.image && validImage(b.image) &&
@@ -46,7 +49,7 @@ export function validSettings(s) {
     }) && s.offers && ['nivel','tarjetas'].every(id => {
       const o = s.offers[id];
       return o && validText(o.title,70) && validText(o.description,180) && validPrice(o.cents) &&
-        typeof o.visible === 'boolean';
+        (o.image === undefined || validImage(o.image)) && typeof o.visible === 'boolean';
     }) && s.payment && validImage(s.payment.qr) &&
     typeof s.payment.whatsapp === 'string' && /^(?:[1-9]\d{7,14})?$/.test(s.payment.whatsapp);
 }

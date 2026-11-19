@@ -20,3 +20,11 @@ input,select { min-width:0; width:100%; background:#150d24; color:inherit }
 input[type="checkbox"],input[type="color"] { width:auto }
 fieldset { min-width:0; margin:12px 0; display:grid; gap:10px; padding:15px; border:1px solid #684b97; border-radius:12px; background:#1f1332 }
 img { display:block; max-width:100%; max-height:150px; object-fit:contain; border-radius:7px }
+
+#preview-tools { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:12px 0 8px }
+#preview-tools p { margin:0; flex:1 1 240px }
+#store-preview { margin-top:4px; border:1px solid #7452a4; border-radius:10px }
+#inline-editor { width:min(460px,calc(100% - 24px)); max-height:85vh; color:inherit; background:#211435; border:1px solid #9362d3; border-radius:14px; }
+#inline-editor::backdrop { background:#0b061ac9 }
+#inline-fields { display:grid; gap:10px; margin-block:10px }
+#inline-fields img { max-height:180px }

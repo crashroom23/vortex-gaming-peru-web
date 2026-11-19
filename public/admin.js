@@ -80,6 +80,7 @@ function imageField(box,label,item,property,{qr=false}={}) {
       if (image.length > 350000) throw new Error('La imagen es demasiado grande. Usa una imagen más pequeña.');
       photo.hidden = false;
       photo.src = item[property] = image;
+      if (!$('#inline-editor').open) syncPreview();
       status.textContent = 'Imagen lista para publicar.';
     } catch (error) {
       status.textContent = error.message || 'No se pudo abrir la imagen.';
@@ -139,6 +140,7 @@ function render() {
       field(box,'Descripción',offer,'description');
       field(box,'Precio en soles',offer,'cents',{type:'number'});
       field(box,'Visible',offer,'visible',{type:'checkbox'});
+      imageField(box,'Reemplazar imagen de la oferta',offer,'image');
     }
   }
   if (section === 'design') {
@@ -155,6 +157,7 @@ function render() {
     box.append(action('Quitar QR',()=>{ settings.payment.qr=''; render(); }));
     box.append(element('p','Estos datos se guardan para configurar el cobro. La tienda de pruebas mantiene los cobros desactivados.'));
   }
+  syncPreview();
 }
 
 $('#login').addEventListener('submit',async event => {
@@ -165,6 +168,7 @@ $('#login').addEventListener('submit',async event => {
   $('#key').value='';
   try {
     ({revision,settings}=await request('GET'));
+    settings.copy ||= {};
     render();
     $('#login').hidden=true;
     $('#panel').hidden=false;
@@ -176,7 +180,7 @@ $('#login').addEventListener('submit',async event => {
 });
 $('#editor').addEventListener('submit',async event => {
   event.preventDefault();
-  if (busy) return;
+  if (busy || $('#inline-editor').open) return;
   busy=true;
   $('#publish').disabled=true;
   try {
@@ -185,20 +189,119 @@ $('#editor').addEventListener('submit',async event => {
   } catch(error) { status.textContent=error.message || 'No se pudo publicar.'; }
   finally { busy=false; $('#publish').disabled=false; }
 });
+const originalCopy = {
+  "verifyTitle": "Verifica tu ID de Free Fire",
+  "catalogHeading": "Catálogo de recargas",
+  "catalogDescription": "Elige una categoría de Free Fire.",
+  "midTitle": "¿YA ELEGISTE TUS DIAMANTES?",
+  "midLabel": "VORTEX // NEXT LEVEL",
+  "midBody": "Elige tu UID, verifica el jugador y pulsa Pagar para abrir la ventana con Yape o Binance Pay.",
+  "walletLabel": "CONOCER MI BILLETERA",
+  "footer": "Un nuevo universo para tus recargas digitales.",
+  "faqTitle": "PREGUNTAS RÁPIDAS",
+  "diamantesTitle": "Diamantes",
+  "diamantesDesc": "Paquetes de diamantes con bono",
+  "fragmentosTitle": "Fragmentos",
+  "fragmentosDesc": "Fragmentos para evolutivas",
+  "paseTitle": "Pase",
+  "paseDesc": "Pase Booyah",
+  "tarjetasTitle": "Tarjetas",
+  "tarjetasDesc": "Tarjetas de Free Fire",
+  "nivelTitle": "Paquete de nivel de aumento",
+  "nivelDesc": "Paquetes para subir de nivel"
+};
+const inlineEditor = $('#inline-editor');
+const inlineFields = $('#inline-fields');
+
+function syncPreview() {
+  const {payment,...draft}=settings;
+  $('#store-preview')?.contentWindow.postMessage({type:'vortex-admin-preview',settings:draft},location.origin);
+}
+
+function editHere(title,setup) {
+  $('#inline-title').textContent=title;
+  inlineFields.replaceChildren();
+  setup(inlineFields);
+  inlineEditor.showModal();
+}
+
+function editBanner(banner) {
+  editHere('Editar banner',box => {
+    field(box,'Título',banner,'title',{max:70});
+    field(box,'Abrir categoría',banner,'category',{options:categoryLabels});
+    field(box,'Visible',banner,'visible',{type:'checkbox'});
+    imageField(box,'Subir o reemplazar imagen',banner,'image');
+  });
+}
+
+function editPreviewElement(event) {
+  const target=event.target.closest('[data-inline-copy], [data-inline-banner], [data-inline-product], [data-offer]');
+  if (!target) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+  if (target.dataset.inlineCopy) {
+    const id=target.dataset.inlineCopy;
+    const key=id==='catalogHeading' ? 'heading' : id==='catalogDescription' ? 'description' : id;
+    const item=key===id ? settings.copy : settings;
+    if (!Object.hasOwn(item,key)) item[key]=originalCopy[id];
+    editHere('Editar texto',box=>field(box,'Texto',item,key,{max:key==='heading' ? 80 : 180}));
+  } else if (target.dataset.inlineBanner !== undefined) {
+    editBanner(settings.banners[Number(target.dataset.inlineBanner)]);
+  } else if (target.dataset.inlineProduct) {
+    const product=settings.products[target.dataset.inlineProduct];
+    editHere('Editar paquete de diamantes',box => {
+      field(box,'Precio en soles',product,'cents',{type:'number'});
+      field(box,'Visible',product,'visible',{type:'checkbox'});
+      imageField(box,'Reemplazar imagen',product,'image');
+    });
+  } else {
+    const offer=settings.offers[target.dataset.offer];
+    editHere('Editar oferta',box => {
+      field(box,'Título',offer,'title',{max:70});
+      field(box,'Descripción',offer,'description');
+      field(box,'Precio en soles',offer,'cents',{type:'number'});
+      field(box,'Visible',offer,'visible',{type:'checkbox'});
+      imageField(box,'Reemplazar imagen',offer,'image');
+    });
+  }
+}
+
+$('#inline-close').addEventListener('click',() => { if (!busy) inlineEditor.close(); });
+inlineEditor.addEventListener('cancel',event => { if (busy) event.preventDefault(); });
+inlineEditor.addEventListener('close',() => { render(); syncPreview(); });
+$('#editor').addEventListener('input',event => {
+  if (event.target.type !== 'file') syncPreview();
+});
+
 $('#preview').addEventListener('click',() => {
   if(busy) return;
   let frame=$('#store-preview');
   if(!frame) {
     frame=element('iframe');
     frame.id='store-preview';
-    frame.title='Vista previa de la tienda';
+    frame.title='Editor visual de la tienda';
     frame.width='100%';
     frame.height='650';
-    $('#panel').append(frame);
-  }
-  const {payment,...draft}=settings;
-  frame.onload=()=>frame.contentWindow.postMessage({type:'vortex-admin-preview',settings:draft},location.origin);
-  frame.src='/?draft=1';
-  frame.scrollIntoView({block:'nearest'});
+    const toolbar=element('div');
+    toolbar.id='preview-tools';
+    toolbar.append(element('p','Haz clic en un texto, una imagen o un paquete para editarlo.'),action('Agregar banner',() => {
+      if (settings.banners.length >= 8) { status.textContent='Ya tienes ocho banners. Quita uno antes de agregar otro.'; return; }
+      const banner={title:'Nuevo banner',category:'diamantes',visible:true,image:'/images/vortex-banner.webp?v=6a62bac'};
+      settings.banners.push(banner);
+      editBanner(banner);
+    }));
+    $('#panel').append(toolbar,frame);
+    frame.onload=() => {
+      const doc=frame.contentDocument;
+      if (!doc || new URL(doc.URL).search !== '?draft=1') return;
+      const style=doc.createElement('style');
+      style.textContent='[data-inline-copy],[data-inline-banner],[data-inline-product],[data-offer]{cursor:pointer} [data-inline-copy]:hover,[data-inline-banner]:hover,[data-inline-product]:hover,[data-offer]:hover{outline:2px dashed #e4bcff;outline-offset:-2px}';
+      doc.head.append(style);
+      doc.addEventListener('click',editPreviewElement,true);
+      syncPreview();
+    };
+    frame.src='/?draft=1';
+  } else syncPreview();
+  $('#preview-tools').scrollIntoView({block:'start'});
 });
 $('#logout').addEventListener('click',() => location.reload());
