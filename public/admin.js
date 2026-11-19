@@ -214,8 +214,22 @@ const inlineEditor = $('#inline-editor');
 const inlineFields = $('#inline-fields');
 
 function syncPreview() {
-  const {payment,...draft}=settings;
-  $('#store-preview')?.contentWindow.postMessage({type:'vortex-admin-preview',settings:draft},location.origin);
+  const frame=$('#store-preview');
+  const message=$('#preview-message');
+  if (!frame || !settings) return;
+  try {
+    const applyDraft=frame.contentWindow.vortexApplyAdminDraft;
+    if (typeof applyDraft !== 'function') {
+      message.textContent='El editor todavía no está conectado. Pulsa Recargar vista previa.';
+      return;
+    }
+    const {payment,...draft}=settings;
+    applyDraft(structuredClone(draft));
+    message.textContent='Edición activa. Haz clic en un texto, un banner o un paquete.';
+  } catch (error) {
+    console.error('VortexGamer: vista previa',error);
+    message.textContent='No se pudo mostrar el borrador. Pulsa Recargar vista previa.';
+  }
 }
 
 function editHere(title,setup) {
@@ -235,8 +249,8 @@ function editBanner(banner) {
 }
 
 function editPreviewElement(event) {
-  const target=event.target.closest('[data-inline-copy], [data-inline-banner], [data-inline-product], [data-offer]');
-  if (!target) return;
+  const target=event.target.closest?.('[data-inline-copy], [data-inline-banner], [data-inline-product], [data-offer]');
+  if (!target || inlineEditor.open || busy) return;
   event.preventDefault();
   event.stopImmediatePropagation();
   if (target.dataset.inlineCopy) {
@@ -284,7 +298,14 @@ $('#preview').addEventListener('click',() => {
     frame.height='650';
     const toolbar=element('div');
     toolbar.id='preview-tools';
-    toolbar.append(element('p','Haz clic en un texto, una imagen o un paquete para editarlo.'),action('Agregar banner',() => {
+    const message=element('p','Cargando editor…');
+    message.id='preview-message';
+    message.setAttribute('role','status');
+    const reloadPreview=() => {
+      message.textContent='Cargando editor…';
+      frame.src='/?draft=1&editor=conectado';
+    };
+    toolbar.append(message,action('Recargar vista previa',reloadPreview),action('Agregar banner',() => {
       if (settings.banners.length >= 8) { status.textContent='Ya tienes ocho banners. Quita uno antes de agregar otro.'; return; }
       const banner={title:'Nuevo banner',category:'diamantes',visible:true,image:'/images/vortex-banner.webp?v=6a62bac'};
       settings.banners.push(banner);
@@ -293,14 +314,14 @@ $('#preview').addEventListener('click',() => {
     $('#panel').append(toolbar,frame);
     frame.onload=() => {
       const doc=frame.contentDocument;
-      if (!doc || new URL(doc.URL).search !== '?draft=1') return;
+      if (!doc || new URL(doc.URL).searchParams.get('draft') !== '1') return;
       const style=doc.createElement('style');
       style.textContent='[data-inline-copy],[data-inline-banner],[data-inline-product],[data-offer]{cursor:pointer} [data-inline-copy]:hover,[data-inline-banner]:hover,[data-inline-product]:hover,[data-offer]:hover{outline:2px dashed #e4bcff;outline-offset:-2px}';
       doc.head.append(style);
       doc.addEventListener('click',editPreviewElement,true);
       syncPreview();
     };
-    frame.src='/?draft=1';
+    reloadPreview();
   } else syncPreview();
   $('#preview-tools').scrollIntoView({block:'start'});
 });

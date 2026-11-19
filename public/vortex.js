@@ -824,13 +824,9 @@
   }
 
   refresh();
-  if (location.search === '?draft=1' && window.parent !== window) {
+  if (new URLSearchParams(location.search).get('draft') === '1' && window.parent !== window) {
     document.documentElement.dataset.draft = 'true';
-    window.addEventListener('message', event => {
-      if (event.origin === location.origin && event.source === window.parent && event.data?.type === 'vortex-admin-preview') {
-        applyStoreSettings(event.data.settings);
-      }
-    });
+    window.vortexApplyAdminDraft = applyStoreSettings;
   } else {
     fetch('/api/site-settings').then(response => response.ok ? response.json() : null)
       .then(data => { if (data?.revision > 0) applyStoreSettings(data.settings); }).catch(() => {});
