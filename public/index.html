@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/vortex.css?v=miniaturas">
-  <script src="/vortex.js?v=guia-nivel" defer></script>
+  <link rel="stylesheet" href="/vortex.css?v=pase-booyah">
+  <script src="/vortex.js?v=pase-booyah" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -127,7 +127,7 @@
           <span class="category-arrow" aria-hidden="true">›</span>
         </button>
         <button type="button" class="catalog-category" id="paquetes-pase" data-category="pase" aria-controls="products-grid empty-state" aria-pressed="false">
-          <span class="category-icon" aria-hidden="true"><img src="/images/pase-mini.webp" alt="" width="29" height="29"></span>
+          <span class="category-icon" aria-hidden="true"><img src="/images/booyah-card.webp" alt="" width="29" height="29"></span>
           <span class="category-copy"><strong>Pase</strong><small>Pase Booyah</small></span>
           <span class="category-arrow" aria-hidden="true">›</span>
         </button>
@@ -161,6 +161,19 @@
           <div class="fragment-quantities"></div>
         </div>
       </section>
+      <article class="catalog-offer" data-offer="pase" hidden>
+        <img src="/images/booyah-card.webp" alt="Tarjeta del Pase Booyah" width="520" height="286">
+        <div class="pass-details">
+          <h3>Pase Booyah</h3>
+          <p>Pase Booyah de la temporada actual de Free Fire.</p>
+          <strong>S/ 5.00</strong>
+          <figure class="pass-reference" hidden>
+            <img alt="Imagen de referencia del Pase Booyah del mes" loading="lazy">
+            <figcaption>Pase del mes</figcaption>
+          </figure>
+          <button type="button" class="btn btn-accent" id="buy-booyah-pass">Comprar</button>
+        </div>
+      </article>
       <article class="catalog-offer" data-offer="nivel" hidden>
         <img src="/images/oferta-nivel.webp" alt="" width="650" height="650" loading="lazy">
         <div class="level-offer-details">

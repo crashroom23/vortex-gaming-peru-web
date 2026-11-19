@@ -1008,3 +1008,9 @@ main > [hidden] { display: none !important; }
 #buy-level-offer:disabled { opacity: .55; cursor: not-allowed; }
 
 .category-icon img { display: block; width: 29px; height: 29px; object-fit: contain; border-radius: 4px; }
+
+.pass-details { min-width: 0; }
+#buy-booyah-pass { display: block; margin-top: 12px; }
+.pass-reference { margin: 12px 0; }
+.catalog-offer .pass-reference img { display: block; width: min(100%, 480px); }
+.pass-reference figcaption { margin-top: 4px; color: #d1bee8; }

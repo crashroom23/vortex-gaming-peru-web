@@ -160,7 +160,10 @@ function render() {
       field(box,'Descripción',offer,'description');
       field(box,'Precio en soles',offer,'cents',{type:'number'});
       field(box,'Visible',offer,'visible',{type:'checkbox'});
-      imageField(box,'Reemplazar imagen de la oferta',offer,'image');
+      imageField(box,id === 'pase' ? 'Subir foto de referencia del pase del mes' : 'Reemplazar imagen de la oferta',offer,'image');
+      if (id === 'pase' && offer.image) {
+        box.append(action('Quitar foto del mes',() => { offer.image=''; render(); }));
+      }
     }
   }
   if (section === 'design') {

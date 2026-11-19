@@ -2,6 +2,7 @@ import {readSettings} from '../lib/site-settings.js';
 const prices = new Map([[100,[10,350]],[310,[31,980]],[520,[52,1500]],[1060,[106,2700]],[2180,[218,5200]],[5600,[560,13000]]]);
 const cardOfferId = 30003;
 const levelOfferId = 30005;
+const passOfferId = 30006;
 const individualCards = new Map([
   [30001, {title:'Tarjeta básica', cents:200}],
   [30002, {title:'Tarjeta semanal', cents:650}],
@@ -41,7 +42,7 @@ export async function onRequest({request, env}) {
     if (method === 'POST') {
       const {uid, productId, paymentMethod} = body;
       const fragment = decodeFragment(productId);
-      if (typeof uid !== 'string' || !/^\d{8,12}$/.test(uid) || (!prices.has(productId) && productId !== cardOfferId && productId !== levelOfferId && !individualCards.has(productId) && !fragment) ||
+      if (typeof uid !== 'string' || !/^\d{8,12}$/.test(uid) || (!prices.has(productId) && productId !== cardOfferId && productId !== levelOfferId && productId !== passOfferId && !individualCards.has(productId) && !fragment) ||
           !['yape','binance'].includes(paymentMethod)) return reply({message:'Revisa el UID, paquete y método.'},400);
       const player = typeof body.player === 'string' ? body.player.trim().slice(0,100) : '';
       const existing = await db.prepare('SELECT code FROM demo_orders WHERE code=?').bind(code).first();
@@ -51,6 +52,7 @@ export async function onRequest({request, env}) {
         const fragmentOption = fragment && settings.fragments[fragment.kind].find(option => option.quantity === fragment.quantity);
         const packageSettings = fragment ? fragmentOption && {...fragmentOption,visible:true} : individualCard
           ? {cents:individualCard.cents, visible:settings.offers.tarjetas.visible}
+          : productId === passOfferId ? settings.offers.pase
           : productId === levelOfferId ? settings.offers.nivel
           : productId === cardOfferId ? settings.offers.tarjetas : settings.products[productId];
         if (!packageSettings?.visible || (body.cents !== undefined && body.cents !== packageSettings.cents))
@@ -73,13 +75,14 @@ export async function onRequest({request, env}) {
       return reply({message:'El código ya pertenece a otro pedido.'},409);
     }
     const storedPrice = await db.prepare('SELECT cents FROM demo_order_prices WHERE code=?').bind(code).first();
+    const isPassOffer = row.product_id === passOfferId;
     const isLevelOffer = row.product_id === levelOfferId;
     const isCardOffer = row.product_id === cardOfferId;
     const individualCard = individualCards.get(row.product_id);
-    const [bonus,originalCents] = prices.get(row.product_id) ?? [0, individualCard?.cents ?? (isLevelOffer ? 1400 : 4000)];
+    const [bonus,originalCents] = prices.get(row.product_id) ?? [0, individualCard?.cents ?? (isPassOffer ? 500 : isLevelOffer ? 1400 : 4000)];
     const fragment = decodeFragment(row.product_id);
     const fragmentName = fragment && (fragment.quantity + ' ' + fragment.kind + (fragment.kind === 'cajas' ? ' evolutivas' : ' evolutivos'));
-    const packageName = isLevelOffer ? 'Aumento de nivel' : fragmentName || (individualCard?.title ?? (isCardOffer
+    const packageName = isPassOffer ? 'Pase Booyah' : isLevelOffer ? 'Aumento de nivel' : fragmentName || (individualCard?.title ?? (isCardOffer
       ? 'Oferta de 3 tarjetas'
       : row.product_id.toLocaleString('en-US') + ' + ' + bonus + ' diamantes'));
     const cents = storedPrice?.cents ?? originalCents;

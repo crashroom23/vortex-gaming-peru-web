@@ -33,12 +33,13 @@ export const fragmentDefaults = {
     {quantity:1200, cents:15000}
   ]
 };
+const passDefault = {title:'Pase Booyah',description:'Pase Booyah de la temporada actual de Free Fire.',cents:500,visible:true,image:''};
 export const defaults = {
   heading:'Catálogo de recargas', description:'Elige una categoría de Free Fire.',
   accent:'#a06aff', activity:true, copy:{},
   banners:Object.values(bannerDefaults).map(item => ({...item,visible:true})),
   products:Object.fromEntries(Object.entries(priceDefaults).map(([id,cents]) => [id,{cents,image:'',visible:true}])),
-  offers:{nivel:{title:'Aumento de nivel',description:'Hasta 1,400 diamantes según tu nivel',cents:1400,visible:true},tarjetas:{title:'Oferta de 3 tarjetas',description:'Mensual, semanal y semanal básica',cents:4000,visible:true}},
+  offers:{pase:passDefault,nivel:{title:'Aumento de nivel',description:'Hasta 1,400 diamantes según tu nivel',cents:1400,visible:true},tarjetas:{title:'Oferta de 3 tarjetas',description:'Mensual, semanal y semanal básica',cents:4000,visible:true}},
   fragments:fragmentDefaults,
   payment:{whatsapp:'',qr:''}
 };
@@ -48,7 +49,13 @@ export async function readSettings(db) {
   const table = await db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='site_settings'").first();
   if (!table) return {revision:0, settings:defaults};
   const entry = await db.prepare('SELECT revision, value FROM site_settings WHERE id=1').first();
-  return entry ? {revision:entry.revision,settings:{fragments:fragmentDefaults,...JSON.parse(entry.value)}} : {revision:0,settings:defaults};
+  if (!entry) return {revision:0,settings:defaults};
+  const saved = JSON.parse(entry.value);
+  return {revision:entry.revision,settings:{
+    fragments:fragmentDefaults,
+    ...saved,
+    offers:{pase:passDefault,...saved.offers}
+  }};
 }
 
 function validText(value,max) {
@@ -105,7 +112,7 @@ export function validSettings(s) {
     Object.keys(priceDefaults).every(id => {
       const p = s.products[id];
       return p && validPrice(p.cents) && validImage(p.image) && typeof p.visible === 'boolean';
-    }) && s.offers && ['nivel','tarjetas'].every(id => {
+    }) && s.offers && ['nivel','tarjetas', ...(s.offers.pase === undefined ? [] : ['pase'])].every(id => {
       const o = s.offers[id];
       return o && validText(o.title,70) && validText(o.description,180) && validPrice(o.cents) &&
         (o.image === undefined || validImage(o.image)) && typeof o.visible === 'boolean';

@@ -628,6 +628,16 @@
     });
   });
 
+  $('#buy-booyah-pass').addEventListener('click', () => {
+    const offer = offerSettings?.pase;
+    requestCheckout({
+      id: 30006,
+      title: offer?.title ?? 'Pase Booyah',
+      price: (offer?.cents ?? 500) / 100,
+      visible: offer?.visible ?? true
+    });
+  });
+
   const levelConfirmation = $('#confirm-level-offer');
   const buyLevelOffer = $('#buy-level-offer');
   levelConfirmation.addEventListener('change', () => {
@@ -989,7 +999,15 @@
       article.querySelector('h3').textContent = offer.title;
       article.querySelector('p').textContent = offer.description;
       article.querySelector('strong').textContent = price(offer.cents / 100);
-      article.querySelector('img').src = offer.image || '/images/oferta-' + id + '.webp';
+      if (id === 'pase') {
+        const reference = article.querySelector('.pass-reference');
+        reference.hidden = !offer.image;
+        const image = reference.querySelector('img');
+        if (offer.image) image.src = offer.image;
+        else image.removeAttribute('src');
+      } else {
+        article.querySelector('img').src = offer.image || '/images/oferta-' + id + '.webp';
+      }
     }
     const art = settings.banners.map((banner,index) => ({banner,index}))
       .filter(({banner}) => banner.visible).map(({banner,index},position) => {
