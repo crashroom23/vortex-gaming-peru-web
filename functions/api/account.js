@@ -3,7 +3,7 @@ const cookieName = '__Host-vortex-session';
 const sessionSeconds = 7 * 24 * 60 * 60;
 const encoder = new TextEncoder();
 const hex = (buffer) => Array.from(new Uint8Array(buffer), (byte) => byte.toString(16).padStart(2, '0')).join('');
-const randomHex = (size) => hex(crypto.getRandomValues(new Uint8Array(size)));
+export const randomHex = (size) => hex(crypto.getRandomValues(new Uint8Array(size)));
 const digest = async (value) => hex(await crypto.subtle.digest('SHA-256', encoder.encode(value)));
 
 function reply(body, status = 200, token) {
@@ -15,7 +15,7 @@ function reply(body, status = 200, token) {
   return Response.json(body, {status, headers});
 }
 
-async function hashPassword(password, salt, pepper) {
+export async function hashPassword(password, salt, pepper) {
   const pepperKey = await crypto.subtle.importKey('raw', encoder.encode(pepper), {name: 'HMAC', hash: 'SHA-256'}, false, ['sign']);
   const prehash = await crypto.subtle.sign('HMAC', pepperKey, encoder.encode(password));
   const key = await crypto.subtle.importKey('raw', prehash, 'PBKDF2', false, ['deriveBits']);
@@ -44,6 +44,13 @@ async function takeAttempt(db, scope, now, limit) {
   return Boolean(result);
 }
 
+export async function readSessionToken(request) {
+  const cookie = request.headers.get('Cookie') || '';
+  const token = cookie.split(';').map((part) => part.trim())
+    .find((part) => part.startsWith(cookieName + '='))?.slice(cookieName.length + 1);
+  return /^[a-f0-9]{64}$/.test(token || '') ? await digest(token) : null;
+}
+
 export async function onRequest({request, env}) {
   const url = new URL(request.url);
   if (url.hostname !== previewHost) return reply({message: 'Ruta no disponible.'}, 404);
@@ -61,10 +68,7 @@ export async function onRequest({request, env}) {
   }
 
   const now = Math.floor(Date.now() / 1000);
-  const cookie = request.headers.get('Cookie') || '';
-  const token = cookie.split(';').map((part) => part.trim())
-    .find((part) => part.startsWith(cookieName + '='))?.slice(cookieName.length + 1);
-  const tokenHash = /^[a-f0-9]{64}$/.test(token || '') ? await digest(token) : null;
+  const tokenHash = await readSessionToken(request);
 
   try {
     if (method === 'GET') {

@@ -3,7 +3,7 @@ const $ = selector => document.querySelector(selector);
 const status = $('#status');
 const fields = $('#fields');
 const categoryLabels = {diamantes:'Diamantes',fragmentos:'Fragmentos',pase:'Pase',tarjetas:'Tarjetas',nivel:'Aumento de nivel'};
-const tabs = {banners:'Banners',products:'Diamantes',fragments:'Fragmentos',offers:'Ofertas',design:'Diseño',payment:'Pagos'};
+const tabs = {banners:'Banners',products:'Diamantes',fragments:'Fragmentos',offers:'Ofertas',design:'Diseño',payment:'Pagos',users:'Usuarios y saldo'};
 let key = '';
 let revision = 0;
 let settings;
@@ -55,6 +55,112 @@ function field(box,label,item,property,{type='text',max=180,options,integer=fals
   wrapper.append(input);
   box.append(wrapper);
 }
+async function walletAdminRequest(method, body) {
+  const response = await fetch('/api/wallet?admin=1', {
+    method, headers:{Authorization:'Bearer '+key,'Content-Type':'application/json'},
+    body:body ? JSON.stringify(body) : undefined
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.message);
+  return data;
+}
+
+function walletInput(box, label, properties) {
+  const wrapper = element('label', label);
+  const input = Object.assign(element('input'), properties);
+  wrapper.append(input);
+  box.append(wrapper);
+  return input;
+}
+
+function renderWalletAdmin() {
+  const create = group('Crear usuario');
+  const username = walletInput(create, 'Nombre de usuario', {maxLength:24, autocomplete:'off'});
+  const password = walletInput(create, 'Contraseña inicial (mínimo 12 caracteres)',
+    {type:'password', maxLength:128, autocomplete:'new-password'});
+
+  const credit = group('Acreditar saldo');
+  const target = walletInput(credit, 'Usuario', {maxLength:24, autocomplete:'off'});
+  const amount = walletInput(credit, 'Importe en soles', {type:'number', step:'.01', min:'.01', max:'99999.99'});
+
+  const pricing = group('Precio especial con saldo');
+  const product = walletInput(pricing, 'Código del paquete (por ejemplo, 100 para 100 + 10 diamantes)',
+    {type:'number', min:'1', step:'1'});
+  const special = walletInput(pricing, 'Precio en soles. Deja vacío para usar el precio normal.',
+    {type:'number', step:'.01', min:'.01', max:'99999.99'});
+
+  const summaries = group('Usuarios y pedidos con saldo');
+  const summary = element('div');
+  summaries.append(summary);
+
+  async function refreshWalletAdmin() {
+    if (!summary.isConnected) return;
+    try {
+      const {users, orders, prices} = await walletAdminRequest('GET');
+      if (!summary.isConnected || !key) return;
+      const soles = cents => 'S/ ' + (cents/100).toFixed(2);
+      const usersList = element('ul');
+      for (const user of users) {
+        const row = element('li');
+        row.append(document.createTextNode(user.username + ' · ' + soles(user.balance_cents) + ' '),
+          action('Acreditar', () => {target.value = user.username; amount.focus();}));
+        usersList.append(row);
+      }
+      const pricesList = element('ul');
+      for (const item of prices) pricesList.append(element('li', 'Paquete ' + item.product_id + ' · ' + soles(item.cents)));
+      const ordersList = element('ul');
+      for (const order of orders) ordersList.append(element('li', order.created_at + ' UTC · ' + order.username +
+        ' · UID ' + order.uid + ' · Paquete ' + order.product_id + ' · ' + soles(order.cents) + ' · ' + order.code));
+      summary.replaceChildren(element('h3','Usuarios'), users.length ? usersList : element('p','Todavía no hay usuarios.'),
+        element('h3','Precios con saldo'), prices.length ? pricesList : element('p','Se usan los precios del catálogo.'),
+        element('h3','Últimos pedidos con saldo'), orders.length ? ordersList : element('p','Todavía no hay pedidos.'));
+    } catch (error) {
+      if (summary.isConnected) summary.textContent = error.message;
+    }
+  }
+
+  function addOperation(box, label, data, success) {
+    const button = action(label, async () => {
+      button.disabled = true;
+      try {
+        const result = await walletAdminRequest('POST', data());
+        if (box.isConnected) status.textContent = success(result);
+        await refreshWalletAdmin();
+      } catch (error) {
+        if (box.isConnected) status.textContent = error.message;
+      } finally {
+        button.disabled = false;
+      }
+    });
+    box.append(button);
+  }
+
+  addOperation(create, 'Crear usuario', () => ({
+    action:'create', username:username.value, password:password.value
+  }), result => {
+    username.value = password.value = '';
+    return 'Usuario creado: ' + result.username;
+  });
+  let creditDraft;
+  addOperation(credit, 'Acreditar saldo', () => {
+    const cents = Math.round(amount.valueAsNumber * 100);
+    const name = target.value.trim().toLowerCase();
+    if (creditDraft?.username !== name || creditDraft.cents !== cents) {
+      creditDraft = {action:'credit', username:name, cents, code:crypto.randomUUID()};
+    }
+    return creditDraft;
+  }, result => {
+    creditDraft = null;
+    amount.value = '';
+    return 'Saldo de ' + result.username + ': S/ ' + (result.balance_cents/100).toFixed(2);
+  });
+  addOperation(pricing, 'Guardar precio con saldo', () => ({
+    action:'price', productId:product.valueAsNumber,
+    cents:special.value === '' ? null : Math.round(special.valueAsNumber * 100)
+  }), () => 'Precio con saldo actualizado.');
+  void refreshWalletAdmin();
+}
+
 function imageField(box,label,item,property,{qr=false}={}) {
   const photo = element('img');
   photo.alt = label;
@@ -178,8 +284,9 @@ function render() {
     field(box,'WhatsApp con código de país, solo dígitos',settings.payment,'whatsapp',{max:15});
     imageField(box,'Subir QR de Yape',settings.payment,'qr',{qr:true});
     box.append(action('Quitar QR',()=>{ settings.payment.qr=''; render(); }));
-    box.append(element('p','Estos datos se guardan para configurar el cobro. La tienda de pruebas mantiene los cobros desactivados.'));
+    box.append(element('p','El número abre WhatsApp desde el pago normal y la solicitud de recarga de saldo.'));
   }
+  if (section === 'users') renderWalletAdmin();
   syncPreview();
 }
 

@@ -575,22 +575,125 @@
     preview.hidden = false;
   });
 
+  let storeWhatsApp = '';
+  let walletSelection;
+  const walletButton = $('#checkout-wallet');
+  const walletMessage = $('#checkout-wallet-message');
+
+  function whatsAppLink(message) {
+    return /^[1-9]\d{7,14}$/.test(storeWhatsApp)
+      ? 'https://wa.me/' + storeWhatsApp + '?text=' + encodeURIComponent(message)
+      : '';
+  }
+
+  function setWhatsAppLink(link, message) {
+    const href = whatsAppLink(message);
+    link.hidden = !href;
+    if (href) link.href = href;
+    else link.removeAttribute('href');
+    return Boolean(href);
+  }
+
+  async function walletRequest(method, productId, data) {
+    const response = await fetch('/api/wallet' + (productId ? '?product=' + productId : ''), {
+      method, cache:'no-store',
+      headers:data ? {'Content-Type':'application/json'} : undefined,
+      body:data ? JSON.stringify(data) : undefined
+    });
+    const result = await response.json();
+    if (response.status === 401 && method === 'GET') return null;
+    if (!response.ok) throw new Error(result.message);
+    return result;
+  }
+
+  async function showCheckoutOptions(product, uid, verified) {
+    const previous = walletSelection;
+    const selection = previous?.uid === uid && previous.productId === product.id && !previous.complete
+      ? previous : {uid, productId:product.id, code:crypto.randomUUID()};
+    walletSelection = selection;
+    walletButton.hidden = $('#checkout-topup').hidden = $('#checkout-wallet-receipt').hidden = true;
+    const hasWhatsApp = setWhatsAppLink($('#checkout-whatsapp'),
+      'Hola, quiero comprar en VortexGamer.\nPaquete: ' + $('#checkout-package').textContent +
+      '\nUID: ' + uid + '\nTotal: ' + price(product.price));
+    const missingWhatsApp = hasWhatsApp ? '' : 'WhatsApp aún no está configurado. ';
+    if (!verified) {
+      walletMessage.textContent = missingWhatsApp + 'Puedes pedir por WhatsApp con el UID ingresado. Verifica tu UID para pagar con saldo.';
+      return;
+    }
+    walletMessage.textContent = missingWhatsApp + 'Consultando saldo…';
+    try {
+      const info = await walletRequest('GET', product.id);
+      if (selection !== walletSelection || selection.complete) return;
+      if (!info) {
+        walletMessage.textContent = missingWhatsApp + 'Inicia sesión en Mi cuenta para pagar con saldo.';
+        return;
+      }
+      selection.cents = info.cents;
+      const enough = info.balance_cents >= info.cents;
+      walletButton.textContent = 'Pagar ' + price(info.cents / 100) + ' con saldo';
+      walletButton.hidden = !enough;
+      walletMessage.textContent = missingWhatsApp + 'Saldo disponible: ' + price(info.balance_cents / 100) +
+        '. Precio con saldo: ' + price(info.cents / 100) + '.' + (enough ? '' : ' Saldo insuficiente.');
+      if (!enough) setWhatsAppLink($('#checkout-topup'),
+        'Hola, quiero recargar saldo en VortexGamer (mínimo S/ 5). Mi usuario es ' + info.username + '.');
+    } catch {
+      if (selection === walletSelection) walletMessage.textContent = missingWhatsApp + 'Pago con saldo temporalmente no disponible.';
+    }
+  }
+
+  walletButton.addEventListener('click', async () => {
+    const selection = walletSelection;
+    if (!selection || selection.complete || walletButton.disabled) return;
+    if (selection.uid !== $('#uid').value.trim()) {
+      walletMessage.textContent = 'Vuelve a verificar tu UID.';
+      return;
+    }
+    walletButton.disabled = true;
+    const packageName = $('#checkout-package').textContent;
+    try {
+      const {order} = await walletRequest('POST', null, selection);
+      selection.complete = true;
+      if (walletSelection !== selection) return;
+      walletButton.hidden = true;
+      $('#checkout-whatsapp').hidden = true;
+      walletMessage.textContent = 'Pago con saldo registrado. Entrega pendiente.';
+      const lines = ['VortexGamer', 'Pedido: ' + order.code, 'Paquete: ' + packageName,
+        'UID: ' + order.uid, 'Pagado con saldo: ' + price(order.cents / 100), 'Fecha UTC: ' + order.createdAt];
+      const receipt = $('#checkout-wallet-receipt');
+      const download = document.createElement('a');
+      download.textContent = 'Descargar comprobante';
+      download.download = order.code + '.txt';
+      download.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(lines.join('\n'));
+      receipt.replaceChildren(document.createTextNode('Pedido ' + order.code + ' · '), download);
+      receipt.hidden = false;
+    } catch (error) {
+      if (walletSelection === selection) walletMessage.textContent = error.message || 'No se pudo confirmar el pago.';
+    } finally {
+      walletButton.disabled = false;
+    }
+  });
+
   function requestCheckout(product) {
     if (!product || product.visible === false || document.documentElement.dataset.draft === 'true') return;
     const currentUID = $('#uid').value.trim();
-    const region = 'br';
-    if (!playerSession || playerSession.uid !== currentUID || playerSession.region !== region) {
-      notify('Primero escribe y verifica tu UID. Para explorar la pantalla de pagos, usa el botón de prueba.');
+    if (!/^\d{8,12}$/.test(currentUID)) {
+      notify('Escribe tu UID de Free Fire para continuar.');
       $('#verificador').scrollIntoView({ behavior: 'smooth', block: 'start' });
       $('#uid').focus({ preventScroll: true });
       return;
     }
+    const currentPlayer = playerSession?.uid === currentUID ? playerSession : null;
+    const demo = Boolean(currentPlayer?.demo);
     checkoutProduct = product;
-    $('#checkout-player').textContent = (playerSession.demo ? 'DEMO (sin verificar) · ' : playerSession.nickname + ' · ') + playerSession.uid;
+    $('#checkout-player').textContent = (demo ? 'DEMO (sin verificar) · ' : currentPlayer ? currentPlayer.nickname + ' · ' : 'UID · ') + currentUID;
     $('#checkout-package').textContent = product.title ?? (product.amount + ' + ' + product.bonus + ' diamantes');
     $('#checkout-price').textContent = price(product.price);
-    setPaymentMethod('yape');
+    if (demo) setPaymentMethod('yape');
+    $('#checkout-demo').hidden = !demo;
+    $('#checkout-options').hidden = demo;
     openLayer('checkout-modal');
+    if (!demo) void showCheckoutOptions(product, currentUID, Boolean(currentPlayer));
+    else walletSelection = null;
   }
 
   document.addEventListener('click', event => {
@@ -729,6 +832,13 @@
     accountLogout.hidden = !username;
     $('#account-preview-note').hidden = Boolean(username);
     accountMessage.textContent = username ? 'Sesión iniciada como ' + username + '.' : '';
+    if (username) {
+      walletRequest('GET').then(info => {
+        if (info?.username === username && accountMessage.textContent === 'Sesión iniciada como ' + username + '.') {
+          accountMessage.textContent += ' Saldo disponible: ' + price(info.balance_cents / 100) + '.';
+        }
+      }).catch(() => {});
+    }
   }
 
   let accountBusy = false;
@@ -774,7 +884,7 @@
     setAccountMode('login');
     void updateAccount('DELETE');
   });
-  $('#wallet-trigger').addEventListener('click', () => showInfo('BILLETERA VORTEX', 'El plan es permitir recargas de saldo desde S/ 5 por Yape, con comprobante y aprobación administrativa. El saldo y los pagos aún no están habilitados.'));
+  $('#wallet-trigger').addEventListener('click', () => $('#account-trigger').click());
   $('#overlay').addEventListener('click', () => closeLayer());
   $('#demo-checkout').addEventListener('click', () => showInfo('COMPRAS EN PREPARACIÓN', 'Tu selección es una simulación. No se generó ningún pedido ni se cobró dinero. El proceso se habilitará cuando integremos y probemos el sistema de pagos, saldo y recargas.'));
   $('#clear-cart').addEventListener('click', () => { cart = {}; refresh(); notify('Carrito de prueba vaciado'); });
@@ -1113,7 +1223,10 @@
     window.vortexApplyAdminDraft = applyStoreSettings;
   } else {
     fetch('/api/site-settings').then(response => response.ok ? response.json() : null)
-      .then(data => { if (data?.revision > 0) applyStoreSettings(data.settings); }).catch(() => {});
+      .then(data => {
+        storeWhatsApp = data?.settings?.payment?.whatsapp || '';
+        if (data?.revision > 0) applyStoreSettings(data.settings);
+      }).catch(() => {});
   }
   setupUidTurnstile();
 })();

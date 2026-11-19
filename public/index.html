@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/vortex.css?v=preview-accounts">
-  <script src="/vortex.js?v=preview-accounts" defer></script>
+  <link rel="stylesheet" href="/vortex.css?v=preview-wallet">
+  <script src="/vortex.js?v=preview-wallet" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -217,21 +217,21 @@
         <div><h3>Oferta de 3 tarjetas</h3><p>Mensual, semanal y semanal básica</p><strong>S/ 40.00</strong><p><button type="button" class="btn btn-accent" id="buy-card-offer">Comprar</button></p></div>
       </article>
       <div class="empty-state" id="empty-state" role="status" hidden><strong id="category-status"></strong><p>Aún no hay productos disponibles en esta categoría.</p></div>
-      <div class="shop-note"><span>ℹ</span><p><strong>MODO PRUEBA.</strong> La ventana de pago es una vista previa. No aparecen QR cobrables ni se procesan pagos reales por Yape o Binance hasta integrar la pasarela.</p></div>
+      <div class="shop-note"><span>ℹ</span><p><strong>MODO PRUEBA.</strong> Los pedidos por WhatsApp se coordinan con VortexGamer. Los pedidos con saldo quedan pendientes de entrega.</p></div>
     </section>
 
     </div>
 
     <section class="mid-banner shell" aria-label="Información VortexGamer">
       <div class="mid-banner-title"><span>◈</span><div><small>VORTEX // NEXT LEVEL</small><h3>¿YA ELEGISTE TUS DIAMANTES?</h3></div></div>
-      <p>Elige tu UID, verifica el jugador y pulsa Pagar para abrir la ventana con Yape o Binance Pay.</p>
+      <p>Ingresa tu UID y elige un paquete. Pulsa Pagar para pedir por WhatsApp o usar tu saldo.</p>
       <button class="btn btn-outline" type="button" id="wallet-trigger">CONOCER MI BILLETERA <svg><use href="#icon-arrow"/></svg></button>
     </section>
 
     <section class="faq-section shell" id="ayuda">
       <div class="section-intro"><div><div class="section-kicker">/ 03 — CENTRO DE AYUDA</div><h2>PREGUNTAS <span>RÁPIDAS</span></h2></div></div>
       <div class="faq-grid">
-        <details><summary>¿Ya puedo comprar diamantes?<span>+</span></summary><p>Todavía no. La ventana Yape y Binance es una vista previa. No procesamos pedidos ni pagos hasta conectar y probar el proveedor de recargas.</p></details>
+        <details><summary>¿Ya puedo comprar diamantes?<span>+</span></summary><p>Puedes coordinar el pedido por WhatsApp. Si tienes una cuenta con saldo y verificas tu UID, puedes pagar desde la tienda.</p></details>
         <details><summary>¿Cómo se confirmarán los pagos por Yape?<span>+</span></summary><p>Para confirmarlos automáticamente usaremos una pasarela compatible con Yape y su confirmación segura. Un QR personal por sí solo no informa a la web de que el cliente pagó.</p></details>
         <details><summary>¿El UID se verifica automáticamente?<span>+</span></summary><p>La consulta funciona cuando el administrador configura una clave válida del proveedor de verificación; puede variar según la región de Free Fire.</p></details>
         <details><summary>¿Qué pasará con mis favoritos?<span>+</span></summary><p>Por ahora se guardan únicamente en este navegador para explorar el diseño. No están vinculados a una cuenta de usuario.</p></details>
@@ -239,7 +239,7 @@
     </section>
   </main>
 
-  <footer class="footer"><div class="shell footer-top"><div><a class="brand" href="#inicio"><span class="brand-mark">V<span class="brand-slash">/</span></span><span class="brand-text"><strong>VORTEX<span>GAMER</span></strong><small>POWER YOUR GAME</small></span></a><p>Un nuevo universo para tus recargas digitales.</p></div><div><strong>NAVEGACIÓN</strong><a href="#tienda">Paquetes</a><a href="#verificador">Verificar jugador</a><a href="#ayuda">Ayuda</a><a href="/admin.html">Administración</a></div><div><strong>ESTADO</strong><span>◉ Catálogo en demostración</span><span>◉ Pagos desactivados</span><span>◉ Integración en desarrollo</span></div></div><div class="shell footer-bottom"><span>© <span id="year"></span> VortexGamer Perú.</span><span>Free Fire es una marca de sus titulares. Sitio no afiliado ni respaldado por Garena.</span></div></footer>
+  <footer class="footer"><div class="shell footer-top"><div><a class="brand" href="#inicio"><span class="brand-mark">V<span class="brand-slash">/</span></span><span class="brand-text"><strong>VORTEX<span>GAMER</span></strong><small>POWER YOUR GAME</small></span></a><p>Un nuevo universo para tus recargas digitales.</p></div><div><strong>NAVEGACIÓN</strong><a href="#tienda">Paquetes</a><a href="#verificador">Verificar jugador</a><a href="#ayuda">Ayuda</a><a href="/admin.html">Administración</a></div><div><strong>ESTADO</strong><span>◉ Catálogo en demostración</span><span>◉ Entrega coordinada</span><span>◉ Integración en desarrollo</span></div></div><div class="shell footer-bottom"><span>© <span id="year"></span> VortexGamer Perú.</span><span>Free Fire es una marca de sus titulares. Sitio no afiliado ni respaldado por Garena.</span></div></footer>
 
   <div class="shade" id="overlay" hidden></div>
   <aside class="side-panel" id="cart-panel" role="dialog" aria-modal="true" aria-labelledby="cart-title" aria-hidden="true" inert>
@@ -276,12 +276,20 @@
     <button type="button" class="close-button modal-close" data-close aria-label="Cerrar ventana de pago">×</button>
     <span class="modal-kicker">PASO 03 / MÉTODO DE PAGO</span>
     <h2 id="checkout-title">RESUMEN <span>DE ORDEN</span></h2>
-    <p class="checkout-warning" id="checkout-warning"><strong>VISTA PREVIA:</strong> no hay cobros ni QR activos. No transfieras dinero desde esta ventana.</p>
     <div class="checkout-order">
       <div><small>CUENTA</small><strong id="checkout-player">—</strong></div>
       <div><small>PAQUETE</small><strong id="checkout-package">—</strong></div>
       <div class="checkout-total"><small>TOTAL A PAGAR</small><strong id="checkout-price">S/ 0.00</strong></div>
     </div>
+    <div id="checkout-options" hidden>
+      <a id="checkout-whatsapp" class="btn btn-outline btn-wide" target="_blank" rel="noopener noreferrer">Pagar por WhatsApp</a>
+      <p id="checkout-wallet-message" role="status"></p>
+      <button type="button" id="checkout-wallet" class="btn btn-accent btn-wide" hidden>Pagar con saldo</button>
+      <a id="checkout-topup" class="btn btn-outline btn-wide" target="_blank" rel="noopener noreferrer" hidden>Recargar saldo</a>
+      <p id="checkout-wallet-receipt" hidden></p>
+    </div>
+    <div id="checkout-demo">
+    <p class="checkout-warning" id="checkout-warning"><strong>VISTA PREVIA:</strong> no hay cobros ni QR activos. No transfieras dinero desde esta ventana.</p>
     <div class="checkout-methods" role="group" aria-label="Selecciona método de pago">
       <button type="button" class="payment-tab active" data-method="yape" aria-pressed="true"><span>🟣</span> YAPE</button>
       <button type="button" class="payment-tab" data-method="binance" aria-pressed="false"><span>◈</span> BINANCE PAY</button>
@@ -302,6 +310,7 @@
     <p class="payment-notice" id="payment-notice"></p>
     <button type="button" class="btn btn-accent btn-wide" id="payment-demo-confirm" disabled>CONFIRMAR PAGO — PRÓXIMAMENTE</button>
     <p class="checkout-footnote">Ningún pago se confirmará automáticamente sin una respuesta verificada del proveedor y registro seguro en el servidor.</p>
+    </div>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>

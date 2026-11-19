@@ -2,7 +2,7 @@ import {readSettings, validSettings} from '../lib/site-settings.js';
 
 const previewHost = 'preview-gamer-aura-v2.vortex-gaming-peru-web.pages.dev';
 const reply = (data,status=200) => Response.json(data,{status,headers:{'Cache-Control':'no-store'}});
-async function authorized(request, secret) {
+export async function authorized(request, secret) {
   if (!secret || secret.length < 32) return false;
   const bearer = request.headers.get('Authorization') || '';
   if (!bearer.startsWith('Bearer ') || bearer.length > 256) return false;
@@ -27,7 +27,9 @@ export async function onRequest({request,env}) {
     }
     if (request.method === 'GET') {
       const data = await readSettings(db);
-      if (!isAdmin) delete (data.settings = {...data.settings}).payment;
+      if (!isAdmin) {
+        data.settings = {...data.settings, payment:{whatsapp:data.settings.payment?.whatsapp || ''}};
+      }
       return reply(data);
     }
     if (request.method !== 'PUT') return reply({message:'Método no disponible.'},405);

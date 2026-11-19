@@ -15,6 +15,17 @@ function decodeFragment(id) {
   if (![1,2].includes(group) || quantity < 1 || quantity > 99999) return null;
   return {kind:group === 1 ? 'cajas' : 'tokens', quantity};
 }
+export function checkoutPackage(settings, productId) {
+  const fragment = decodeFragment(productId);
+  const individualCard = individualCards.get(productId);
+  const fragmentOption = fragment && settings.fragments[fragment.kind].find(option => option.quantity === fragment.quantity);
+  const packageSettings = fragment ? fragmentOption && {...fragmentOption,visible:true} : individualCard
+    ? {cents:individualCard.cents, visible:settings.offers.tarjetas.visible}
+    : productId === passOfferId ? settings.offers.pase
+    : productId === levelOfferId ? settings.offers.nivel
+    : productId === cardOfferId ? settings.offers.tarjetas : settings.products[productId];
+  return packageSettings;
+}
 const host = 'preview-gamer-aura-v2.vortex-gaming-peru-web.pages.dev';
 const reply = (body, status = 200) => Response.json(body, {status, headers:{'Cache-Control':'no-store'}});
 export async function onRequest({request, env}) {
@@ -48,13 +59,7 @@ export async function onRequest({request, env}) {
       const existing = await db.prepare('SELECT code FROM demo_orders WHERE code=?').bind(code).first();
       if (!existing) {
         const {settings} = await readSettings(db);
-        const individualCard = individualCards.get(productId);
-        const fragmentOption = fragment && settings.fragments[fragment.kind].find(option => option.quantity === fragment.quantity);
-        const packageSettings = fragment ? fragmentOption && {...fragmentOption,visible:true} : individualCard
-          ? {cents:individualCard.cents, visible:settings.offers.tarjetas.visible}
-          : productId === passOfferId ? settings.offers.pase
-          : productId === levelOfferId ? settings.offers.nivel
-          : productId === cardOfferId ? settings.offers.tarjetas : settings.products[productId];
+        const packageSettings = checkoutPackage(settings, productId);
         if (!packageSettings?.visible || (body.cents !== undefined && body.cents !== packageSettings.cents))
           return reply({message:'El paquete o precio cambió. Recarga la página y vuelve a elegir.'},409);
         await db.batch([

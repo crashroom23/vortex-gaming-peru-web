@@ -1034,3 +1034,11 @@ main > [hidden] { display: none !important; }
   color: #fff;
   font: inherit;
 }
+
+#checkout-options .btn + .btn {
+  margin-top: .5rem;
+}
+
+#checkout-modal [hidden] {
+  display: none;
+}
