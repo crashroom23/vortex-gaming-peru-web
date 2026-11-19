@@ -587,7 +587,21 @@ img,svg{max-width:100%}
   box-shadow: 0 0 24px #8e4ae94d, 0 12px 34px #05001199;
   animation: none;
 }
+@media (min-width: 641px) {
+  .storefront-banner .storefront-banner-title::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(#18083122, #10051c44),
+      url("/images/vortex-banner.webp?v=6a62bac") center / cover no-repeat;
+    filter: blur(24px);
+    transform: scale(1.06);
+    pointer-events: none;
+  }
+}
+
 .storefront-banner-title img {
+  position: relative;
   width: min(100%, clamp(640px, 50vw, 800px));
   margin-inline: auto;
 }
