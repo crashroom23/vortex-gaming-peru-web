@@ -1006,3 +1006,5 @@ main > [hidden] { display: none !important; }
 .level-guide h4 { margin: 0; }
 .level-confirm { display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px; }
 #buy-level-offer:disabled { opacity: .55; cursor: not-allowed; }
+
+.category-icon img { display: block; width: 29px; height: 29px; object-fit: contain; border-radius: 4px; }
