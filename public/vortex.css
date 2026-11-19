@@ -999,3 +999,10 @@ main > [hidden] { display: none !important; }
 .fragment-quantities > button:is(:hover,:focus-visible) { background: #ffca49; color: #170e25; }
 .fragment-quantities > button span { font-size: .85rem; }
 @media (min-width: 560px) { .fragment-quantities { grid-template-columns: repeat(4,minmax(0,1fr)); } }
+
+.level-guide { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-block: 14px; padding: 12px; border: 1px solid #7651ad; border-radius: 12px; background: #221436; }
+.catalog-offer .level-guide img { width: 112px; }
+.level-guide > div { flex: 1 1 220px; }
+.level-guide h4 { margin: 0; }
+.level-confirm { display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px; }
+#buy-level-offer:disabled { opacity: .55; cursor: not-allowed; }

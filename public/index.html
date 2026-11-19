@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/vortex.css?v=arte-evo">
-  <script src="/vortex.js?v=fragmentos" defer></script>
+  <link rel="stylesheet" href="/vortex.css?v=guia-nivel">
+  <script src="/vortex.js?v=guia-nivel" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -163,7 +163,21 @@
       </section>
       <article class="catalog-offer" data-offer="nivel" hidden>
         <img src="/images/oferta-nivel.webp" alt="" width="650" height="650" loading="lazy">
-        <div><h3>Aumento de nivel</h3><p>Hasta 1,400 diamantes según tu nivel</p><strong>S/ 14.00</strong><p>Compra en preparación.</p></div>
+        <div class="level-offer-details">
+          <h3>Aumento de nivel</h3>
+          <p>Hasta 1,400 diamantes según tu nivel</p>
+          <strong>S/ 14.00</strong>
+          <div class="level-guide">
+            <img src="/images/guia-aumento-nivel.webp" width="196" height="172" alt="Icono de diamante de Paquetes de aumento de nivel en el lobby de Free Fire">
+            <div>
+              <h4>Revisa tu cuenta antes de comprar</h4>
+              <p>Entra a Free Fire con la cuenta que quieres recargar y busca en tu lobby el icono de diamante que dice «Paquetes de aumento de nivel».</p>
+              <p>Si ves el icono, confirma abajo y continúa con la compra. Si no aparece, este paquete no está disponible para tu cuenta.</p>
+            </div>
+          </div>
+          <label class="level-confirm"><input type="checkbox" id="confirm-level-offer"> Veo el icono en mi lobby de Free Fire.</label>
+          <button type="button" class="btn btn-accent" id="buy-level-offer" disabled>Comprar</button>
+        </div>
       </article>
       <section class="individual-cards" data-offer="tarjetas" aria-labelledby="individual-cards-title" hidden>
         <h3 id="individual-cards-title">Tarjetas individuales</h3>

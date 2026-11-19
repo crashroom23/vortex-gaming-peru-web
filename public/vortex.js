@@ -628,6 +628,26 @@
     });
   });
 
+  const levelConfirmation = $('#confirm-level-offer');
+  const buyLevelOffer = $('#buy-level-offer');
+  levelConfirmation.addEventListener('change', () => {
+    buyLevelOffer.disabled = !levelConfirmation.checked;
+  });
+  $('#uid').addEventListener('input', () => {
+    levelConfirmation.checked = false;
+    buyLevelOffer.disabled = true;
+  });
+  buyLevelOffer.addEventListener('click', () => {
+    if (!levelConfirmation.checked) return;
+    const offer = offerSettings?.nivel;
+    requestCheckout({
+      id: 30005,
+      title: offer?.title ?? 'Aumento de nivel',
+      price: (offer?.cents ?? 1400) / 100,
+      visible: offer?.visible ?? true
+    });
+  });
+
   $('#buy-card-offer').addEventListener('click', () => {
     const offer = offerSettings?.tarjetas;
     requestCheckout({
