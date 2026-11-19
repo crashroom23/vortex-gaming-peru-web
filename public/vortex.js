@@ -41,8 +41,7 @@
   }
   const loadedFavs = loadJSON(storageKeyFav, []);
   const favorites = new Set(Array.isArray(loadedFavs) ? loadedFavs.map(Number).filter(id => byId.has(id)) : []);
-  let currentFilter = 'all';
-  let query = '';
+  let currentCategory = 'diamantes';
   let activeLayer = null;
   let lastFocus = null;
   let toastTimer;
@@ -128,24 +127,17 @@
     ].join('');
   }
 
-  function filteredProducts() {
-    const text = query.trim().toLowerCase();
-    return PRODUCTS.filter(product => {
-      const categoryMatches = currentFilter === 'all'
-        || (currentFilter === 'favorites' ? favorites.has(product.id) : product.category === currentFilter);
-      const searchable = (product.amount + ' ' + product.id + ' ' + product.bonus + ' ' + product.type + ' ' + price(product.price)).toLowerCase();
-      return categoryMatches && (!text || searchable.includes(text) || searchable.replaceAll(',', '').includes(text.replaceAll(',', '')));
-    });
-  }
-
   function renderProducts() {
-    const filtered = filteredProducts();
-    $('#products-grid').innerHTML = filtered.map(cardMarkup).join('');
-    $('#empty-state').hidden = filtered.length > 0;
-    $$('.tab').forEach(button => {
-      const selected = button.dataset.filter === currentFilter;
+    const products = currentCategory === 'diamantes' ? PRODUCTS : [];
+    const grid = $('#products-grid');
+    grid.innerHTML = products.map(cardMarkup).join('');
+    grid.hidden = products.length === 0;
+    $('#empty-state').hidden = products.length > 0;
+    $$('.catalog-category').forEach(button => {
+      const selected = button.dataset.category === currentCategory;
       button.classList.toggle('active', selected);
       button.setAttribute('aria-pressed', String(selected));
+      if (selected) $('#category-status').textContent = button.querySelector('strong').textContent;
     });
   }
 
@@ -576,20 +568,10 @@
   $('#overlay').addEventListener('click', () => closeLayer());
   $('#demo-checkout').addEventListener('click', () => showInfo('COMPRAS EN PREPARACIÓN', 'Tu selección es una simulación. No se generó ningún pedido ni se cobró dinero. El proceso se habilitará cuando integremos y probemos el sistema de pagos, saldo y recargas.'));
   $('#clear-cart').addEventListener('click', () => { cart = {}; refresh(); notify('Carrito de prueba vaciado'); });
-  $$('.tab').forEach(button => button.addEventListener('click', () => {
-    currentFilter = button.dataset.filter;
+  $$('.catalog-category').forEach(button => button.addEventListener('click', () => {
+    currentCategory = button.dataset.category;
     renderProducts();
   }));
-  $('#catalog-search').addEventListener('input', event => {
-    query = event.target.value;
-    renderProducts();
-  });
-  $('#reset-search').addEventListener('click', () => {
-    currentFilter = 'all';
-    query = '';
-    $('#catalog-search').value = '';
-    renderProducts();
-  });
   $('#menu-trigger').addEventListener('click', () => {
     const menu = $('#mobile-nav');
     menu.hidden = !menu.hidden;
@@ -607,10 +589,6 @@
         $('#mobile-nav').hidden = true;
         $('#menu-trigger').setAttribute('aria-expanded', 'false');
       }
-    }
-    if (event.key === '/' && !activeLayer && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
-      event.preventDefault();
-      $('#catalog-search').focus();
     }
   });
 
