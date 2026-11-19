@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/vortex.css?v=banner-ancho">
-  <script src="/vortex.js?v=resumen-yape" defer></script>
+  <link rel="stylesheet" href="/vortex.css?v=categorias-free-fire">
+  <script src="/vortex.js?v=categorias-free-fire" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -103,19 +103,37 @@
 
     <section class="shop-section shell" id="tienda">
       <div class="section-intro">
-        <div><h2>Catálogo de <span>recargas</span></h2><p>Elige los diamantes que quieres enviar a tu cuenta.</p></div>
+        <div><h2>Catálogo de <span>recargas</span></h2><p>Elige una categoría de Free Fire.</p></div>
       </div>
-      <div class="catalog-controls">
-        <div class="tabs" role="group" aria-label="Filtrar paquetes">
-          <button type="button" class="tab active" data-filter="all" aria-pressed="true">FREE FIRE <span>06</span></button>
-          <button type="button" class="tab" data-filter="starter" aria-pressed="false">INICIO</button>
-          <button type="button" class="tab" data-filter="premium" aria-pressed="false">PRO</button>
-          <button type="button" class="tab" data-filter="favorites" aria-pressed="false">FAVORITOS ♥</button>
-        </div>
-        <label class="catalog-search"><svg><use href="#icon-search"/></svg><input id="catalog-search" type="search" placeholder="Buscar diamantes..." autocomplete="off" aria-label="Buscar paquete de diamantes"><kbd>/</kbd></label>
+      <div class="catalog-categories" role="group" aria-label="Categorías de recargas">
+        <button type="button" class="catalog-category active" data-category="diamantes" aria-controls="products-grid empty-state" aria-pressed="true">
+          <span class="category-icon" aria-hidden="true">💎</span>
+          <span class="category-copy"><strong>Diamantes</strong><small>Paquetes de diamantes con bono</small></span>
+          <span class="category-arrow" aria-hidden="true">›</span>
+        </button>
+        <button type="button" class="catalog-category" data-category="fragmentos" aria-controls="products-grid empty-state" aria-pressed="false">
+          <span class="category-icon" aria-hidden="true">◈</span>
+          <span class="category-copy"><strong>Fragmentos</strong><small>Fragmentos para evolutivas</small></span>
+          <span class="category-arrow" aria-hidden="true">›</span>
+        </button>
+        <button type="button" class="catalog-category" data-category="pase" aria-controls="products-grid empty-state" aria-pressed="false">
+          <span class="category-icon" aria-hidden="true">★</span>
+          <span class="category-copy"><strong>Pase</strong><small>Pase Booyah</small></span>
+          <span class="category-arrow" aria-hidden="true">›</span>
+        </button>
+        <button type="button" class="catalog-category" data-category="tarjetas" aria-controls="products-grid empty-state" aria-pressed="false">
+          <span class="category-icon" aria-hidden="true">▣</span>
+          <span class="category-copy"><strong>Tarjetas</strong><small>Tarjetas de Free Fire</small></span>
+          <span class="category-arrow" aria-hidden="true">›</span>
+        </button>
+        <button type="button" class="catalog-category" data-category="nivel" aria-controls="products-grid empty-state" aria-pressed="false">
+          <span class="category-icon" aria-hidden="true">↗</span>
+          <span class="category-copy"><strong>Paquete de nivel de aumento</strong><small>Paquetes para subir de nivel</small></span>
+          <span class="category-arrow" aria-hidden="true">›</span>
+        </button>
       </div>
       <div class="products-grid" id="products-grid" aria-live="polite"></div>
-      <div class="empty-state" id="empty-state" hidden><div>◇</div><strong>No encontramos paquetes</strong><p>Prueba con otro número de diamantes o cambia el filtro.</p><button type="button" class="btn btn-ghost" id="reset-search">VER TODOS</button></div>
+      <div class="empty-state" id="empty-state" role="status" hidden><strong id="category-status"></strong><p>Aún no hay productos disponibles en esta categoría.</p></div>
       <div class="shop-note"><span>ℹ</span><p><strong>MODO PRUEBA.</strong> La ventana de pago es una vista previa. No aparecen QR cobrables ni se procesan pagos reales por Yape o Binance hasta integrar la pasarela.</p></div>
     </section>
 
