@@ -940,3 +940,8 @@ img,svg{max-width:100%}
 @media (max-width: 480px) {
   .catalog-categories { grid-template-columns: 1fr; }
 }
+
+.storefront-promos[hidden], .activity-ticker[hidden] { display: none; }
+@media (max-width:650px) { .managed-main-banner { grid-column: 1 / -1; } }
+.recharge-area .btn-accent { background: linear-gradient(110deg, var(--store-accent,#a06aff), #7335dd); }
+.catalog-category.active { border-color: var(--store-accent,#c69dff); }

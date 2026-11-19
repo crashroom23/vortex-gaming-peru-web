@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/vortex.css?v=ofertas">
-  <script src="/vortex.js?v=ofertas" defer></script>
+  <link rel="stylesheet" href="/vortex.css?v=editor-visual">
+  <script src="/vortex.js?v=editor-visual" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -113,7 +113,7 @@
 
     <section class="shop-section shell" id="tienda">
       <div class="section-intro">
-        <div><h2>Catálogo de <span>recargas</span></h2><p>Elige una categoría de Free Fire.</p></div>
+        <div><h2 id="catalog-heading">Catálogo de <span>recargas</span></h2><p id="catalog-description">Elige una categoría de Free Fire.</p></div>
       </div>
       <div class="catalog-categories" role="group" aria-label="Categorías de recargas">
         <button type="button" class="catalog-category active" id="paquetes-diamantes" data-category="diamantes" aria-controls="products-grid empty-state" aria-pressed="true">
@@ -121,12 +121,12 @@
           <span class="category-copy"><strong>Diamantes</strong><small>Paquetes de diamantes con bono</small></span>
           <span class="category-arrow" aria-hidden="true">›</span>
         </button>
-        <button type="button" class="catalog-category" data-category="fragmentos" aria-controls="products-grid empty-state" aria-pressed="false">
+        <button type="button" class="catalog-category" id="paquetes-fragmentos" data-category="fragmentos" aria-controls="products-grid empty-state" aria-pressed="false">
           <span class="category-icon" aria-hidden="true">◈</span>
           <span class="category-copy"><strong>Fragmentos</strong><small>Fragmentos para evolutivas</small></span>
           <span class="category-arrow" aria-hidden="true">›</span>
         </button>
-        <button type="button" class="catalog-category" data-category="pase" aria-controls="products-grid empty-state" aria-pressed="false">
+        <button type="button" class="catalog-category" id="paquetes-pase" data-category="pase" aria-controls="products-grid empty-state" aria-pressed="false">
           <span class="category-icon" aria-hidden="true">★</span>
           <span class="category-copy"><strong>Pase</strong><small>Pase Booyah</small></span>
           <span class="category-arrow" aria-hidden="true">›</span>
@@ -174,7 +174,7 @@
     </section>
   </main>
 
-  <footer class="footer"><div class="shell footer-top"><div><a class="brand" href="#inicio"><span class="brand-mark">V<span class="brand-slash">/</span></span><span class="brand-text"><strong>VORTEX<span>GAMER</span></strong><small>POWER YOUR GAME</small></span></a><p>Un nuevo universo para tus recargas digitales.</p></div><div><strong>NAVEGACIÓN</strong><a href="#tienda">Paquetes</a><a href="#verificador">Verificar jugador</a><a href="#ayuda">Ayuda</a></div><div><strong>ESTADO</strong><span>◉ Catálogo en demostración</span><span>◉ Pagos desactivados</span><span>◉ Integración en desarrollo</span></div></div><div class="shell footer-bottom"><span>© <span id="year"></span> VortexGamer Perú.</span><span>Free Fire es una marca de sus titulares. Sitio no afiliado ni respaldado por Garena.</span></div></footer>
+  <footer class="footer"><div class="shell footer-top"><div><a class="brand" href="#inicio"><span class="brand-mark">V<span class="brand-slash">/</span></span><span class="brand-text"><strong>VORTEX<span>GAMER</span></strong><small>POWER YOUR GAME</small></span></a><p>Un nuevo universo para tus recargas digitales.</p></div><div><strong>NAVEGACIÓN</strong><a href="#tienda">Paquetes</a><a href="#verificador">Verificar jugador</a><a href="#ayuda">Ayuda</a><a href="/admin.html">Administración</a></div><div><strong>ESTADO</strong><span>◉ Catálogo en demostración</span><span>◉ Pagos desactivados</span><span>◉ Integración en desarrollo</span></div></div><div class="shell footer-bottom"><span>© <span id="year"></span> VortexGamer Perú.</span><span>Free Fire es una marca de sus titulares. Sitio no afiliado ni respaldado por Garena.</span></div></footer>
 
   <div class="shade" id="overlay" hidden></div>
   <aside class="side-panel" id="cart-panel" role="dialog" aria-modal="true" aria-labelledby="cart-title" aria-hidden="true" inert>

@@ -1,3 +1,4 @@
+import {readSettings} from '../lib/site-settings.js';
 const prices = new Map([[100,[10,350]],[310,[31,980]],[520,[52,1500]],[1060,[106,2700]],[2180,[218,5200]],[5600,[560,13000]]]);
 const host = 'preview-gamer-aura-v2.vortex-gaming-peru-web.pages.dev';
 const reply = (body, status = 200) => Response.json(body, {status, headers:{'Cache-Control':'no-store'}});
@@ -22,13 +23,25 @@ export async function onRequest({request, env}) {
   const code = method === 'GET' ? url.searchParams.get('code') : body?.code;
   if (typeof code !== 'string' || !/^VG-[A-F0-9]{32}$/.test(code)) return reply({message:'Código de pedido no válido.'},400);
   try {
+    await db.prepare('CREATE TABLE IF NOT EXISTS demo_order_prices (code TEXT PRIMARY KEY, cents INTEGER NOT NULL)').run();
     if (method === 'POST') {
       const {uid, productId, paymentMethod} = body;
       if (typeof uid !== 'string' || !/^\d{8,12}$/.test(uid) || !prices.has(productId) ||
           !['yape','binance'].includes(paymentMethod)) return reply({message:'Revisa el UID, paquete y método.'},400);
       const player = typeof body.player === 'string' ? body.player.trim().slice(0,100) : '';
-      await db.prepare('INSERT INTO demo_orders (code,uid,player,product_id,payment_method) VALUES (?,?,?,?,?) ON CONFLICT(code) DO NOTHING')
-        .bind(code,uid,player || 'Jugador de prueba',productId,paymentMethod).run();
+      const existing = await db.prepare('SELECT code FROM demo_orders WHERE code=?').bind(code).first();
+      if (!existing) {
+        const {settings} = await readSettings(db);
+        const packageSettings = settings.products[productId];
+        if (!packageSettings.visible || (body.cents !== undefined && body.cents !== packageSettings.cents))
+          return reply({message:'El paquete o precio cambió. Recarga la página y vuelve a elegir.'},409);
+        await db.batch([
+          db.prepare('INSERT INTO demo_order_prices (code,cents) SELECT ?,? WHERE NOT EXISTS (SELECT 1 FROM demo_orders WHERE code=?) ON CONFLICT(code) DO NOTHING')
+            .bind(code,packageSettings.cents,code),
+          db.prepare('INSERT INTO demo_orders (code,uid,player,product_id,payment_method) VALUES (?,?,?,?,?) ON CONFLICT(code) DO NOTHING')
+            .bind(code,uid,player || 'Jugador de prueba',productId,paymentMethod)
+        ]);
+      }
     }
     if (method === 'PATCH') {
       if (body.stage !== 0 && body.stage !== 1) return reply({message:'Etapa no válida.'},400);
@@ -39,8 +52,9 @@ export async function onRequest({request, env}) {
     if (method === 'POST' && (row.uid !== body.uid || row.product_id !== body.productId || row.payment_method !== body.paymentMethod)) {
       return reply({message:'El código ya pertenece a otro pedido.'},409);
     }
-    // Values are fixed for this set of demonstration packages.
-    const [bonus,cents] = prices.get(row.product_id);
+    const storedPrice = await db.prepare('SELECT cents FROM demo_order_prices WHERE code=?').bind(code).first();
+    const [bonus,originalCents] = prices.get(row.product_id);
+    const cents = storedPrice?.cents ?? originalCents;
     return reply({order:{
       code:row.code, uid:row.uid, player:row.player, stage:row.stage, createdAt:row.created_at,
       package:row.product_id.toLocaleString('en-US') + ' + ' + bonus + ' diamantes',

@@ -10,6 +10,7 @@
     { id: 5600, providerProductId: 10, providerSku: 'ADS010', amount: '5,600', bonus: '560', price: 130.00, category: 'premium', tag: 'MAX PACK', type: 'PACK MÁXIMO' }
   ];
   const byId = new Map(PRODUCTS.map(product => [product.id, product]));
+  let offerSettings = null;
   const $ = selector => document.querySelector(selector);
   const $$ = selector => [...document.querySelectorAll(selector)];
   const price = amount => 'S/ ' + amount.toFixed(2);
@@ -115,7 +116,7 @@
       '<div class="card-media">',
       '<span class="card-badge', isPro ? ' premium' : '', '">', product.tag, '</span>',
       '<button type="button" class="favorite-btn', saved ? ' saved' : '', '" data-action="favorite" data-id="', product.id, '" aria-label="', saved ? 'Quitar de' : 'Añadir a', ' favoritos: ', product.amount, ' diamantes" aria-pressed="', saved, '">', heartSVG, '</button>',
-      '<img class="card-gem pack-photo" src="/images/pack-', product.providerProductId - 4, '.png?v=6a62bac" alt="" loading="lazy" decoding="async">',
+      '<img class="card-gem pack-photo" src="', product.image || '/images/pack-' + (product.providerProductId - 4) + '.png?v=6a62bac', '" alt="" loading="lazy" decoding="async">',
       '</div><div class="card-body">',
       '<span class="card-type">', product.type, ' / FREE FIRE</span>',
       '<h3 class="card-title">', product.amount, ' <span>DIAMANTES</span></h3>',
@@ -128,12 +129,12 @@
   }
 
   function renderProducts() {
-    const products = currentCategory === 'diamantes' ? PRODUCTS : [];
+    const products = currentCategory === 'diamantes' ? PRODUCTS.filter(product => product.visible !== false) : [];
     const grid = $('#products-grid');
     grid.innerHTML = products.map(cardMarkup).join('');
     grid.hidden = products.length === 0;
     const offers = $('[data-offer]');
-    offers.forEach(offer => { offer.hidden = offer.dataset.offer !== currentCategory; });
+    offers.forEach(offer => { offer.hidden = offer.dataset.offer !== currentCategory || offerSettings?.[offer.dataset.offer]?.visible === false; });
     $('#empty-state').hidden = products.length > 0 || offers.some(offer => !offer.hidden);
     $$('.catalog-category').forEach(button => {
       const selected = button.dataset.category === currentCategory;
@@ -152,7 +153,7 @@
   }
 
   function renderCart() {
-    const entries = Object.entries(cart).map(([id, quantity]) => ({ product: byId.get(Number(id)), quantity })).filter(x => x.product && x.quantity > 0);
+    const entries = Object.entries(cart).map(([id, quantity]) => ({ product: byId.get(Number(id)), quantity })).filter(x => x.product && x.product.visible !== false && x.quantity > 0);
     const total = entries.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
     const count = entries.reduce((sum, item) => sum + item.quantity, 0);
     $('#drawer-count').textContent = count;
@@ -172,7 +173,7 @@
   }
 
   function renderFavorites() {
-    const products = PRODUCTS.filter(product => favorites.has(product.id));
+    const products = PRODUCTS.filter(product => product.visible !== false && favorites.has(product.id));
     $('#favorites-items').innerHTML = products.length ? products.map(product =>
       '<div class="panel-item">' +
       '<div class="panel-item-img">' + miniGemSVG + '</div>' +
@@ -405,7 +406,7 @@
       const order = await requestDemoOrder('POST', {
         code:draft.code, uid:playerSession.uid, productId:checkoutProduct.id,
         player:playerSession.demo ? 'Jugador de prueba' : playerSession.nickname,
-        paymentMethod:selectedPaymentMethod
+        paymentMethod:selectedPaymentMethod, cents:Math.round(checkoutProduct.price * 100)
       });
       draftOrder = null;
       $('#demo-order-code').value = order.code;
@@ -497,7 +498,7 @@
 
   function requestCheckout(id) {
     const product = byId.get(id);
-    if (!product) return;
+    if (!product || product.visible === false || document.documentElement.dataset.draft === 'true') return;
     const currentUID = $('#uid').value.trim();
     const region = 'br';
     if (!playerSession || playerSession.uid !== currentUID || playerSession.region !== region) {
@@ -751,6 +752,53 @@
   $('.features-bar').before(activity);
 
   $('#year').textContent = new Date().getFullYear();
+  function applyStoreSettings(settings) {
+    $('#catalog-heading').textContent = settings.heading;
+    $('#catalog-description').textContent = settings.description;
+    document.documentElement.style.setProperty('--store-accent', settings.accent);
+    activity.hidden = !settings.activity;
+    offerSettings = settings.offers;
+    for (const product of PRODUCTS) {
+      const options = settings.products[product.id];
+      product.price = options.cents / 100;
+      product.visible = options.visible;
+      product.image = /^(?:\/images\/[\w.-]+(?:\?v=[\w-]+)?|data:image\/(?:webp|png|jpeg);base64,[A-Za-z0-9+/]+={0,2})$/.test(options.image) ? options.image : '';
+    }
+    for (const [id,offer] of Object.entries(offerSettings)) {
+      const article = document.querySelector('[data-offer="' + id + '"]');
+      if (!article) continue;
+      article.querySelector('h3').textContent = offer.title;
+      article.querySelector('p').textContent = offer.description;
+      article.querySelector('strong').textContent = price(offer.cents / 100);
+    }
+    const art = settings.banners.filter(banner => banner.visible).map((banner,index) => {
+      const link = document.createElement('a');
+      link.className = index === 0 ? 'storefront-promo managed-main-banner' : 'storefront-promo';
+      link.href = '#paquetes-' + banner.category;
+      const image = document.createElement('img');
+      image.src = banner.image;
+      image.alt = '';
+      const caption = document.createElement('span');
+      caption.textContent = banner.title + ' · Ver paquetes →';
+      link.append(image, caption);
+      return link;
+    });
+    $('.storefront-promos').replaceChildren(...art);
+    $('.storefront-promos').hidden = !art.length;
+    refresh();
+  }
+
   refresh();
+  if (location.search === '?draft=1' && window.parent !== window) {
+    document.documentElement.dataset.draft = 'true';
+    window.addEventListener('message', event => {
+      if (event.origin === location.origin && event.source === window.parent && event.data?.type === 'vortex-admin-preview') {
+        applyStoreSettings(event.data.settings);
+      }
+    });
+  } else {
+    fetch('/api/site-settings').then(response => response.ok ? response.json() : null)
+      .then(data => { if (data?.revision > 0) applyStoreSettings(data.settings); }).catch(() => {});
+  }
   setupUidTurnstile();
 })();

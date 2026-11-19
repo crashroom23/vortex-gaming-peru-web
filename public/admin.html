@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Administración · VortexGamer</title>
+<link rel="stylesheet" href="/admin.css?v=1">
+<script src="/admin.js?v=1" defer></script>
+</head>
+<body>
+<header><a href="/">← VortexGamer</a><h1>Administración</h1></header>
+<main>
+<form id="login">
+  <label>Clave de administrador<input id="key" type="password" autocomplete="current-password" required maxlength="240"></label>
+  <button>Entrar</button>
+</form>
+<p id="status" role="status"></p>
+<section id="panel" hidden>
+  <form id="editor">
+    <nav aria-label="Secciones del editor"></nav>
+    <div id="fields"></div>
+    <footer><button id="preview" type="button">Vista previa</button><button id="publish">Publicar cambios</button><button id="logout" type="button">Salir</button></footer>
+  </form>
+</section>
+</main>
+</body>
+</html>
