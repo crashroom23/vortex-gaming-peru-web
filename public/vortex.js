@@ -133,7 +133,7 @@
     const grid = $('#products-grid');
     grid.innerHTML = products.map(cardMarkup).join('');
     grid.hidden = products.length === 0;
-    const offers = $('[data-offer]');
+    const offers = $$('[data-offer]');
     offers.forEach(offer => { offer.hidden = offer.dataset.offer !== currentCategory || offerSettings?.[offer.dataset.offer]?.visible === false; });
     $('#empty-state').hidden = products.length > 0 || offers.some(offer => !offer.hidden);
     $$('.catalog-category').forEach(button => {
@@ -579,10 +579,13 @@
     renderProducts();
   }
   window.addEventListener('hashchange', () => openCategoryFromHash());
-  $('.storefront-promos a').forEach(link => link.addEventListener('click', () => openCategoryFromHash(link.hash)));
+  $('.storefront-promos').addEventListener('click', event => {
+    const link = event.target.closest('a[href^="#paquetes-"]');
+    if (link) openCategoryFromHash(link.hash);
+  });
   openCategoryFromHash();
 
-  $('.catalog-category').forEach(button => button.addEventListener('click', () => {
+  $$('.catalog-category').forEach(button => button.addEventListener('click', () => {
     currentCategory = button.dataset.category;
     renderProducts();
   }));

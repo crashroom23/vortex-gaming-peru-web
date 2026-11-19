@@ -303,7 +303,7 @@ $('#preview').addEventListener('click',() => {
     message.setAttribute('role','status');
     const reloadPreview=() => {
       message.textContent='Cargando editor…';
-      frame.src='/?draft=1&editor=conectado';
+      frame.src='/?draft=1&editor=listo';
     };
     toolbar.append(message,action('Recargar vista previa',reloadPreview),action('Agregar banner',() => {
       if (settings.banners.length >= 8) { status.textContent='Ya tienes ocho banners. Quita uno antes de agregar otro.'; return; }
