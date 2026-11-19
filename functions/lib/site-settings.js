@@ -34,8 +34,28 @@ function validPrice(value) {
   return Number.isSafeInteger(value) && value > 0 && value <= 9999999;
 }
 const copyKeys = new Set(["verifyTitle","midTitle","midLabel","midBody","walletLabel","footer","faqTitle","diamantesTitle","diamantesDesc","fragmentosTitle","fragmentosDesc","paseTitle","paseDesc","tarjetasTitle","tarjetasDesc","nivelTitle","nivelDesc"]);
+const coreSections = ["inicio","beneficios","recargas","promocion","seguimiento","ayuda"];
+function validLayout(layout) {
+  if (layout === undefined) return true;
+  if (!Array.isArray(layout) || layout.length < coreSections.length || layout.length > 26) return false;
+  const ids = new Set();
+  for (const block of layout) {
+    if (!block || typeof block.id !== 'string' || ids.has(block.id) || typeof block.visible !== 'boolean') return false;
+    ids.add(block.id);
+    if (coreSections.includes(block.id)) continue;
+    if (!/^bloque-[a-f0-9-]{36}$/.test(block.id) || !['texto','imagen','promocion','boton'].includes(block.type) ||
+      typeof block.title !== 'string' || block.title.length > 90 || typeof block.body !== 'string' || block.body.length > 800 ||
+      typeof block.button !== 'string' || block.button.length > 50 || !validImage(block.image) ||
+      (block.imageSize !== undefined && !['small','medium','full'].includes(block.imageSize)) ||
+      !['left','center','right'].includes(block.align) || !['normal','wide','full'].includes(block.width) ||
+      !/^#[0-9a-f]{6}$/i.test(block.background) || !/^#[0-9a-f]{6}$/i.test(block.color) ||
+      typeof block.link !== 'string' || block.link.length > 300 ||
+      !(block.link === '' || /^#[a-z0-9-]+$/i.test(block.link) || /^https:\/\/[^\s\\]+$/i.test(block.link))) return false;
+  }
+  return coreSections.every(id => ids.has(id));
+}
 export function validSettings(s) {
-  return s && validText(s.heading,80) && validText(s.description,180) &&
+  return s && validLayout(s.layout) && validText(s.heading,80) && validText(s.description,180) &&
     (s.copy === undefined || (s.copy && typeof s.copy === 'object' && !Array.isArray(s.copy) &&
       Object.entries(s.copy).every(([key,value]) => copyKeys.has(key) && validText(value,180)))) &&
     /^#[0-9a-f]{6}$/i.test(s.accent) && typeof s.activity === 'boolean' &&

@@ -945,3 +945,29 @@ img,svg{max-width:100%}
 @media (max-width:650px) { .managed-main-banner { grid-column: 1 / -1; } }
 .recharge-area .btn-accent { background: linear-gradient(110deg, var(--store-accent,#a06aff), #7335dd); }
 .catalog-category.active { border-color: var(--store-accent,#c69dff); }
+
+main > [hidden] { display: none !important; }
+.builder-block {
+  width: min(100% - 24px, 760px);
+  margin: 18px auto;
+  padding: clamp(14px,3vw,36px);
+  border: 1px solid #7452a4;
+  border-radius: 14px;
+  overflow-wrap: anywhere;
+}
+.builder-wide { width: min(100% - 24px, 1140px); }
+.builder-full { width: 100%; border-radius: 0; }
+.builder-block img {
+  display: inline-block;
+  max-width: 100%;
+  width: auto;
+  max-height: 480px;
+  height: auto;
+  border-radius: 9px;
+}
+.builder-block h2 { font-size: clamp(21px,4vw,38px); margin: 8px 0; }
+.builder-block p { margin: 8px 0; white-space: pre-wrap; }
+.builder-block .btn { margin-top: 8px; }
+
+.builder-block .builder-image-small { max-width: min(100%, 260px); }
+.builder-block .builder-image-medium { max-width: min(100%, 540px); }

@@ -777,11 +777,75 @@
   "nivelDesc": "[data-category=\"nivel\"] small"
 };
 
+  const mainContent = $('main');
+  const coreSections = new Map([
+    ['inicio', $('#inicio')], ['beneficios', $('.features-bar')], ['recargas', $('.recharge-area')],
+    ['promocion', $('.mid-banner')], ['seguimiento', orderSection], ['ayuda', $('#ayuda')]
+  ]);
+
+  function renderLayout(layout) {
+    for (const old of mainContent.querySelectorAll('[data-builder-block]')) old.remove();
+    for (const block of layout) {
+      const core = coreSections.get(block.id);
+      if (core) {
+        core.hidden = !block.visible;
+        if (block.id === 'beneficios') {
+          activity.hidden = !block.visible || activity.dataset.settingHidden === 'true';
+          mainContent.append(activity);
+        }
+        mainContent.append(core);
+        continue;
+      }
+      if (!block.visible) continue;
+      const section = document.createElement('section');
+      section.id = block.id;
+      section.dataset.builderBlock = block.id;
+      section.className = 'builder-block builder-' + block.width;
+      section.style.textAlign = block.align;
+      section.style.backgroundColor = block.background;
+      section.style.color = block.color;
+      const linkAllowed = /^(?:#[a-z0-9-]+|https:\/\/[^\s\\]+)$/i.test(block.link);
+      if (block.image) {
+        const image = document.createElement('img');
+        image.src = block.image;
+        image.alt = block.title || '';
+        image.loading = 'lazy';
+        image.className = 'builder-image-' + (block.imageSize || 'full');
+        if (!block.button && linkAllowed) {
+          const link = document.createElement('a');
+          link.href = block.link;
+          link.setAttribute('aria-label', block.title || 'Ver promoción');
+          link.append(image);
+          section.append(link);
+        } else section.append(image);
+      }
+      if (block.title) {
+        const title = document.createElement('h2');
+        title.textContent = block.title;
+        section.append(title);
+      }
+      if (block.body) {
+        const body = document.createElement('p');
+        body.textContent = block.body;
+        section.append(body);
+      }
+      if (block.button && linkAllowed) {
+        const button = document.createElement('a');
+        button.className = 'btn btn-accent';
+        button.href = block.link;
+        button.textContent = block.button;
+        section.append(button);
+      }
+      mainContent.append(section);
+    }
+  }
+
   function applyStoreSettings(settings) {
     $('#catalog-heading').textContent = settings.heading;
     $('#catalog-description').textContent = settings.description;
     document.documentElement.style.setProperty('--store-accent', settings.accent);
     activity.hidden = !settings.activity;
+    activity.dataset.settingHidden = String(!settings.activity);
     offerSettings = settings.offers;
     for (const [key,selector] of Object.entries(editableCopy)) {
       const node = $(selector);
@@ -823,6 +887,7 @@
     });
     $('.storefront-promos').replaceChildren(...art);
     $('.storefront-promos').hidden = !art.length;
+    if (settings.layout) renderLayout(settings.layout);
     refresh();
   }
 

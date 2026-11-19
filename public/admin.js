@@ -169,6 +169,7 @@ $('#login').addEventListener('submit',async event => {
   try {
     ({revision,settings}=await request('GET'));
     settings.copy ||= {};
+    settings.layout ||= Object.keys(sectionNames).map(id => ({id,visible:true}));
     render();
     $('#login').hidden=true;
     $('#panel').hidden=false;
@@ -225,7 +226,7 @@ function syncPreview() {
     }
     const {payment,...draft}=settings;
     applyDraft(structuredClone(draft));
-    message.textContent='Edición activa. Haz clic en un texto, un banner o un paquete.';
+    message.textContent='Edición activa. Haz clic en un elemento o abre Estructura de la página.';
   } catch (error) {
     console.error('VortexGamer: vista previa',error);
     message.textContent='No se pudo mostrar el borrador. Pulsa Recargar vista previa.';
@@ -248,12 +249,86 @@ function editBanner(banner) {
   });
 }
 
+const sectionNames = {inicio:'Portada y banners',beneficios:'Beneficios y actividad',recargas:'Verificador y catálogo',
+  promocion:'Promoción de billetera',seguimiento:'Seguimiento de pedidos',ayuda:'Preguntas frecuentes'};
+const blockNames = {texto:'Texto',imagen:'Imagen',promocion:'Promoción',boton:'Botón'};
+
+function editBlock(block) {
+  editHere('Editar bloque',box => {
+    field(box,'Título',block,'title',{max:90});
+    const wrapper=element('label','Descripción');
+    const body=element('textarea');
+    body.value=block.body;
+    body.rows=4;
+    body.maxLength=800;
+    body.addEventListener('input',()=>{block.body=body.value;});
+    wrapper.append(body);
+    box.append(wrapper);
+    imageField(box,'Subir o reemplazar imagen',block,'image');
+    if (block.image) box.append(action('Quitar imagen',()=>{block.image='';inlineEditor.close();}));
+    field(box,'Texto del botón',block,'button',{max:50});
+    field(box,'Enlace HTTPS o ancla de la tienda',block,'link',{max:300});
+    block.imageSize ||= 'full';
+    field(box,'Tamaño de la imagen',block,'imageSize',{options:{small:'Pequeña',medium:'Mediana',full:'Ancho disponible'}});
+    field(box,'Alineación',block,'align',{options:{left:'Izquierda',center:'Centro',right:'Derecha'}});
+    field(box,'Ancho',block,'width',{options:{normal:'Normal',wide:'Ancho',full:'Pantalla completa'}});
+    field(box,'Color de fondo',block,'background',{type:'color'});
+    field(box,'Color del texto',block,'color',{type:'color'});
+  });
+}
+
+function makeBlock(type) {
+  return {id:'bloque-'+crypto.randomUUID(),type,visible:true,
+    title:type==='imagen'||type==='boton'?'':type==='promocion'?'Nueva promoción':'Nuevo texto',
+    body:'',image:'',button:type==='boton'?'Ver recargas':'',link:type==='boton'?'#tienda':'',
+    align:'center',width:'wide',background:'#190e30',color:'#ffffff'};
+}
+
+function renderLayoutControls() {
+  const list=$('#builder-items');
+  if (!list) return;
+  const layout=settings.layout;
+  list.replaceChildren(...layout.map((block,index) => {
+    const item=element('li');
+    const core=Object.hasOwn(sectionNames,block.id);
+    item.append(element('strong',core ? sectionNames[block.id] : block.title || blockNames[block.type]));
+    const update=()=>{renderLayoutControls();syncPreview();};
+    const move=step=>{
+      [layout[index],layout[index+step]]=[layout[index+step],layout[index]];
+      update();
+    };
+    const up=action('↑ Subir',()=>move(-1));
+    const down=action('↓ Bajar',()=>move(1));
+    up.disabled=index===0;
+    down.disabled=index===layout.length-1;
+    item.append(up,down,action(block.visible?'Ocultar':'Mostrar',()=>{block.visible=!block.visible;update();}));
+    if (!core) {
+      const duplicate=action('Duplicar',()=>{
+        layout.splice(index+1,0,{...block,id:makeBlock(block.type).id});
+        update();
+      });
+      duplicate.disabled=layout.length>=26;
+      item.append(action('Editar',()=>editBlock(block)),duplicate,
+        action('Quitar del borrador',()=>{layout.splice(index,1);update();}));
+    }
+    return item;
+  }));
+  const position=$('#builder-position');
+  const previous=position.value;
+  position.replaceChildren(new Option('Al final',''));
+  for (const block of layout) position.add(new Option('Antes de '+(sectionNames[block.id] || block.title || blockNames[block.type]),block.id));
+  if (layout.some(block=>block.id===previous)) position.value=previous;
+}
+
 function editPreviewElement(event) {
-  const target=event.target.closest?.('[data-inline-copy], [data-inline-banner], [data-inline-product], [data-offer]');
+  const target=event.target.closest?.('[data-inline-copy], [data-inline-banner], [data-inline-product], [data-offer], [data-builder-block]');
   if (!target || inlineEditor.open || busy) return;
   event.preventDefault();
   event.stopImmediatePropagation();
-  if (target.dataset.inlineCopy) {
+  if (target.dataset.builderBlock) {
+    const block=settings.layout.find(item=>item.id===target.dataset.builderBlock);
+    if (block) editBlock(block);
+  } else if (target.dataset.inlineCopy) {
     const id=target.dataset.inlineCopy;
     const key=id==='catalogHeading' ? 'heading' : id==='catalogDescription' ? 'description' : id;
     const item=key===id ? settings.copy : settings;
@@ -282,7 +357,7 @@ function editPreviewElement(event) {
 
 $('#inline-close').addEventListener('click',() => { if (!busy) inlineEditor.close(); });
 inlineEditor.addEventListener('cancel',event => { if (busy) event.preventDefault(); });
-inlineEditor.addEventListener('close',() => { render(); syncPreview(); });
+inlineEditor.addEventListener('close',() => { render(); renderLayoutControls(); });
 $('#editor').addEventListener('input',event => {
   if (event.target.type !== 'file') syncPreview();
 });
@@ -303,7 +378,7 @@ $('#preview').addEventListener('click',() => {
     message.setAttribute('role','status');
     const reloadPreview=() => {
       message.textContent='Cargando editor…';
-      frame.src='/?draft=1&editor=listo';
+      frame.src='/?draft=1&editor=constructor';
     };
     toolbar.append(message,action('Recargar vista previa',reloadPreview),action('Agregar banner',() => {
       if (settings.banners.length >= 8) { status.textContent='Ya tienes ocho banners. Quita uno antes de agregar otro.'; return; }
@@ -311,12 +386,55 @@ $('#preview').addEventListener('click',() => {
       settings.banners.push(banner);
       editBanner(banner);
     }));
-    $('#panel').append(toolbar,frame);
+    const structure=element('details');
+    structure.id='builder-layout';
+    structure.append(element('summary','Estructura de la página'));
+    const type=element('select');
+    type.setAttribute('aria-label','Tipo de bloque');
+    for (const [value,label] of Object.entries(blockNames)) type.add(new Option(label,value));
+    const position=element('select');
+    position.id='builder-position';
+    position.setAttribute('aria-label','Posición del bloque');
+    const list=element('ol');
+    list.id='builder-items';
+    const add=action('Agregar bloque',()=>{
+      if (settings.layout.length>=26) {message.textContent='Llegaste al máximo de 20 bloques personalizados.';return;}
+      const block=makeBlock(type.value);
+      const index=settings.layout.findIndex(item=>item.id===position.value);
+      settings.layout.splice(index<0 ? settings.layout.length : index,0,block);
+      renderLayoutControls();
+      editBlock(block);
+    });
+    const size=element('select');
+    size.setAttribute('aria-label','Tamaño de pantalla');
+    size.add(new Option('Computadora','100%'));
+    size.add(new Option('Celular','390px'));
+    size.addEventListener('change',()=>{frame.style.width=size.value;});
+    toolbar.append(size);
+    structure.append(type,position,add,list);
+    const draftKey='vortex-visual-layout-draft';
+    toolbar.append(action('Guardar borrador',()=>{
+      try {
+        const {payment,...draft}=settings;
+        localStorage.setItem(draftKey,JSON.stringify({revision,draft}));
+        message.textContent='Borrador guardado en este navegador.';
+      } catch {message.textContent='No se pudo guardar el borrador en este navegador.';}
+    }),action('Recuperar borrador',()=>{
+      try {
+        const saved=JSON.parse(localStorage.getItem(draftKey));
+        if (!saved || saved.revision!==revision) {message.textContent='No hay borrador para la versión publicada actual.';return;}
+        settings={...saved.draft,payment:settings.payment};
+        render();
+        renderLayoutControls();
+      } catch {message.textContent='No se pudo leer el borrador.';}
+    }));
+    $('#panel').append(toolbar,structure,frame);
+    renderLayoutControls();
     frame.onload=() => {
       const doc=frame.contentDocument;
       if (!doc || new URL(doc.URL).searchParams.get('draft') !== '1') return;
       const style=doc.createElement('style');
-      style.textContent='[data-inline-copy],[data-inline-banner],[data-inline-product],[data-offer]{cursor:pointer} [data-inline-copy]:hover,[data-inline-banner]:hover,[data-inline-product]:hover,[data-offer]:hover{outline:2px dashed #e4bcff;outline-offset:-2px}';
+      style.textContent='[data-inline-copy],[data-inline-banner],[data-inline-product],[data-offer],[data-builder-block]{cursor:pointer} [data-inline-copy]:hover,[data-inline-banner]:hover,[data-inline-product]:hover,[data-offer]:hover,[data-builder-block]:hover{outline:2px dashed #e4bcff;outline-offset:-2px}';
       doc.head.append(style);
       doc.addEventListener('click',editPreviewElement,true);
       syncPreview();
