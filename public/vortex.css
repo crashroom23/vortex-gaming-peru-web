@@ -768,3 +768,46 @@ img,svg{max-width:100%}
   .recharge-area .verify-card #uid { grid-area: 4 / 1; }
   .recharge-area .verify-card #verify-btn { grid-area: 4 / 2; }
 }
+
+/* Press feedback for the catalog and checkout. */
+.tab,
+.payment-tab,
+.quick-view,
+.favorite-btn {
+  transition: transform 160ms ease-out, background-color 160ms ease-out,
+    border-color 160ms ease-out, color 160ms ease-out, box-shadow 160ms ease-out;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .payment-tab:not(:disabled):hover,
+  .tab:not(:disabled):hover {
+    transform: translateY(-2px);
+    border-color: #b58aff;
+  }
+}
+
+:is(.btn, .tab, .payment-tab, .quick-view, .favorite-btn):not(:disabled):not([aria-disabled="true"]):active {
+  transform: translateY(1px) scale(.97);
+}
+
+.recharge-area .product-card:has([data-action]:not(:disabled):active),
+.recharge-area .product-card:has(:focus-visible) {
+  border-color: var(--pack-accent, #b58aff);
+  box-shadow: 0 0 18px var(--pack-light, #a779ff55);
+}
+
+.payment-tab[aria-pressed="true"],
+.recharge-area .tab[aria-pressed="true"] {
+  box-shadow: inset 0 0 0 1px #c9adff70, 0 3px 12px #7a4bea40;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #checkout-modal[aria-hidden="false"] {
+    animation: checkout-enter 180ms ease-out both;
+  }
+
+  @keyframes checkout-enter {
+    from { opacity: 0; transform: translate(-50%, calc(-50% + 12px)); }
+    to { opacity: 1; transform: translate(-50%, -50%); }
+  }
+}
