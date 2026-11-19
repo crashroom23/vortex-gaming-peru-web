@@ -576,34 +576,63 @@ img,svg{max-width:100%}
 }
 
 
-/* Full-width hero preserves the complete artwork at its original aspect ratio. */
+/* Storefront banners and catalog offers */
 .storefront-banner { padding: 0 0 14px; }
 .storefront-banner > .shell { width: 100%; max-width: none; }
-.storefront-banner .storefront-banner-title {
-  border-radius: 0;
-  border-width: 0 0 1px;
-  border-color: #aa68ff;
-  background: radial-gradient(ellipse at center, #32135d, #10091e 75%);
-  box-shadow: 0 0 24px #8e4ae94d, 0 12px 34px #05001199;
+.storefront-promos {
+  display: grid;
+  grid-template-columns: 2.35fr 1fr 1fr;
+  gap: 10px;
+  padding: 10px clamp(10px, 2vw, 28px) 0;
+}
+.storefront-banner .storefront-banner-title,
+.storefront-promo {
+  margin: 0;
+  border: 1px solid #aa68ff;
+  border-radius: 12px;
+  background: #170d2c;
   animation: none;
 }
-@media (min-width: 641px) {
-  .storefront-banner .storefront-banner-title::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(#18083122, #10051c44),
-      url("/images/vortex-banner.webp?v=6a62bac") center / cover no-repeat;
-    filter: blur(24px);
-    transform: scale(1.06);
-    pointer-events: none;
-  }
+.storefront-banner-title::after { display: none; }
+.storefront-banner-title a { display: block; height: 100%; }
+.storefront-banner-title a:focus-visible { outline-offset: -3px; }
+.storefront-banner-title img { height: 100%; object-fit: contain; }
+.storefront-promo {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-width: 0;
+  height: clamp(174px, 20vw, 284px);
+  overflow: hidden;
+  transition: border-color .18s, transform .18s;
 }
-
-.storefront-banner-title img {
-  position: relative;
-  width: min(100%, clamp(640px, 50vw, 800px));
-  margin-inline: auto;
+.storefront-promo:hover { border-color: #e4bcff; }
+.storefront-promo:active { transform: scale(.98); }
+.storefront-promo img { width: 100%; height: 100%; object-fit: contain; }
+.storefront-promo span { padding: 6px 8px; text-align: center; }
+.storefront-promo strong, .storefront-promo small { display: block; }
+.storefront-promo strong { font-size: 13px; color: #fff; }
+.storefront-promo small { font-size: 11px; color: #d8bdff; }
+.catalog-category[id] { scroll-margin-top: 100px; }
+.catalog-offer:not([hidden]) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 16px;
+  padding: 14px;
+  border: 1px solid #7250ae;
+  border-radius: 14px;
+  background: #190e30;
+}
+.catalog-offer img { width: min(100%, 240px); height: auto; border-radius: 9px; }
+.catalog-offer h3 { margin: 0; }
+.catalog-offer p { margin: 6px 0; color: #d1bee8; }
+.catalog-offer strong { color: #ddc5ff; }
+@media (max-width: 650px) {
+  .storefront-promos { grid-template-columns: 1fr 1fr; }
+  .storefront-banner .storefront-banner-title { grid-column: 1 / -1; }
+  .storefront-banner-title img { height: auto; }
+  .storefront-promo { height: clamp(142px, 43vw, 230px); }
 }
 
 .storefront-banner-actions {

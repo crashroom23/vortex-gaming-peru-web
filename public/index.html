@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/vortex.css?v=categorias-free-fire">
-  <script src="/vortex.js?v=categorias-free-fire" defer></script>
+  <link rel="stylesheet" href="/vortex.css?v=ofertas">
+  <script src="/vortex.js?v=ofertas" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -69,9 +69,19 @@
   <main>
     <section class="hero storefront-banner" id="inicio" aria-label="VortexGamer Perú">
       <div class="shell">
-        <h1 class="storefront-banner-title">
-          <img src="/images/vortex-banner.webp?v=6a62bac" alt="VortexGamer · Recargas Free Fire" width="1920" height="819" fetchpriority="high">
-        </h1>
+        <div class="storefront-promos">
+          <h1 class="storefront-banner-title">
+            <a href="#paquetes-diamantes"><img src="/images/vortex-banner.webp?v=6a62bac" alt="VortexGamer · Ver paquetes de diamantes Free Fire" width="1920" height="819" fetchpriority="high"></a>
+          </h1>
+          <a class="storefront-promo" href="#paquetes-nivel">
+            <img src="/images/oferta-nivel.webp" alt="" width="650" height="650">
+            <span><strong>Aumento de nivel</strong><small>S/ 14.00 · Ver paquete →</small></span>
+          </a>
+          <a class="storefront-promo" href="#paquetes-tarjetas">
+            <img src="/images/oferta-tarjetas.webp" alt="" width="567" height="850">
+            <span><strong>Oferta de 3 tarjetas</strong><small>S/ 40.00 · Ver paquete →</small></span>
+          </a>
+        </div>
         <div class="storefront-banner-actions">
           <a class="btn btn-accent" href="#verificador">VERIFICAR MI UID <svg><use href="#icon-arrow"/></svg></a>
           <a class="btn btn-ghost" href="#tienda">EXPLORAR PAQUETES</a>
@@ -106,7 +116,7 @@
         <div><h2>Catálogo de <span>recargas</span></h2><p>Elige una categoría de Free Fire.</p></div>
       </div>
       <div class="catalog-categories" role="group" aria-label="Categorías de recargas">
-        <button type="button" class="catalog-category active" data-category="diamantes" aria-controls="products-grid empty-state" aria-pressed="true">
+        <button type="button" class="catalog-category active" id="paquetes-diamantes" data-category="diamantes" aria-controls="products-grid empty-state" aria-pressed="true">
           <span class="category-icon" aria-hidden="true">💎</span>
           <span class="category-copy"><strong>Diamantes</strong><small>Paquetes de diamantes con bono</small></span>
           <span class="category-arrow" aria-hidden="true">›</span>
@@ -121,18 +131,26 @@
           <span class="category-copy"><strong>Pase</strong><small>Pase Booyah</small></span>
           <span class="category-arrow" aria-hidden="true">›</span>
         </button>
-        <button type="button" class="catalog-category" data-category="tarjetas" aria-controls="products-grid empty-state" aria-pressed="false">
+        <button type="button" class="catalog-category" id="paquetes-tarjetas" data-category="tarjetas" aria-controls="products-grid empty-state" aria-pressed="false">
           <span class="category-icon" aria-hidden="true">▣</span>
           <span class="category-copy"><strong>Tarjetas</strong><small>Tarjetas de Free Fire</small></span>
           <span class="category-arrow" aria-hidden="true">›</span>
         </button>
-        <button type="button" class="catalog-category" data-category="nivel" aria-controls="products-grid empty-state" aria-pressed="false">
+        <button type="button" class="catalog-category" id="paquetes-nivel" data-category="nivel" aria-controls="products-grid empty-state" aria-pressed="false">
           <span class="category-icon" aria-hidden="true">↗</span>
           <span class="category-copy"><strong>Paquete de nivel de aumento</strong><small>Paquetes para subir de nivel</small></span>
           <span class="category-arrow" aria-hidden="true">›</span>
         </button>
       </div>
       <div class="products-grid" id="products-grid" aria-live="polite"></div>
+      <article class="catalog-offer" data-offer="nivel" hidden>
+        <img src="/images/oferta-nivel.webp" alt="" width="650" height="650" loading="lazy">
+        <div><h3>Aumento de nivel</h3><p>Hasta 1,400 diamantes según tu nivel</p><strong>S/ 14.00</strong><p>Compra en preparación.</p></div>
+      </article>
+      <article class="catalog-offer" data-offer="tarjetas" hidden>
+        <img src="/images/oferta-tarjetas.webp" alt="" width="567" height="850" loading="lazy">
+        <div><h3>Oferta de 3 tarjetas</h3><p>Mensual, semanal y semanal básica</p><strong>S/ 40.00</strong><p>Compra en preparación.</p></div>
+      </article>
       <div class="empty-state" id="empty-state" role="status" hidden><strong id="category-status"></strong><p>Aún no hay productos disponibles en esta categoría.</p></div>
       <div class="shop-note"><span>ℹ</span><p><strong>MODO PRUEBA.</strong> La ventana de pago es una vista previa. No aparecen QR cobrables ni se procesan pagos reales por Yape o Binance hasta integrar la pasarela.</p></div>
     </section>

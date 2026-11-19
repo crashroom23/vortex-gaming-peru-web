@@ -132,7 +132,9 @@
     const grid = $('#products-grid');
     grid.innerHTML = products.map(cardMarkup).join('');
     grid.hidden = products.length === 0;
-    $('#empty-state').hidden = products.length > 0;
+    const offers = $('[data-offer]');
+    offers.forEach(offer => { offer.hidden = offer.dataset.offer !== currentCategory; });
+    $('#empty-state').hidden = products.length > 0 || offers.some(offer => !offer.hidden);
     $$('.catalog-category').forEach(button => {
       const selected = button.dataset.category === currentCategory;
       button.classList.toggle('active', selected);
@@ -568,7 +570,18 @@
   $('#overlay').addEventListener('click', () => closeLayer());
   $('#demo-checkout').addEventListener('click', () => showInfo('COMPRAS EN PREPARACIÓN', 'Tu selección es una simulación. No se generó ningún pedido ni se cobró dinero. El proceso se habilitará cuando integremos y probemos el sistema de pagos, saldo y recargas.'));
   $('#clear-cart').addEventListener('click', () => { cart = {}; refresh(); notify('Carrito de prueba vaciado'); });
-  $$('.catalog-category').forEach(button => button.addEventListener('click', () => {
+  function openCategoryFromHash(hash = location.hash) {
+    const id = hash.slice(1);
+    const category = document.getElementById(id)?.dataset.category;
+    if (!category) return;
+    currentCategory = category;
+    renderProducts();
+  }
+  window.addEventListener('hashchange', () => openCategoryFromHash());
+  $('.storefront-promos a').forEach(link => link.addEventListener('click', () => openCategoryFromHash(link.hash)));
+  openCategoryFromHash();
+
+  $('.catalog-category').forEach(button => button.addEventListener('click', () => {
     currentCategory = button.dataset.category;
     renderProducts();
   }));
