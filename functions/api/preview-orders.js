@@ -1,6 +1,11 @@
 import {readSettings} from '../lib/site-settings.js';
 const prices = new Map([[100,[10,350]],[310,[31,980]],[520,[52,1500]],[1060,[106,2700]],[2180,[218,5200]],[5600,[560,13000]]]);
 const cardOfferId = 30003;
+const individualCards = new Map([
+  [30001, {title:'Tarjeta básica', cents:200}],
+  [30002, {title:'Tarjeta semanal', cents:650}],
+  [30004, {title:'Tarjeta mensual', cents:2800}]
+]);
 const host = 'preview-gamer-aura-v2.vortex-gaming-peru-web.pages.dev';
 const reply = (body, status = 200) => Response.json(body, {status, headers:{'Cache-Control':'no-store'}});
 export async function onRequest({request, env}) {
@@ -27,13 +32,16 @@ export async function onRequest({request, env}) {
     await db.prepare('CREATE TABLE IF NOT EXISTS demo_order_prices (code TEXT PRIMARY KEY, cents INTEGER NOT NULL)').run();
     if (method === 'POST') {
       const {uid, productId, paymentMethod} = body;
-      if (typeof uid !== 'string' || !/^\d{8,12}$/.test(uid) || (!prices.has(productId) && productId !== cardOfferId) ||
+      if (typeof uid !== 'string' || !/^\d{8,12}$/.test(uid) || (!prices.has(productId) && productId !== cardOfferId && !individualCards.has(productId)) ||
           !['yape','binance'].includes(paymentMethod)) return reply({message:'Revisa el UID, paquete y método.'},400);
       const player = typeof body.player === 'string' ? body.player.trim().slice(0,100) : '';
       const existing = await db.prepare('SELECT code FROM demo_orders WHERE code=?').bind(code).first();
       if (!existing) {
         const {settings} = await readSettings(db);
-        const packageSettings = productId === cardOfferId ? settings.offers.tarjetas : settings.products[productId];
+        const individualCard = individualCards.get(productId);
+        const packageSettings = individualCard
+          ? {cents:individualCard.cents, visible:settings.offers.tarjetas.visible}
+          : productId === cardOfferId ? settings.offers.tarjetas : settings.products[productId];
         if (!packageSettings.visible || (body.cents !== undefined && body.cents !== packageSettings.cents))
           return reply({message:'El paquete o precio cambió. Recarga la página y vuelve a elegir.'},409);
         await db.batch([
@@ -55,11 +63,15 @@ export async function onRequest({request, env}) {
     }
     const storedPrice = await db.prepare('SELECT cents FROM demo_order_prices WHERE code=?').bind(code).first();
     const isCardOffer = row.product_id === cardOfferId;
-    const [bonus,originalCents] = isCardOffer ? [0,4000] : prices.get(row.product_id);
+    const individualCard = individualCards.get(row.product_id);
+    const [bonus,originalCents] = prices.get(row.product_id) ?? [0, individualCard?.cents ?? 4000];
+    const packageName = individualCard?.title ?? (isCardOffer
+      ? 'Oferta de 3 tarjetas'
+      : row.product_id.toLocaleString('en-US') + ' + ' + bonus + ' diamantes');
     const cents = storedPrice?.cents ?? originalCents;
     return reply({order:{
       code:row.code, uid:row.uid, player:row.player, stage:row.stage, createdAt:row.created_at,
-      package:isCardOffer ? 'Oferta de 3 tarjetas' : row.product_id.toLocaleString('en-US') + ' + ' + bonus + ' diamantes',
+      package:packageName,
       total:cents / 100, method:row.payment_method === 'yape' ? 'Yape' : 'Binance Pay'
     }});
   } catch (_) { return reply({message:'No se pudo acceder a los pedidos de prueba.'},503); }

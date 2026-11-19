@@ -537,6 +537,18 @@
     if (event.target.closest('[data-close]')) closeLayer();
   });
 
+  const individualCards = new Map([
+    [30001, {id: 30001, title: 'Tarjeta básica', price: 2}],
+    [30002, {id: 30002, title: 'Tarjeta semanal', price: 6.5}],
+    [30004, {id: 30004, title: 'Tarjeta mensual', price: 28}]
+  ]);
+  $('[data-card-purchase]').forEach(button => {
+    button.addEventListener('click', () => {
+      if (offerSettings?.tarjetas?.visible === false) return;
+      requestCheckout(individualCards.get(Number(button.dataset.cardPurchase)));
+    });
+  });
+
   $('#buy-card-offer').addEventListener('click', () => {
     const offer = offerSettings?.tarjetas;
     requestCheckout({
@@ -872,7 +884,7 @@
       product.image = /^(?:\/images\/[\w.-]+(?:\?v=[\w-]+)?|data:image\/(?:webp|png|jpeg);base64,[A-Za-z0-9+/]+={0,2})$/.test(options.image) ? options.image : '';
     }
     for (const [id,offer] of Object.entries(offerSettings)) {
-      const article = document.querySelector('[data-offer="' + id + '"]');
+      const article = document.querySelector('.catalog-offer[data-offer="' + id + '"]');
       if (!article) continue;
       article.querySelector('h3').textContent = offer.title;
       article.querySelector('p').textContent = offer.description;

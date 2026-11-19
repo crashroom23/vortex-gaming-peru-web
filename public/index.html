@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/vortex.css?v=constructor-visual">
-  <script src="/vortex.js?v=comprar-tarjetas" defer></script>
+  <link rel="stylesheet" href="/vortex.css?v=tarjetas-individuales">
+  <script src="/vortex.js?v=tarjetas-individuales" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -147,6 +147,26 @@
         <img src="/images/oferta-nivel.webp" alt="" width="650" height="650" loading="lazy">
         <div><h3>Aumento de nivel</h3><p>Hasta 1,400 diamantes según tu nivel</p><strong>S/ 14.00</strong><p>Compra en preparación.</p></div>
       </article>
+      <section class="individual-cards" data-offer="tarjetas" aria-labelledby="individual-cards-title" hidden>
+        <h3 id="individual-cards-title">Tarjetas individuales</h3>
+        <div class="individual-card-grid">
+          <article class="individual-card individual-card--1">
+            <h4>Básica</h4>
+            <span class="individual-card-art" aria-hidden="true">✦ <b>W LITE</b> ✦</span>
+            <button type="button" class="btn btn-accent" data-card-purchase="30001" aria-label="Comprar tarjeta básica por S/ 2.00">Comprar · S/ 2.00</button>
+          </article>
+          <article class="individual-card individual-card--2">
+            <h4>Semanal</h4>
+            <span class="individual-card-art" aria-hidden="true">✦ <b>W</b> ✦</span>
+            <button type="button" class="btn btn-accent" data-card-purchase="30002" aria-label="Comprar tarjeta semanal por S/ 6.50">Comprar · S/ 6.50</button>
+          </article>
+          <article class="individual-card individual-card--3">
+            <h4>Mensual</h4>
+            <span class="individual-card-art" aria-hidden="true">✦ <b>VIP</b> ✦</span>
+            <button type="button" class="btn btn-accent" data-card-purchase="30004" aria-label="Comprar tarjeta mensual por S/ 28.00">Comprar · S/ 28.00</button>
+          </article>
+        </div>
+      </section>
       <article class="catalog-offer" data-offer="tarjetas" hidden>
         <img src="/images/oferta-tarjetas.webp" alt="" width="567" height="850" loading="lazy">
         <div><h3>Oferta de 3 tarjetas</h3><p>Mensual, semanal y semanal básica</p><strong>S/ 40.00</strong><p><button type="button" class="btn btn-accent" id="buy-card-offer">Comprar</button></p></div>

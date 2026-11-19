@@ -971,3 +971,14 @@ main > [hidden] { display: none !important; }
 
 .builder-block .builder-image-small { max-width: min(100%, 260px); }
 .builder-block .builder-image-medium { max-width: min(100%, 540px); }
+
+.individual-cards { margin-block: 18px; }
+.individual-cards h3 { margin: 0 0 12px; }
+.individual-card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 12px; }
+.individual-card { display: grid; justify-items: center; gap: 12px; padding: 14px; border: 1px solid #7651ad; border-radius: 16px; background: linear-gradient(145deg, #3f2076, #1b1033); }
+.individual-card h4 { margin: 0; font-size: 1.15rem; text-transform: uppercase; }
+.individual-card .btn { width: 100%; }
+.individual-card-art { display: grid; grid-auto-flow: column; align-items: center; justify-content: space-around; width: 138px; aspect-ratio: 1.75; border: 1px solid #ffffff80; border-radius: 10px; color: white; background: linear-gradient(145deg, #13529a, #417ee9); transform: rotate(-5deg); box-shadow: 0 7px 15px #09051c80; }
+.individual-card-art b { font-size: 1.35rem; }
+.individual-card--2 .individual-card-art { background: linear-gradient(145deg, #6d218f, #aa42df); }
+.individual-card--3 .individual-card-art { background: linear-gradient(145deg, #81500c, #ba7915); }
