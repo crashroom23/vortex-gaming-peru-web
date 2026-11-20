@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/vortex.css?v=yape-destino">
-  <script src="/vortex.js?v=yape-destino" defer></script>
+  <link rel="stylesheet" href="/vortex.css?v=yape-visible">
+  <script src="/vortex.js?v=yape-visible" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -282,14 +282,14 @@
       <div class="checkout-total"><small>TOTAL A PAGAR</small><strong id="checkout-price">S/ 0.00</strong></div>
     </div>
     <div id="checkout-options" hidden>
-      <details id="checkout-yape" hidden>
-        <summary>Pagar por Yape y enviar captura</summary>
-        <p>Escanea el QR y paga el total indicado arriba. Toma una captura de la confirmación y adjúntala en WhatsApp.</p>
+      <section id="checkout-yape" aria-labelledby="checkout-yape-title" hidden>
+        <h3 id="checkout-yape-title">Paga con Yape</h3>
+        <img id="checkout-yape-qr" alt="QR de pago por Yape de VortexGamer" width="224" height="224" hidden>
         <p id="checkout-yape-number" hidden></p>
-        <img id="checkout-yape-qr" alt="QR de pago por Yape de VortexGamer" width="224" height="224">
         <p id="checkout-yape-status" role="status"></p>
-        <a id="checkout-whatsapp" class="btn btn-outline btn-wide" target="_blank" rel="noopener noreferrer" hidden>Ya pagué · Enviar captura</a>
-      </details>
+        <p class="checkout-yape-instruction">Paga el monto indicado y adjunta tu captura en WhatsApp.</p>
+        <a id="checkout-whatsapp" class="btn btn-accent btn-wide" target="_blank" rel="noopener noreferrer" hidden>Ya pagué · Enviar captura</a>
+      </section>
       <p id="checkout-yape-unavailable" hidden>El pago por Yape estará disponible cuando se configure el QR y WhatsApp.</p>
       <p id="checkout-wallet-message" role="status"></p>
       <button type="button" id="checkout-wallet" class="btn btn-accent btn-wide" hidden>Pagar con saldo</button>

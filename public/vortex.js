@@ -622,7 +622,6 @@
       'Hola, ya pagué por Yape en VortexGamer.\nPaquete: ' + $('#checkout-package').textContent +
       '\nUID: ' + uid + '\nMonto: ' + price(product.price) + '\nAdjunto mi captura de pago.'));
     yape.hidden = !hasYape;
-    yape.open = false;
     const yapeNumber = $('#checkout-yape-number');
     yapeNumber.hidden = !/^9\d{8}$/.test(storeYapeNumber);
     yapeNumber.textContent = 'Número de Yape: ' + storeYapeNumber.replace(/(\d{3})(?=\d)/g, '$1 ');

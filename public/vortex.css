@@ -1043,15 +1043,37 @@ main > [hidden] { display: none !important; }
   display: none;
 }
 
-#checkout-yape summary {
-  cursor: pointer;
-  padding: .7rem;
-  font-weight: 700;
+#checkout-yape {
+  padding: 1rem;
+  border: 1px solid #584477;
+  border-radius: 12px;
+  background: #171129;
+  text-align: center;
+}
+
+#checkout-yape h3 {
+  margin: 0;
+  font-size: 1.15rem;
 }
 
 #checkout-yape-qr {
   display: block;
-  width: min(100%, 224px);
+  width: min(100%, 208px);
   height: auto;
-  margin: .75rem auto;
+  margin: .65rem auto;
+  border-radius: 12px;
+}
+
+#checkout-yape-number {
+  margin: .5rem 0;
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+
+.checkout-modal .checkout-yape-instruction {
+  margin: .5rem 0 .8rem;
+}
+
+#checkout-yape-status:empty {
+  display: none;
 }
