@@ -576,6 +576,7 @@
   });
 
   let storeWhatsApp = '';
+  let storeYapeQr = '';
   let walletSelection;
   const walletButton = $('#checkout-wallet');
   const walletMessage = $('#checkout-wallet-message');
@@ -612,32 +613,56 @@
       ? previous : {uid, productId:product.id, code:crypto.randomUUID()};
     walletSelection = selection;
     walletButton.hidden = $('#checkout-topup').hidden = $('#checkout-wallet-receipt').hidden = true;
-    const hasWhatsApp = setWhatsAppLink($('#checkout-whatsapp'),
-      'Hola, quiero comprar en VortexGamer.\nPaquete: ' + $('#checkout-package').textContent +
-      '\nUID: ' + uid + '\nTotal: ' + price(product.price));
-    const missingWhatsApp = hasWhatsApp ? '' : 'WhatsApp aún no está configurado. ';
+    const yape = $('#checkout-yape');
+    const qr = $('#checkout-yape-qr');
+    const whatsapp = $('#checkout-whatsapp');
+    const qrStatus = $('#checkout-yape-status');
+    const hasYape = Boolean(storeYapeQr && setWhatsAppLink(whatsapp,
+      'Hola, ya pagué por Yape en VortexGamer.\nPaquete: ' + $('#checkout-package').textContent +
+      '\nUID: ' + uid + '\nMonto: ' + price(product.price) + '\nAdjunto mi captura de pago.'));
+    yape.hidden = !hasYape;
+    yape.open = false;
+    $('#checkout-yape-unavailable').hidden = hasYape;
+    whatsapp.hidden = true;
+    qr.hidden = true;
+    qr.onload = () => {
+      qr.hidden = false;
+      whatsapp.hidden = false;
+      qrStatus.textContent = '';
+    };
+    qr.onerror = () => {
+      qr.hidden = whatsapp.hidden = true;
+      qrStatus.textContent = 'No pudimos cargar el QR. Vuelve a abrir el pedido.';
+    };
+    if (hasYape) {
+      qrStatus.textContent = 'Cargando QR…';
+      qr.src = storeYapeQr;
+      if (qr.complete && qr.naturalWidth) qr.onload();
+    } else {
+      qr.removeAttribute('src');
+    }
     if (!verified) {
-      walletMessage.textContent = missingWhatsApp + 'Puedes pedir por WhatsApp con el UID ingresado. Verifica tu UID para pagar con saldo.';
+      walletMessage.textContent = 'Verifica tu UID para pagar con saldo.';
       return;
     }
-    walletMessage.textContent = missingWhatsApp + 'Consultando saldo…';
+    walletMessage.textContent = 'Consultando saldo…';
     try {
       const info = await walletRequest('GET', product.id);
       if (selection !== walletSelection || selection.complete) return;
       if (!info) {
-        walletMessage.textContent = missingWhatsApp + 'Inicia sesión en Mi cuenta para pagar con saldo.';
+        walletMessage.textContent = 'Inicia sesión en Mi cuenta para pagar con saldo.';
         return;
       }
       selection.cents = info.cents;
       const enough = info.balance_cents >= info.cents;
       walletButton.textContent = 'Pagar ' + price(info.cents / 100) + ' con saldo';
       walletButton.hidden = !enough;
-      walletMessage.textContent = missingWhatsApp + 'Saldo disponible: ' + price(info.balance_cents / 100) +
+      walletMessage.textContent = 'Saldo disponible: ' + price(info.balance_cents / 100) +
         '. Precio con saldo: ' + price(info.cents / 100) + '.' + (enough ? '' : ' Saldo insuficiente.');
       if (!enough) setWhatsAppLink($('#checkout-topup'),
         'Hola, quiero recargar saldo en VortexGamer (mínimo S/ 5). Mi usuario es ' + info.username + '.');
     } catch {
-      if (selection === walletSelection) walletMessage.textContent = missingWhatsApp + 'Pago con saldo temporalmente no disponible.';
+      if (selection === walletSelection) walletMessage.textContent = 'Pago con saldo temporalmente no disponible.';
     }
   }
 
@@ -655,7 +680,8 @@
       selection.complete = true;
       if (walletSelection !== selection) return;
       walletButton.hidden = true;
-      $('#checkout-whatsapp').hidden = true;
+      $('#checkout-yape').hidden = true;
+      $('#checkout-yape-unavailable').hidden = true;
       walletMessage.textContent = 'Pago con saldo registrado. Entrega pendiente.';
       const lines = ['VortexGamer', 'Pedido: ' + order.code, 'Paquete: ' + packageName,
         'UID: ' + order.uid, 'Pagado con saldo: ' + price(order.cents / 100), 'Fecha UTC: ' + order.createdAt];
@@ -1225,6 +1251,7 @@
     fetch('/api/site-settings').then(response => response.ok ? response.json() : null)
       .then(data => {
         storeWhatsApp = data?.settings?.payment?.whatsapp || '';
+        storeYapeQr = data?.settings?.payment?.qr || '';
         if (data?.revision > 0) applyStoreSettings(data.settings);
       }).catch(() => {});
   }

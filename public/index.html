@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/vortex.css?v=preview-wallet">
-  <script src="/vortex.js?v=preview-wallet" defer></script>
+  <link rel="stylesheet" href="/vortex.css?v=yape-whatsapp">
+  <script src="/vortex.js?v=yape-whatsapp" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -217,14 +217,14 @@
         <div><h3>Oferta de 3 tarjetas</h3><p>Mensual, semanal y semanal básica</p><strong>S/ 40.00</strong><p><button type="button" class="btn btn-accent" id="buy-card-offer">Comprar</button></p></div>
       </article>
       <div class="empty-state" id="empty-state" role="status" hidden><strong id="category-status"></strong><p>Aún no hay productos disponibles en esta categoría.</p></div>
-      <div class="shop-note"><span>ℹ</span><p><strong>MODO PRUEBA.</strong> Los pedidos por WhatsApp se coordinan con VortexGamer. Los pedidos con saldo quedan pendientes de entrega.</p></div>
+      <div class="shop-note"><span>ℹ</span><p><strong>MODO PRUEBA.</strong> Los pagos por Yape se revisan con la captura enviada por WhatsApp. Los pedidos con saldo quedan pendientes de entrega.</p></div>
     </section>
 
     </div>
 
     <section class="mid-banner shell" aria-label="Información VortexGamer">
       <div class="mid-banner-title"><span>◈</span><div><small>VORTEX // NEXT LEVEL</small><h3>¿YA ELEGISTE TUS DIAMANTES?</h3></div></div>
-      <p>Ingresa tu UID y elige un paquete. Pulsa Pagar para pedir por WhatsApp o usar tu saldo.</p>
+      <p>Ingresa tu UID y elige un paquete. Pulsa Pagar para pagar por Yape y enviar tu captura o usar tu saldo.</p>
       <button class="btn btn-outline" type="button" id="wallet-trigger">CONOCER MI BILLETERA <svg><use href="#icon-arrow"/></svg></button>
     </section>
 
@@ -282,7 +282,14 @@
       <div class="checkout-total"><small>TOTAL A PAGAR</small><strong id="checkout-price">S/ 0.00</strong></div>
     </div>
     <div id="checkout-options" hidden>
-      <a id="checkout-whatsapp" class="btn btn-outline btn-wide" target="_blank" rel="noopener noreferrer">Pagar por WhatsApp</a>
+      <details id="checkout-yape" hidden>
+        <summary>Pagar por Yape y enviar captura</summary>
+        <p>Escanea el QR y paga el total indicado arriba. Toma una captura de la confirmación y adjúntala en WhatsApp.</p>
+        <img id="checkout-yape-qr" alt="QR de pago por Yape de VortexGamer" width="224" height="224">
+        <p id="checkout-yape-status" role="status"></p>
+        <a id="checkout-whatsapp" class="btn btn-outline btn-wide" target="_blank" rel="noopener noreferrer" hidden>Ya pagué · Enviar captura</a>
+      </details>
+      <p id="checkout-yape-unavailable" hidden>El pago por Yape estará disponible cuando se configure el QR y WhatsApp.</p>
       <p id="checkout-wallet-message" role="status"></p>
       <button type="button" id="checkout-wallet" class="btn btn-accent btn-wide" hidden>Pagar con saldo</button>
       <a id="checkout-topup" class="btn btn-outline btn-wide" target="_blank" rel="noopener noreferrer" hidden>Recargar saldo</a>

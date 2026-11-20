@@ -1042,3 +1042,16 @@ main > [hidden] { display: none !important; }
 #checkout-modal [hidden] {
   display: none;
 }
+
+#checkout-yape summary {
+  cursor: pointer;
+  padding: .7rem;
+  font-weight: 700;
+}
+
+#checkout-yape-qr {
+  display: block;
+  width: min(100%, 224px);
+  height: auto;
+  margin: .75rem auto;
+}
