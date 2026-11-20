@@ -577,6 +577,7 @@
 
   let storeWhatsApp = '';
   let storeYapeQr = '';
+  let storeYapeNumber = '';
   let walletSelection;
   const walletButton = $('#checkout-wallet');
   const walletMessage = $('#checkout-wallet-message');
@@ -622,6 +623,9 @@
       '\nUID: ' + uid + '\nMonto: ' + price(product.price) + '\nAdjunto mi captura de pago.'));
     yape.hidden = !hasYape;
     yape.open = false;
+    const yapeNumber = $('#checkout-yape-number');
+    yapeNumber.hidden = !/^9\d{8}$/.test(storeYapeNumber);
+    yapeNumber.textContent = 'Número de Yape: ' + storeYapeNumber.replace(/(\d{3})(?=\d)/g, '$1 ');
     $('#checkout-yape-unavailable').hidden = hasYape;
     whatsapp.hidden = true;
     qr.hidden = true;
@@ -1252,6 +1256,7 @@
       .then(data => {
         storeWhatsApp = data?.settings?.payment?.whatsapp || '';
         storeYapeQr = data?.settings?.payment?.qr || '';
+        storeYapeNumber = data?.settings?.payment?.yapeNumber || '';
         if (data?.revision > 0) applyStoreSettings(data.settings);
       }).catch(() => {});
   }

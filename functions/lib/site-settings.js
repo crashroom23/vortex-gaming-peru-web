@@ -41,7 +41,7 @@ export const defaults = {
   products:Object.fromEntries(Object.entries(priceDefaults).map(([id,cents]) => [id,{cents,image:'',visible:true}])),
   offers:{pase:passDefault,nivel:{title:'Aumento de nivel',description:'Hasta 1,400 diamantes según tu nivel',cents:1400,visible:true},tarjetas:{title:'Oferta de 3 tarjetas',description:'Mensual, semanal y semanal básica',cents:4000,visible:true}},
   fragments:fragmentDefaults,
-  payment:{whatsapp:'',qr:''}
+  payment:{whatsapp:'51960452730',qr:'/images/vortex-yape.jpeg',yapeNumber:'981359098'}
 };
 
 export async function readSettings(db) {
@@ -54,7 +54,8 @@ export async function readSettings(db) {
   return {revision:entry.revision,settings:{
     fragments:fragmentDefaults,
     ...saved,
-    offers:{pase:passDefault,...saved.offers}
+    offers:{pase:passDefault,...saved.offers},
+    payment:{yapeNumber:'',...saved.payment}
   }};
 }
 
@@ -117,5 +118,6 @@ export function validSettings(s) {
       return o && validText(o.title,70) && validText(o.description,180) && validPrice(o.cents) &&
         (o.image === undefined || validImage(o.image)) && typeof o.visible === 'boolean';
     }) && s.payment && validImage(s.payment.qr) &&
+    (s.payment.yapeNumber === undefined || (typeof s.payment.yapeNumber === 'string' && /^(?:9\d{8})?$/.test(s.payment.yapeNumber))) &&
     typeof s.payment.whatsapp === 'string' && /^(?:[1-9]\d{7,14})?$/.test(s.payment.whatsapp);
 }

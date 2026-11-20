@@ -282,6 +282,7 @@ function render() {
   if (section === 'payment') {
     const box=group('Yape manual y WhatsApp');
     field(box,'WhatsApp con código de país, solo dígitos',settings.payment,'whatsapp',{max:15});
+    field(box,'Número de Yape para pagar',settings.payment,'yapeNumber',{max:9});
     imageField(box,'Subir QR de Yape',settings.payment,'qr',{qr:true});
     box.append(action('Quitar QR',()=>{ settings.payment.qr=''; render(); }));
     box.append(element('p','El número abre WhatsApp desde el pago normal y la solicitud de recarga de saldo.'));

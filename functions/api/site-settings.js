@@ -28,7 +28,7 @@ export async function onRequest({request,env}) {
     if (request.method === 'GET') {
       const data = await readSettings(db);
       if (!isAdmin) {
-        data.settings = {...data.settings, payment:{whatsapp:data.settings.payment?.whatsapp || '', qr:data.settings.payment?.qr || ''}};
+        data.settings = {...data.settings, payment:{whatsapp:data.settings.payment?.whatsapp || '', qr:data.settings.payment?.qr || '', yapeNumber:data.settings.payment?.yapeNumber || ''}};
       }
       return reply(data);
     }
