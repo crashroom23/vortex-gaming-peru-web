@@ -110,6 +110,12 @@ export async function onRequestPost({ request, env }) {
     }
     const rawName = data.data.account_name;
     const nickname = typeof rawName === "string" && rawName.trim() ? rawName.trim().slice(0, 100) : null;
+    if (nickname?.toLowerCase() === "sandbox user") {
+      return reply({
+        ok: true, supported: true, verified: false, code: "SANDBOX_RESULT",
+        message: "Recargas América devolvió un usuario de prueba. El nombre real del jugador sigue sin confirmar."
+      });
+    }
     return reply({
       ok: true, supported: true, verified: true,
       player: { uid, nickname, regionLabel: "Sur LATAM (etiqueta de tienda, no región verificada)" }
