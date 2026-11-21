@@ -1330,3 +1330,32 @@ main > [hidden] { display: none !important; }
 @media (display-mode: standalone) {
   #install-app, #install-app-floating:not([hidden]) { display: none; }
 }
+
+.whatsapp-support {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+  z-index: 36;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: .7rem 1rem;
+  border: 1px solid #78efd0;
+  border-radius: 999px;
+  background: #12664f;
+  box-shadow: 0 6px 22px #080515aa;
+  color: #fff;
+  font: 800 .85rem/1 Inter, sans-serif;
+}
+.whatsapp-support:hover { background: #185243; }
+body.overlay-open .whatsapp-support { display: none; }
+@media (max-width: 768px), (pointer: coarse) {
+  body:has(#install-app-floating:not([hidden])) .whatsapp-support {
+    bottom: calc(4.25rem + env(safe-area-inset-bottom));
+  }
+}
+@media (display-mode: standalone) {
+  body:has(#install-app-floating:not([hidden])) .whatsapp-support {
+    bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
+}
