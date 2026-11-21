@@ -38,7 +38,7 @@ export const fragmentDefaults = {
 };
 const passDefault = {title:'Pase Booyah',description:'Pase Booyah de la temporada actual de Free Fire.',cents:500,visible:true,image:''};
 export const defaults = {
-  heading:'Catálogo de recargas', description:'Elige una categoría de Free Fire.',
+  heading:'Ruleta VortexPeru', description:'Prueba Tu Suerte',
   accent:'#a06aff', activity:true, copy:{},
   banners:Object.values(bannerDefaults).map(item => ({...item,visible:true})),
   products:Object.fromEntries(Object.entries(priceDefaults).map(([id,cents]) => [id,{cents,image:'',visible:true}])),
@@ -63,6 +63,8 @@ export async function readSettings(db) {
   return {revision:entry.revision,settings:{
     fragments:fragmentDefaults,
     ...saved,
+    heading: !saved.heading || saved.heading === 'Catálogo de recargas' ? defaults.heading : saved.heading,
+    description: !saved.description || saved.description === 'Elige una categoría de Free Fire.' ? defaults.description : saved.description,
     products,
     offers:{pase:passDefault,...saved.offers},
     payment:{yapeNumber:'',...saved.payment}

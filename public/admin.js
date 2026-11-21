@@ -433,8 +433,8 @@ $('#editor').addEventListener('submit',async event => {
 });
 const originalCopy = {
   "verifyTitle": "Verifica tu ID de Free Fire",
-  "catalogHeading": "Catálogo de recargas",
-  "catalogDescription": "Elige una categoría de Free Fire.",
+  "catalogHeading": "Ruleta VortexPeru",
+  "catalogDescription": "Prueba Tu Suerte",
   "midTitle": "¿YA ELEGISTE TUS DIAMANTES?",
   "midLabel": "VORTEX // NEXT LEVEL",
   "midBody": "Elige tu UID, verifica el jugador y pulsa Pagar para abrir la ventana con Yape o Binance Pay.",

@@ -1196,7 +1196,14 @@
   }
 
   function applyStoreSettings(settings) {
-    $('#catalog-heading').textContent = settings.heading;
+    const heading = $('#catalog-heading');
+    if (settings.heading === 'Ruleta VortexPeru') {
+      const accent = document.createElement('span');
+      accent.textContent = 'VortexPeru';
+      heading.replaceChildren('Ruleta ', accent);
+    } else {
+      heading.textContent = settings.heading;
+    }
     $('#catalog-description').textContent = settings.description;
     document.documentElement.style.setProperty('--store-accent', settings.accent);
     offerSettings = settings.offers;
