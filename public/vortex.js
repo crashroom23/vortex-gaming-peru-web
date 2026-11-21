@@ -85,12 +85,11 @@
         'error-callback': () => { uidTurnstileToken = ''; }
       });
     } catch (_) {
-      // El formulario sigue accesible para el modo de demostración.
       const result = $('#verify-result');
       if (uidValidationConfig?.validationReady && result) {
         result.hidden = false;
         result.className = 'verify-result error';
-        result.textContent = 'El control de seguridad no cargó. Comprueba tu conexión o utiliza el modo demostración.';
+        result.textContent = 'El control de seguridad no cargó. Comprueba tu conexión.';
       }
     }
   }
@@ -246,7 +245,7 @@
       '</div>').join('') :
       '<div class="panel-empty"><span class="big-icon">◇</span><strong>TU CARRITO ESTÁ VACÍO</strong><p>Explora los paquetes y añade tus favoritos para probar la nueva experiencia.</p></div>';
     $('#clear-cart').hidden = count === 0;
-    $('#demo-checkout').disabled = count === 0;
+    $('#cart-whatsapp').disabled = count === 0;
   }
 
   function renderFavorites() {
@@ -311,7 +310,7 @@
     if (!product) return;
     cart[id] = Math.min(99, (cart[id] || 0) + 1);
     refresh();
-    notify(product.amount + ' diamantes añadidos al carrito de prueba');
+    notify(product.amount + ' diamantes añadidos al carrito');
   }
 
   function toggleFavorite(id) {
@@ -610,15 +609,11 @@
       return;
     }
     const currentPlayer = playerSession?.uid === currentUID ? playerSession : null;
-    const demo = Boolean(currentPlayer?.demo);
-    $('#checkout-player').textContent = (demo ? 'DEMO (sin verificar) · ' : currentPlayer ? currentPlayer.nickname + ' · ' : 'UID · ') + currentUID;
+    $('#checkout-player').textContent = (currentPlayer ? currentPlayer.nickname + ' · ' : 'UID · ') + currentUID;
     $('#checkout-package').textContent = product.title ?? (product.amount + ' + ' + product.bonus + ' diamantes');
     $('#checkout-price').textContent = price(product.price);
-    $('#checkout-demo').hidden = !demo;
-    $('#checkout-options').hidden = demo;
     openLayer('checkout-modal');
-    if (!demo) void showCheckoutOptions(product, currentUID, Boolean(currentPlayer));
-    else walletSelection = null;
+    void showCheckoutOptions(product, currentUID, Boolean(currentPlayer));
   }
 
   document.addEventListener('click', event => {
@@ -636,7 +631,7 @@
         case 'remove': delete cart[id]; refresh(); notify('Paquete eliminado del carrito'); break;
         case 'detail':
           showInfo(product.amount + ' DIAMANTES',
-            'Incluye ' + product.amount + ' diamantes y ' + product.bonus + ' adicionales de bono por ' + price(product.price) + '. Esta es una ficha de producto de demostración; todavía no se aceptan pagos.');
+            'Incluye ' + product.amount + ' diamantes y ' + product.bonus + ' adicionales de bono por ' + price(product.price) + '. Haz tu pedido por WhatsApp.');
           break;
       }
       return;
@@ -696,27 +691,6 @@
     });
   });
   $('#cart-trigger').addEventListener('click', () => openLayer('cart-panel'));
-  $('#simulate-verify').addEventListener('click', () => {
-    const uidInput = $('#uid');
-    const uid = uidInput.value.trim() || '123456789';
-    if (!/^\d{8,12}$/.test(uid)) {
-      notify('Para probar, introduce un UID de 8 a 12 dígitos.');
-      uidInput.focus();
-      return;
-    }
-    if (!uidInput.value.trim()) uidInput.value = uid;
-    playerSession = { uid, region: 'br', nickname: 'JUGADOR DEMO', demo: true };
-    const result = $('#verify-result');
-    result.hidden = false;
-    result.className = 'verify-result';
-    result.textContent = 'MODO DEMO: UID ' + uid + ' NO verificado con Free Fire. Solo podrás visualizar el diseño de pago.';
-    const status = $('#verified-status');
-    status.hidden = false;
-    status.textContent = '✓ MODO DE PRUEBA · SIN VERIFICACIÓN REAL';
-    status.className = 'verified-status is-demo';
-    notify('Vista de demostración activada. Selecciona un paquete y pulsa Pagar.');
-    $('#tienda').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
   ['uid'].forEach(id => document.getElementById(id).addEventListener('input', () => {
     playerSession = null;
     $('#verified-status').hidden = true;
@@ -834,7 +808,6 @@
     accountDashboard.hidden = !username;
     $('#account-modal').classList.toggle('has-account', Boolean(username));
     accountUsername = username;
-    $('#account-preview-note').hidden = Boolean(username);
     accountMessage.textContent = '';
     accountOrders.replaceChildren();
     accountMore.hidden = true;
@@ -899,10 +872,10 @@
     void updateAccount('DELETE');
   });
   $('#overlay').addEventListener('click', () => closeLayer());
-  $('#demo-checkout').addEventListener('click', () => {
+  $('#cart-whatsapp').addEventListener('click', () => {
     const uidInput = $('#uid');
     const uid = uidInput.value.trim();
-    if (!/^\d{8,12}$/.test(uid) || playerSession?.demo) {
+    if (!/^\d{8,12}$/.test(uid)) {
       closeLayer();
       notify('Escribe el UID de tu cuenta de Free Fire para enviar el pedido.');
       uidInput.focus();
@@ -920,7 +893,7 @@
     if (href) window.open(href, '_blank', 'noopener,noreferrer');
     else notify('WhatsApp no está disponible en este momento.');
   });
-  $('#clear-cart').addEventListener('click', () => { cart = {}; refresh(); notify('Carrito de prueba vaciado'); });
+  $('#clear-cart').addEventListener('click', () => { cart = {}; refresh(); notify('Carrito vaciado'); });
   function openCategoryFromHash(hash = location.hash) {
     const id = hash.slice(1);
     const category = document.getElementById(id)?.dataset.category;
@@ -999,7 +972,7 @@
       } else {
         if (!response.ok || !data.ok) throw new Error(data.message || 'No fue posible validar el UID.');
         if (data.supported !== true || data.verified !== true) {
-          throw new Error(data.message || 'Este UID no pudo verificarse. Utiliza el modo demostración para explorar la web.');
+          throw new Error(data.message || 'Este UID no pudo verificarse.');
         }
       }
       result.className = 'verify-result ok';
@@ -1012,8 +985,7 @@
       playerSession = {
         uid,
         nickname: data.player.nickname || 'Cuenta validada',
-        region,
-        demo: false
+        region
       };
       const status = $('#verified-status');
       status.hidden = false;
@@ -1031,74 +1003,6 @@
       button.innerHTML = originalLabel;
     }
   });
-
-  const sampleNames = [
-    'KIRAツ', 'NOVA亗', 'RAYO⚡', 'LUNA彡', 'AKIRA✦', 'ZETAシ',
-    'NEON亗', 'YUKIツ', 'KAZE✧', 'DRACO彡', 'RYU⚡', 'NIX✦'
-  ];
-  const nicknameRoots = [
-    'Ghost', 'Sombra', 'Fénix', 'Demon', 'Lobo', 'Kenshi', 'Ninja', 'Ragnar', 'Venom', 'Zafiro',
-    'Raven', 'Kitsune', 'Tigre', 'Skull', 'Blade', 'Onyx', 'Zero', 'Kronos', 'Lynx', 'Chaos'
-  ];
-  const nicknameStyles = [
-    name => '亗' + name, name => name + 'ツ', name => '꧁' + name + '꧂', name => name + '〆',
-    name => 'x' + name + 'x', name => name + '彡', name => 'ᴳᵀ' + name, name => name + '⚡',
-    name => 'SR・' + name, name => name + '⁹⁹', name => '『' + name + '』', name => name + 'ᴳᵒᵈ',
-    name => 'FF・' + name, name => name + '✦', name => '么' + name, name => name + 'ᵖʳᵒ',
-    name => 'RZ_' + name, name => name + '᭄', name => 'ᴮᴼˢˢ' + name, name => name + '×7'
-  ];
-  const activity = document.createElement('section');
-  activity.className = 'activity-ticker';
-  activity.setAttribute('aria-label', 'Ejemplos de actividad de recargas');
-  activity.innerHTML = `
-    <div class="activity-ticker-controls">
-      <span>ACTIVIDAD DE EJEMPLO</span>
-      <button type="button" class="activity-toggle">Pausar</button>
-    </div>
-    <div class="activity-window"><div class="activity-track"></div></div>`;
-
-  const samples = document.createElement('ul');
-  samples.className = 'activity-items';
-  const formatter = new Intl.NumberFormat('es-PE');
-  const selectedNames = [
-    ...sampleNames,
-    ...nicknameRoots.flatMap(name => nicknameStyles.map(style => style(name)))
-  ];
-  const sampleAmounts = PRODUCTS.flatMap(product => [1, 2, 3].map(quantity => ({
-    base: product.id * quantity,
-    bonus: Number(product.bonus) * quantity
-  })));
-  const cardsPerVisit = 24;
-  let previousAmount;
-  for (let i = 0; i < cardsPerVisit; i += 1) {
-    const [nickname] = selectedNames.splice(Math.floor(Math.random() * selectedNames.length), 1);
-    const choices = sampleAmounts.filter(amount => amount !== previousAmount);
-    const amount = choices[Math.floor(Math.random() * choices.length)];
-    previousAmount = amount;
-    const item = document.createElement('li');
-    item.className = 'activity-pill';
-    item.innerHTML = '<span class="activity-dot" aria-hidden="true"></span><span class="activity-game">FREE FIRE</span>';
-    const player = document.createElement('strong');
-    player.className = 'activity-player';
-    player.textContent = nickname;
-    const diamonds = document.createElement('strong');
-    diamonds.textContent = formatter.format(amount.base) + ' + ' + formatter.format(amount.bonus) +
-      ' diamantes (' + formatter.format(amount.base + amount.bonus) + ' 💎)';
-    item.append(player, ' · ', diamonds);
-    samples.append(item);
-  }
-
-  const duplicate = samples.cloneNode(true);
-  duplicate.setAttribute('aria-hidden', 'true');
-  const activityTrack = activity.querySelector('.activity-track');
-  activityTrack.style.animationDuration = cardsPerVisit * 7.75 + 's';
-  activityTrack.append(samples, duplicate);
-  const activityToggle = activity.querySelector('.activity-toggle');
-  activityToggle.addEventListener('click', () => {
-    const paused = activity.classList.toggle('is-paused');
-    activityToggle.textContent = paused ? 'Reanudar' : 'Pausar';
-  });
-  $('.features-bar').before(activity);
 
   const editableCopy = {
   "verifyTitle": ".verify-card-head h2",
@@ -1127,10 +1031,6 @@
       const core = coreSections.get(block.id);
       if (core) {
         core.hidden = !block.visible;
-        if (block.id === 'beneficios') {
-          activity.hidden = !block.visible || activity.dataset.settingHidden === 'true';
-          mainContent.append(activity);
-        }
         mainContent.append(core);
         continue;
       }
@@ -1182,8 +1082,6 @@
     $('#catalog-heading').textContent = settings.heading;
     $('#catalog-description').textContent = settings.description;
     document.documentElement.style.setProperty('--store-accent', settings.accent);
-    activity.hidden = !settings.activity;
-    activity.dataset.settingHidden = String(!settings.activity);
     offerSettings = settings.offers;
     if (settings.fragments) fragments = settings.fragments;
     for (const [key,selector] of Object.entries(editableCopy)) {

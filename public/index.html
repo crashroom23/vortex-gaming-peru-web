@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0a0719">
-  <meta name="description" content="VortexGamer Perú — descubre paquetes de diamantes Free Fire con bonus. Tienda en modo demostración.">
+  <meta name="description" content="VortexGamer Perú — descubre paquetes de diamantes Free Fire con bonus. Pedidos por WhatsApp.">
   <title>VortexGamer Perú | Tu próxima victoria empieza aquí</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/vortex.css?v=store-clean">
-  <script src="/vortex.js?v=store-clean" defer></script>
+  <link rel="stylesheet" href="/vortex.css?v=manual-store">
+  <script src="/vortex.js?v=manual-store" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -101,9 +101,8 @@
           <label for="uid">UID DE FREE FIRE</label>
           <input id="uid" name="uid" inputmode="numeric" autocomplete="off" placeholder="Ingresa tu UID" minlength="8" maxlength="12" pattern="[0-9]{8,12}" required>
           <div id="uid-turnstile" class="uid-turnstile" hidden aria-label="Comprobación de seguridad"></div>
-          <button type="submit" id="verify-btn" class="btn btn-accent btn-wide">VERIFICAR UID <svg><use href="#icon-arrow"/></svg></button><button type="button" id="simulate-verify" class="btn btn-ghost btn-wide demo-verify-button">Probar flujo demo</button>
+          <button type="submit" id="verify-btn" class="btn btn-accent btn-wide">VERIFICAR UID <svg><use href="#icon-arrow"/></svg></button>
           <div class="verify-result" id="verify-result" role="status" aria-live="polite" hidden></div><div class="verified-status" id="verified-status" hidden></div>
-          <p class="verify-footnote">La verificación real requiere una API activa. El modo demo NO verifica tu identidad ni permite pagar.</p>
         </form>
       </div>
     </section>
@@ -214,7 +213,7 @@
         <div><h3>Oferta de 3 tarjetas</h3><p>Mensual, semanal y semanal básica</p><strong>S/ 40.00</strong><p><button type="button" class="btn btn-accent" id="buy-card-offer">Comprar</button></p></div>
       </article>
       <div class="empty-state" id="empty-state" role="status" hidden><strong id="category-status"></strong><p>Aún no hay productos disponibles en esta categoría.</p></div>
-      <div class="shop-note"><span>ℹ</span><p><strong>MODO PRUEBA.</strong> Los pagos por Yape se revisan con la captura enviada por WhatsApp. Los pedidos con saldo quedan pendientes de entrega.</p></div>
+      <div class="shop-note"><span>ℹ</span><p>Envía tu comprobante por WhatsApp. Revisaremos el pago antes de entregar tu pedido.</p></div>
     </section>
 
     </div>
@@ -225,7 +224,7 @@
   <aside class="side-panel" id="cart-panel" role="dialog" aria-modal="true" aria-labelledby="cart-title" aria-hidden="true" inert>
     <div class="panel-head"><div><span>MI SELECCIÓN</span><h2 id="cart-title">TU CARRITO <span id="drawer-count">0</span></h2></div><button type="button" class="close-button" data-close aria-label="Cerrar carrito">×</button></div>
     <div class="panel-items" id="cart-items"></div>
-    <div class="panel-bottom"><div class="subtotal"><span>SUBTOTAL</span><strong id="cart-total">S/ 0.00</strong></div><p>Coordina tu pedido y envía tu comprobante por WhatsApp.</p><button type="button" class="btn btn-accent btn-wide" id="demo-checkout">PEDIR POR WHATSAPP <svg><use href="#icon-arrow"/></svg></button><button type="button" class="clear-cart" id="clear-cart">VACIAR CARRITO</button></div>
+    <div class="panel-bottom"><div class="subtotal"><span>SUBTOTAL</span><strong id="cart-total">S/ 0.00</strong></div><p>Coordina tu pedido y envía tu comprobante por WhatsApp.</p><button type="button" class="btn btn-accent btn-wide" id="cart-whatsapp">PEDIR POR WHATSAPP <svg><use href="#icon-arrow"/></svg></button><button type="button" class="clear-cart" id="clear-cart">VACIAR CARRITO</button></div>
   </aside>
   <aside class="side-panel" id="favorites-panel" role="dialog" aria-modal="true" aria-labelledby="favorites-title" aria-hidden="true" inert>
     <div class="panel-head"><div><span>TUS ELEGIDOS</span><h2 id="favorites-title">FAVORITOS ♥</h2></div><button type="button" class="close-button" data-close aria-label="Cerrar favoritos">×</button></div>
@@ -240,7 +239,6 @@
     <button type="button" class="close-button modal-close" data-close aria-label="Cerrar Mi cuenta">×</button>
     <h2 id="account-title">MI CUENTA</h2>
     <p id="account-message" role="status"></p>
-    <p id="account-preview-note">Cuenta de prueba. Crea una contraseña nueva para esta vista previa.</p>
     <form id="account-form" hidden>
       <label for="account-username">Usuario</label>
       <input id="account-username" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required minlength="3" maxlength="24" pattern="[a-zA-Z0-9_]{3,24}">
@@ -339,7 +337,6 @@
       <button type="button" id="checkout-topup" class="btn btn-outline btn-wide" hidden>Recargar saldo</button>
       <div id="checkout-wallet-receipt" hidden></div>
     </div>
-    <p id="checkout-demo" class="checkout-warning" hidden>Estás en modo de prueba. Escribe tu UID y verifica tu cuenta para hacer un pedido.</p>
   </div>
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
