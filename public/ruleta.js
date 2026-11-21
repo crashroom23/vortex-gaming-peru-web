@@ -6,7 +6,7 @@ const context = canvas.getContext('2d');
 const status = get('status');
 const form = get('spin');
 const button = form.querySelector('button');
-const colors = ['#593698','#852265','#2f478a','#176367','#67409a','#983e55','#3b5596','#385e41','#613d31'];
+const colors = ['#593698','#852265','#2f478a','#176367','#67409a','#983e55','#3b5596','#385e41','#613d31','#6d2855','#244660','#6b4d27'];
 let angle = 0;
 let touched = false;
 let currentPrizes = [];
@@ -114,7 +114,7 @@ form.addEventListener('submit',async event => {
     status.textContent = 'Girando…';
     if (animate)
       await new Promise(resolve => setTimeout(resolve,4000));
-    status.textContent = 'Resultado del código ' + code;
+    status.textContent = result.test ? 'Resultado de prueba, sin cupón canjeable.' : 'Resultado del código ' + code;
     get('prize').textContent = result.prize;
     get('coupon').value = result.coupon || '';
     get('roulette-coupon').hidden = !result.coupon;

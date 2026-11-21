@@ -10,8 +10,47 @@ const hosts = new Set([
 const reply = (data, status = 200) => Response.json(data, {
   status, headers:{'Cache-Control':'no-store'}
 });
-const miss = 'Será para la próxima';
-const isMiss = label => label.trim().normalize('NFD').replace(/\p{M}/gu, '').toLowerCase() === 'sera para la proxima';
+const miss = 'Sigue intentando';
+const isMiss = label => ['sigue intentando', 'sera para la proxima'].includes(
+  label.trim().normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
+);
+const testUntil = Date.parse('2026-11-29T05:00:00Z');
+const testCodeHashes = new Set([
+  '6a383f62d734ca632e156c62e199daeb281ea8f7154e6fabd90b3f4bd7e184ba',
+  '7b445231ac70d02eba45330d202ad6f7cb388791b19a5cf2224899e96cce2ae0',
+  '1e62374903043f0fbea603857ab9a18036c6e7cd63369019866299348e8fc64d',
+  '3744321309e0a1ea141e1f6d51e4171c3935d46ee13b1b3261ccd7b0b64191a1',
+  '9f0d2562bed2d1dbe7e81e43e7a1ce8a9655a19a19b857c43374961ff6616ab5',
+  '210c730837a7445053aba5af4dc168054de119cef0b1be6316a9c58d946dfa05',
+  '4079f388670a7e5b1f05d007a3b67cd7a677c1b86c0fb2a7543eb46562241328',
+  'c4158e6e94df8437441524155dece76019e08fde2226f37c50c23a93f24033db',
+  'b4367585caaf577fc71b629cac1ce7c1b2463e387e50e362166840fbb2f119bb',
+  '9e4e06c4854113221887b92f62f2e91f9bdcc0311c0ed5ecd19346ae6979c971',
+]);
+const isTestCode = code => typeof code === 'string' && /^VT-[A-F0-9]{16}$/.test(code);
+
+async function registerTestCode(db, code) {
+  if (Date.now() >= testUntil) return;
+  const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(code));
+  const hash = Array.from(new Uint8Array(bytes), byte => byte.toString(16).padStart(2,'0')).join('');
+  if (!testCodeHashes.has(hash)) return;
+  await db.prepare('INSERT INTO roulette_entries (code, confirmed_at) VALUES (?,CURRENT_TIMESTAMP) ON CONFLICT(code) DO NOTHING')
+    .bind(code).run();
+}
+
+function buildWheel(options) {
+  const wheel = options.map(label => isMiss(label) ? miss : label);
+  if (wheel.length && !wheel.includes(miss)) wheel.push(miss);
+  return wheel;
+}
+
+function randomIndex(count) {
+  const limit = 2 ** 32 - (2 ** 32 % count);
+  const random = new Uint32Array(1);
+  do { crypto.getRandomValues(random); } while (random[0] >= limit);
+  return random[0] % count;
+}
+
 const token = prefix => prefix + crypto.randomUUID().replaceAll('-', '').toUpperCase();
 const isCode = (code, prefix) => typeof code === 'string' && code.startsWith(prefix) &&
   /^[A-F0-9]{32}$/.test(code.slice(prefix.length));
@@ -20,9 +59,11 @@ async function admin(db, body) {
   const {action, code} = body;
   if (action === 'prizes') {
     const prizes = body.prizes;
-    if (!Array.isArray(prizes) || prizes.length < 2 || prizes.length > 8 ||
-        prizes.some(label => typeof label !== 'string' || !label.trim() || label.length > 40 || isMiss(label)))
-      return reply({message:'Ingresa de 2 a 8 premios de hasta 40 caracteres. «Será para la próxima» se agrega automáticamente.'},400);
+    if (!Array.isArray(prizes) || prizes.length < 2 || prizes.length > 12 ||
+        prizes.some(label => typeof label !== 'string' || !label.trim() || label.length > 40))
+      return reply({message:'Ingresa de 2 a 12 casillas de hasta 40 caracteres.'},400);
+    if (!prizes.some(label => !isMiss(label)) || buildWheel(prizes).length > 12)
+      return reply({message:'Incluye al menos un premio y reserva una casilla para «Sigue intentando».'},400);
     await db.prepare('INSERT INTO roulette_settings VALUES (1,?) ON CONFLICT(id) DO UPDATE SET prizes=excluded.prizes')
       .bind(JSON.stringify(prizes.map(label => label.trim()))).run();
     return reply({message:'Premios guardados.'});
@@ -78,26 +119,26 @@ async function createOrder(db, {order, uid, productId, cents}) {
   return reply({code:row.code});
 }
 
-async function spin(db, code, prizes) {
-  if (!isCode(code,'VX-')) return reply({message:'Escribe un código de giro válido.'},400);
+async function spin(db, code, wheel) {
+  const test = isTestCode(code);
+  if (!test && !isCode(code,'VX-')) return reply({message:'Escribe un código de giro válido.'},400);
+  if (test) await registerTestCode(db, code);
   let row = await db.prepare('SELECT confirmed_at, prize, coupon, wheel, sector FROM roulette_entries WHERE code=?').bind(code).first();
-  if (!row) return reply({message:'Código de giro no encontrado.'},404);
+  if (!row) return reply({message:'Código de giro no encontrado o vencido.'},404);
   if (!row.confirmed_at) return reply({message:'El código se activa cuando confirmemos tu pago.'},409);
   const existing = Boolean(row.prize);
   if (!existing) {
-    if (!prizes.length) return reply({message:'La ruleta todavía no tiene premios configurados.'},503);
-    const wheel = [miss, ...prizes];
-    const tickets = 5 * prizes.length;
-    const limit = 2 ** 32 - (2 ** 32 % tickets);
-    const random = new Uint32Array(1);
-    do { crypto.getRandomValues(random); } while (random[0] >= limit);
-    const ticket = random[0] % tickets;
-    const sector = ticket < prizes.length ? ticket + 1 : 0;
+    const wins = [];
+    const misses = [];
+    wheel.forEach((label,index) => (isMiss(label) ? misses : wins).push(index));
+    if (!wins.length) return reply({message:'La ruleta todavía no tiene premios configurados.'},503);
+    const pool = randomIndex(5) === 0 ? wins : misses;
+    const sector = pool[randomIndex(pool.length)];
     await db.prepare('UPDATE roulette_entries SET prize=?,coupon=?,wheel=?,sector=? WHERE code=? AND prize IS NULL')
-      .bind(wheel[sector],sector ? token('VP-') : null,JSON.stringify(wheel),sector,code).run();
+      .bind(wheel[sector],!test && !isMiss(wheel[sector]) ? token('VP-') : null,JSON.stringify(wheel),sector,code).run();
     row = await db.prepare('SELECT prize, coupon, wheel, sector FROM roulette_entries WHERE code=?').bind(code).first();
   }
-  return reply({prize:row.prize,coupon:isMiss(row.prize) ? null : row.coupon,prizes:JSON.parse(row.wheel),sector:row.sector,existing});
+  return reply({prize:row.prize,coupon:isMiss(row.prize) ? null : row.coupon,prizes:JSON.parse(row.wheel),sector:row.sector,existing,test});
 }
 
 export async function onRequest({request, env}) {
@@ -129,9 +170,10 @@ export async function onRequest({request, env}) {
     if (isAdmin && body) return await admin(db,body);
     if (body?.action === 'order') return await createOrder(db,body);
     const saved = await db.prepare('SELECT prizes FROM roulette_settings WHERE id=1').first();
-    const prizes = saved ? JSON.parse(saved.prizes).filter(label => !isMiss(label)) : [];
-    if (request.method === 'GET') return reply({prizes,wheel:prizes.length ? [miss, ...prizes] : []});
-    if (body?.action === 'spin') return await spin(db,body.code,prizes);
+    const prizes = saved ? JSON.parse(saved.prizes) : [];
+    const wheel = buildWheel(prizes);
+    if (request.method === 'GET') return reply({prizes,wheel});
+    if (body?.action === 'spin') return await spin(db,body.code,wheel);
     return reply({message:'Acción inválida.'},400);
   } catch {
     return reply({message:'No pudimos acceder a la ruleta. Intenta de nuevo.'},503);
