@@ -3,7 +3,11 @@ import {authorized} from './site-settings.js';
 import {checkoutPackage} from './preview-orders.js';
 import {readSettings} from '../lib/site-settings.js';
 
-const previewHost = 'preview-gamer-aura-v2.vortex-gaming-peru-web.pages.dev';
+const storefrontHosts = new Set([
+  'vortexperu.store',
+  'vortex-gaming-peru-web.pages.dev',
+  'preview-gamer-aura-v2.vortex-gaming-peru-web.pages.dev'
+]);
 const reply = (body, status = 200) => Response.json(body, {status, headers:{'Cache-Control':'no-store'}});
 const walletPurchasesEnabled = false;
 const validCents = (cents) => Number.isSafeInteger(cents) && cents > 0 && cents <= 9999999;
@@ -157,7 +161,7 @@ async function customer(request, db, url, body) {
 
 export async function onRequest({request, env}) {
   const url = new URL(request.url);
-  if (url.hostname !== previewHost) return reply({message:'Ruta no disponible.'}, 404);
+  if (!storefrontHosts.has(url.hostname)) return reply({message:'Ruta no disponible.'}, 404);
   const db = env.ORDERS_DB;
   if (!db || (env.PREVIEW_ACCOUNT_PEPPER?.length ?? 0) < 32) {
     return reply({message:'La billetera aún no está habilitada en esta vista previa.'}, 503);

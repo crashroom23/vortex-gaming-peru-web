@@ -1,4 +1,8 @@
-const previewHost = 'preview-gamer-aura-v2.vortex-gaming-peru-web.pages.dev';
+const storefrontHosts = new Set([
+  'vortexperu.store',
+  'vortex-gaming-peru-web.pages.dev',
+  'preview-gamer-aura-v2.vortex-gaming-peru-web.pages.dev'
+]);
 const cookieName = '__Host-vortex-session';
 const sessionSeconds = 7 * 24 * 60 * 60;
 const encoder = new TextEncoder();
@@ -53,7 +57,7 @@ export async function readSessionToken(request) {
 
 export async function onRequest({request, env}) {
   const url = new URL(request.url);
-  if (url.hostname !== previewHost) return reply({message: 'Ruta no disponible.'}, 404);
+  if (!storefrontHosts.has(url.hostname)) return reply({message: 'Ruta no disponible.'}, 404);
 
   const method = request.method;
   if (!['GET', 'POST', 'DELETE'].includes(method)) return reply({message: 'Método no permitido.'}, 405);

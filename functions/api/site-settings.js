@@ -1,6 +1,10 @@
 import {readSettings, validSettings} from '../lib/site-settings.js';
 
-const previewHost = 'preview-gamer-aura-v2.vortex-gaming-peru-web.pages.dev';
+const storefrontHosts = new Set([
+  'vortexperu.store',
+  'vortex-gaming-peru-web.pages.dev',
+  'preview-gamer-aura-v2.vortex-gaming-peru-web.pages.dev'
+]);
 const reply = (data,status=200) => Response.json(data,{status,headers:{'Cache-Control':'no-store'}});
 export async function authorized(request, secret) {
   if (!secret || secret.length < 32) return false;
@@ -18,7 +22,7 @@ export async function onRequest({request,env}) {
   const url = new URL(request.url);
   const db = env.ORDERS_DB;
   const isAdmin = url.searchParams.get('admin') === '1' || request.method !== 'GET';
-  if (url.hostname !== previewHost) return reply({message:'Ruta no disponible.'},404);
+  if (!storefrontHosts.has(url.hostname)) return reply({message:'Ruta no disponible.'},404);
   try {
     if (isAdmin) {
       if (!db || !env.VORTEX_ADMIN_KEY || env.VORTEX_ADMIN_KEY.length < 32)
