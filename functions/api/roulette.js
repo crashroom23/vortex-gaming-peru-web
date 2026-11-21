@@ -11,6 +11,8 @@ const reply = (data, status = 200) => Response.json(data, {
   status, headers:{'Cache-Control':'no-store'}
 });
 const miss = 'Sigue intentando';
+const discount = 'S/ 1 de descuento (desde 1,000 diamantes)';
+const isDiscount = label => label === discount || /^S\/ 1\.00 DESCUENTO \(de 1k para arriba\)$/i.test(label.trim());
 const isMiss = label => ['sigue intentando', 'sera para la proxima'].includes(
   label.trim().normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
 );
@@ -39,8 +41,9 @@ async function registerTestCode(db, code) {
 }
 
 function buildWheel(options) {
-  const wheel = options.map(label => isMiss(label) ? miss : label);
-  if (wheel.length && !wheel.includes(miss)) wheel.push(miss);
+  const wheel = options.length ? options.map(label => isDiscount(label) ? discount : miss) : Array(8).fill(miss);
+  if (!wheel.includes(discount)) wheel[0] = discount;
+  if (!wheel.includes(miss)) wheel[wheel.length - 1] = miss;
   return wheel;
 }
 
@@ -60,12 +63,11 @@ async function admin(db, body) {
   if (action === 'prizes') {
     const prizes = body.prizes;
     if (!Array.isArray(prizes) || prizes.length < 2 || prizes.length > 12 ||
-        prizes.some(label => typeof label !== 'string' || !label.trim() || label.length > 40))
-      return reply({message:'Ingresa de 2 a 12 casillas de hasta 40 caracteres.'},400);
-    if (!prizes.some(label => !isMiss(label)) || buildWheel(prizes).length > 12)
-      return reply({message:'Incluye al menos un premio y reserva una casilla para «Sigue intentando».'},400);
+        prizes.some(label => typeof label !== 'string' || (!isMiss(label) && !isDiscount(label))) ||
+        !prizes.some(isMiss) || !prizes.some(isDiscount))
+      return reply({message:'Usa de 2 a 12 casillas e incluye «Sigue intentando» y «' + discount + '».'},400);
     await db.prepare('INSERT INTO roulette_settings VALUES (1,?) ON CONFLICT(id) DO UPDATE SET prizes=excluded.prizes')
-      .bind(JSON.stringify(prizes.map(label => label.trim()))).run();
+      .bind(JSON.stringify(buildWheel(prizes))).run();
     return reply({message:'Premios guardados.'});
   }
   if (action === 'create') {
@@ -172,7 +174,7 @@ export async function onRequest({request, env}) {
     const saved = await db.prepare('SELECT prizes FROM roulette_settings WHERE id=1').first();
     const prizes = saved ? JSON.parse(saved.prizes) : [];
     const wheel = buildWheel(prizes);
-    if (request.method === 'GET') return reply({prizes,wheel});
+    if (request.method === 'GET') return reply({prizes:wheel,wheel});
     if (body?.action === 'spin') return await spin(db,body.code,wheel);
     return reply({message:'Acción inválida.'},400);
   } catch {

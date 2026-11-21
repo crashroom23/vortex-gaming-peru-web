@@ -257,7 +257,7 @@ function renderRouletteAdmin() {
   const prizes = element('textarea');
   prizes.rows = 5;
   prizes.setAttribute('aria-label','Casillas, una por línea');
-  box.append(element('p','Escribe entre 2 y 12 casillas, una por línea. Puedes repetir «Sigue intentando». Esas casillas comparten el 80 % y los premios el 20 %. Si omites «Sigue intentando», se agrega una casilla automáticamente.'),prizes);
+  box.append(element('p','Escribe de 2 a 12 casillas, una por línea. Incluye «Sigue intentando» (80 %) y «S/ 1 de descuento (desde 1,000 diamantes)» (20 %). Puedes repetir las casillas.'),prizes);
   const codes = group('Códigos y cupones');
   const input = walletInput(codes,'Código VX de giro o cupón VP de premio',{maxLength:35});
   const output = walletInput(codes,'Código generado',{readOnly:true});
