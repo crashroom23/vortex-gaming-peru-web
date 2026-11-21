@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/vortex.css?v=wallet-topup">
-  <script src="/vortex.js?v=wallet-topup" defer></script>
+  <link rel="stylesheet" href="/vortex.css?v=wallet-receipt">
+  <script src="/vortex.js?v=wallet-receipt" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -319,7 +319,7 @@
       <p id="checkout-wallet-message" role="status"></p>
       <button type="button" id="checkout-wallet" class="btn btn-accent btn-wide" hidden>Pagar con saldo</button>
       <button type="button" id="checkout-topup" class="btn btn-outline btn-wide" hidden>Recargar saldo</button>
-      <p id="checkout-wallet-receipt" hidden></p>
+      <div id="checkout-wallet-receipt" hidden></div>
     </div>
     <div id="checkout-demo">
     <p class="checkout-warning" id="checkout-warning"><strong>VISTA PREVIA:</strong> no hay cobros ni QR activos. No transfieras dinero desde esta ventana.</p>

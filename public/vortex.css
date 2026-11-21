@@ -1121,3 +1121,16 @@ main > [hidden] { display: none !important; }
 #topup-back {
   margin-top: .65rem;
 }
+
+#checkout-wallet-receipt {
+  max-width: 520px;
+  margin: 1rem auto 0;
+}
+
+#checkout-wallet-receipt img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-bottom: .85rem;
+  border-radius: 14px;
+}

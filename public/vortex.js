@@ -728,6 +728,82 @@
     }
   }
 
+  function showWalletReceipt(order, packageName) {
+    const paid = price(order.cents / 100);
+    const timestamp = new Date(order.createdAt.replace(' ', 'T') + 'Z');
+    const date = new Intl.DateTimeFormat('es-PE', {
+      dateStyle:'short', timeStyle:'short', timeZone:'America/Lima'
+    }).format(timestamp);
+    const image = document.createElement('img');
+    image.width = 900;
+    image.height = 920;
+    image.alt = 'Comprobante de pago con saldo. Entrega pendiente. ' + packageName +
+      '. Importe: ' + paid + '. ID: ' + order.uid + '. Pedido: ' + order.code + '. Fecha: ' + date;
+    const escapeXml = value => String(value).replace(/[&<>]/g, character => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;'
+    })[character]);
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="900" height="920" viewBox="0 0 900 920">
+      <defs>
+        <linearGradient id="background" x2="1" y2="1">
+          <stop stop-color="#251048"/><stop offset="1" stop-color="#080615"/>
+        </linearGradient>
+        <linearGradient id="accent">
+          <stop stop-color="#5de9ff"/><stop offset="1" stop-color="#df65ff"/>
+        </linearGradient>
+      </defs>
+      <rect width="900" height="920" fill="url(#background)"/>
+      <path d="M0 160V0h160z M900 752v168H732z" fill="#922fff" opacity=".48"/>
+      <path d="M0 225v-34L191 0h34z M900 687v34L701 920h-34z" fill="#df65ff" opacity=".65"/>
+      <rect x="36" y="36" width="828" height="848" rx="34" fill="#100b25" stroke="#a94af9" stroke-width="3"/>
+      <g font-family="Arial, sans-serif" fill="#f8f4ff">
+        <text x="76" y="112" font-size="44" font-weight="900" font-style="italic">VORTEX<tspan fill="#df65ff">GAMER</tspan></text>
+        <text x="76" y="156" fill="#6de9ff" font-size="23" font-weight="bold">FREE FIRE</text>
+        <text x="76" y="226" font-size="47" font-weight="900">PAGO REGISTRADO</text>
+        <text x="76" y="268" fill="#ffc978" font-size="24">Entrega pendiente</text>
+        <rect x="76" y="306" width="748" height="128" rx="18" fill="#211137" stroke="#bb54ff" stroke-width="2"/>
+        <path d="M102 354l21-24h55l21 24-48 49z" fill="url(#accent)"/>
+        <text x="225" y="350" fill="#df8dff" font-size="23" font-weight="bold">PAQUETE</text>
+        <text x="225" y="400" font-size="40" font-weight="bold">${escapeXml(packageName)}</text>
+        <rect x="76" y="452" width="748" height="122" rx="18" fill="#211137" stroke="#bb54ff" stroke-width="2"/>
+        <text x="103" y="495" fill="#df8dff" font-size="23" font-weight="bold">TOTAL PAGADO CON SALDO</text>
+        <text x="103" y="548" font-size="49" font-weight="bold">${escapeXml(paid)}</text>
+        <text x="76" y="628" fill="#df8dff" font-size="22" font-weight="bold">ID DEL JUGADOR</text>
+        <text x="76" y="667" font-size="32" font-weight="bold">${escapeXml(order.uid)}</text>
+        <text x="76" y="723" fill="#df8dff" font-size="22" font-weight="bold">CÓDIGO DE PEDIDO</text>
+        <text x="76" y="764" font-family="monospace" font-size="27">${escapeXml(order.code)}</text>
+        <path d="M76 797h748" stroke="#674296"/>
+        <text x="76" y="842" font-size="22" fill="#dbcaef">${escapeXml(date)} · Hora de Perú</text>
+      </g>
+    </svg>`;
+    image.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+
+    const download = document.createElement('button');
+    download.type = 'button';
+    download.className = 'btn btn-accent btn-wide';
+    download.textContent = 'Descargar comprobante PNG';
+    download.addEventListener('click', async () => {
+      download.disabled = true;
+      try {
+        await image.decode();
+        const canvas = document.createElement('canvas');
+        canvas.width = image.naturalWidth;
+        canvas.height = image.naturalHeight;
+        canvas.getContext('2d').drawImage(image, 0, 0);
+        const link = document.createElement('a');
+        link.download = 'VortexGamer-' + order.code + '.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      } catch {
+        notify('No se pudo descargar el comprobante. Inténtalo de nuevo.');
+      } finally {
+        download.disabled = false;
+      }
+    });
+    const receipt = $('#checkout-wallet-receipt');
+    receipt.replaceChildren(image, download);
+    receipt.hidden = false;
+  }
+
   walletButton.addEventListener('click', async () => {
     const selection = walletSelection;
     if (!selection || selection.complete || walletButton.disabled) return;
@@ -745,15 +821,7 @@
       $('#checkout-yape').hidden = true;
       $('#checkout-yape-unavailable').hidden = true;
       walletMessage.textContent = 'Pago con saldo registrado. Entrega pendiente.';
-      const lines = ['VortexGamer', 'Pedido: ' + order.code, 'Paquete: ' + packageName,
-        'UID: ' + order.uid, 'Pagado con saldo: ' + price(order.cents / 100), 'Fecha UTC: ' + order.createdAt];
-      const receipt = $('#checkout-wallet-receipt');
-      const download = document.createElement('a');
-      download.textContent = 'Descargar comprobante';
-      download.download = order.code + '.txt';
-      download.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(lines.join('\n'));
-      receipt.replaceChildren(document.createTextNode('Pedido ' + order.code + ' · '), download);
-      receipt.hidden = false;
+      showWalletReceipt(order, packageName);
     } catch (error) {
       if (walletSelection === selection) {
         walletMessage.textContent = error.message || 'No se pudo confirmar el pago.';
