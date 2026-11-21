@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Ruleta Vortex</title>
-  <link rel="stylesheet" href="/ruleta.css?v=premios">
-  <script src="/ruleta.js?v=casillas-no-disponibles" defer></script>
+  <link rel="stylesheet" href="/ruleta.css?v=lista">
+  <script src="/ruleta.js?v=lista" defer></script>
 </head>
 <body class="roulette-page">
   <main class="roulette-game">
@@ -16,8 +16,6 @@
       <div class="pointer"></div>
       <canvas id="wheel" width="640" height="640"></canvas>
     </div>
-    <div id="roulette-options" class="roulette-options" role="group" aria-label="Opciones de la ruleta" hidden></div>
-    <p id="roulette-unavailable" hidden>Casillas marcadas con ×: 6,000 diamantes y tu próxima compra gratis. No disponibles.</p>
     <p id="roulette-detail" class="roulette-detail" role="status" hidden></p>
     <form id="spin">
       <label for="code">Código de giro</label>
@@ -33,6 +31,7 @@
         <button id="copy" type="button">Copiar cupón</button>
       </div>
     </section>
+    <ol id="roulette-options" class="roulette-options" role="list" aria-label="Opciones de la ruleta" hidden></ol>
   </main>
 </body>
 </html>

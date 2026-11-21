@@ -17,8 +17,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/vortex.css?v=ruleta-recuadro">
   <script src="/vortex.js?v=ruleta-recuadro" defer></script>
-  <link rel="stylesheet" href="/ruleta.css?v=premios">
-  <script src="/ruleta.js?v=casillas-no-disponibles" defer></script>
+  <link rel="stylesheet" href="/ruleta.css?v=lista">
+  <script src="/ruleta.js?v=lista" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -403,8 +403,6 @@
       <div class="pointer"></div>
       <canvas id="wheel" width="640" height="640"></canvas>
     </div>
-    <div id="roulette-options" class="roulette-options" role="group" aria-label="Opciones de la ruleta" hidden></div>
-    <p id="roulette-unavailable" hidden>Casillas marcadas con ×: 6,000 diamantes y tu próxima compra gratis. No disponibles.</p>
     <p id="roulette-detail" class="roulette-detail" role="status" hidden></p>
     <form id="spin">
       <label for="code">Código de giro</label>
@@ -420,6 +418,7 @@
         <button id="copy" type="button">Copiar cupón</button>
       </div>
     </section>
+    <ol id="roulette-options" class="roulette-options" role="list" aria-label="Opciones de la ruleta" hidden></ol>
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>

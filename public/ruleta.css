@@ -64,26 +64,44 @@ body:has(.roulette-dialog[open]) { overflow: hidden; }
 .roulette-dialog .wheel-frame { width: min(100%, 15rem, 39dvh); margin: 1.25rem auto; }
 
 .roulette-options:not([hidden]) {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: .25rem;
-  margin: 0 0 .75rem;
+  display: grid;
+  gap: .4rem;
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
 }
 
 .roulette-options button {
-  width: 2.15rem;
-  height: 2.5rem;
-  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  min-height: 2.75rem;
+  padding: .35rem .6rem;
   margin: 0;
-  background: var(--sector-color);
-  border: 1px solid #d5bded;
+  background: #211735;
+  border: 1px solid #73588c;
   color: #fff;
+  font-size: .91rem;
+  font-weight: 650;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.roulette-option-number {
+  display: grid;
+  place-items: center;
+  flex: 0 0 2.2rem;
+  min-height: 1.7rem;
+  border-radius: .35rem;
+  background: var(--sector-color);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
 }
 
 .roulette-options button[aria-pressed="true"] {
   border-color: #ffdd78;
-  outline: 2px solid #ffdd78;
+  background: #3e265f;
+  font-size: 1.1rem;
 }
 
 .roulette-game .roulette-detail {

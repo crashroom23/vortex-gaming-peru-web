@@ -16,13 +16,13 @@ const unavailable = label => label.endsWith(' · No disponible');
 const sectorColor = (label,index) => unavailable(label) ? '#515064' : colors[index];
 const sectorNumber = (label,index) => String(index + 1) + (unavailable(label) ? '×' : '');
 
-function showOption(index) {
+function showOption(index, showDetail = true) {
   if (button.disabled) return;
-  for (const [position, option] of Array.from(options.children).entries()) {
+  for (const [position, option] of Array.from(options.querySelectorAll('button')).entries()) {
     option.setAttribute('aria-pressed', String(position === index));
   }
   detail.textContent = currentPrizes[index];
-  detail.hidden = false;
+  detail.hidden = !showDetail;
 }
 
 function showWheel(prizes) {
@@ -31,15 +31,20 @@ function showWheel(prizes) {
   options.replaceChildren(...prizes.map((label,index) => {
     const option = document.createElement('button');
     option.type = 'button';
-    option.textContent = sectorNumber(label,index);
-    option.style.setProperty('--sector-color', sectorColor(label,index));
-    option.setAttribute('aria-label', label);
+    const number = document.createElement('span');
+    number.className = 'roulette-option-number';
+    number.textContent = sectorNumber(label,index);
+    number.style.setProperty('--sector-color', sectorColor(label,index));
+    const description = document.createElement('span');
+    description.textContent = label;
+    option.append(number,description);
     option.setAttribute('aria-pressed', 'false');
-    option.addEventListener('click', () => showOption(index));
-    return option;
+    option.addEventListener('click', () => showOption(index,false));
+    const item = document.createElement('li');
+    item.append(option);
+    return item;
   }));
   options.hidden = false;
-  get('roulette-unavailable').hidden = !prizes.some(unavailable);
   detail.hidden = true;
 }
 
