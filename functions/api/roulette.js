@@ -47,6 +47,17 @@ function buildWheel(options) {
   return wheel;
 }
 
+function addUnavailableSectors(wheel) {
+  const display = [...wheel];
+  const firstWin = display.indexOf(discount);
+  const firstMiss = display.indexOf(miss);
+  if (display.length < 4) display.length = 4;
+  const replaceable = Array.from(display.keys()).filter(index => index !== firstWin && index !== firstMiss);
+  display[replaceable.at(-2)] = '6,000 diamantes · No disponible';
+  display[replaceable.at(-1)] = 'Tu próxima compra gratis · No disponible';
+  return display;
+}
+
 function randomIndex(count) {
   const limit = 2 ** 32 - (2 ** 32 % count);
   const random = new Uint32Array(1);
@@ -132,7 +143,10 @@ async function spin(db, code, wheel) {
   if (!existing) {
     const wins = [];
     const misses = [];
-    wheel.forEach((label,index) => (isMiss(label) ? misses : wins).push(index));
+    wheel.forEach((label,index) => {
+      if (label === discount) wins.push(index);
+      if (label === miss) misses.push(index);
+    });
     if (!wins.length) return reply({message:'La ruleta todavía no tiene premios configurados.'},503);
     const pool = randomIndex(5) === 0 ? wins : misses;
     const sector = pool[randomIndex(pool.length)];
@@ -173,8 +187,9 @@ export async function onRequest({request, env}) {
     if (body?.action === 'order') return await createOrder(db,body);
     const saved = await db.prepare('SELECT prizes FROM roulette_settings WHERE id=1').first();
     const prizes = saved ? JSON.parse(saved.prizes) : [];
-    const wheel = buildWheel(prizes);
-    if (request.method === 'GET') return reply({prizes:wheel,wheel});
+    const active = buildWheel(prizes);
+    const wheel = addUnavailableSectors(active);
+    if (request.method === 'GET') return reply({prizes:active,wheel});
     if (body?.action === 'spin') return await spin(db,body.code,wheel);
     return reply({message:'Acción inválida.'},400);
   } catch {

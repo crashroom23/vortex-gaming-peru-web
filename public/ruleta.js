@@ -12,6 +12,9 @@ let touched = false;
 let currentPrizes = [];
 const options = get('roulette-options');
 const detail = get('roulette-detail');
+const unavailable = label => label.endsWith(' · No disponible');
+const sectorColor = (label,index) => unavailable(label) ? '#515064' : colors[index];
+const sectorNumber = (label,index) => String(index + 1) + (unavailable(label) ? '×' : '');
 
 function showOption(index) {
   if (button.disabled) return;
@@ -28,14 +31,15 @@ function showWheel(prizes) {
   options.replaceChildren(...prizes.map((label,index) => {
     const option = document.createElement('button');
     option.type = 'button';
-    option.textContent = String(index + 1);
-    option.style.setProperty('--sector-color', colors[index]);
+    option.textContent = sectorNumber(label,index);
+    option.style.setProperty('--sector-color', sectorColor(label,index));
     option.setAttribute('aria-label', label);
     option.setAttribute('aria-pressed', 'false');
     option.addEventListener('click', () => showOption(index));
     return option;
   }));
   options.hidden = false;
+  get('roulette-unavailable').hidden = !prizes.some(unavailable);
   detail.hidden = true;
 }
 
@@ -61,7 +65,7 @@ function draw(prizes) {
     context.beginPath();
     context.moveTo(center,center);
     context.arc(center,center,center,middle-step/2,middle+step/2);
-    context.fillStyle = colors[index];
+    context.fillStyle = sectorColor(label,index);
     context.fill();
     context.save();
     context.translate(center,center);
@@ -70,7 +74,7 @@ function draw(prizes) {
     context.textAlign = 'center';
     context.textBaseline = 'middle';
     context.fillStyle = '#fff';
-    context.fillText(currentPrizes.length ? String(index + 1) : label,205,0,185);
+    context.fillText(currentPrizes.length ? sectorNumber(label,index) : label,205,0,185);
     context.restore();
   }
   context.beginPath();
