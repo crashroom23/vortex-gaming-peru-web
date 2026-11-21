@@ -15,8 +15,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/vortex.css?v=whatsapp-support">
-  <script src="/vortex.js?v=payment-capture" defer></script>
+  <link rel="stylesheet" href="/vortex.css?v=yape-copy">
+  <script src="/vortex.js?v=yape-copy" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -335,7 +335,19 @@
       <section id="checkout-yape" aria-labelledby="checkout-yape-title" hidden>
         <h3 id="checkout-yape-title">Paga con Yape</h3>
         <img id="checkout-yape-qr" alt="QR de pago por Yape de VortexGamer" width="224" height="224" hidden>
-        <p id="checkout-yape-number" hidden></p>
+        <div id="checkout-yape-number" hidden>
+          <div>Número de Yape</div>
+          <div class="yape-number-row">
+            <strong id="checkout-yape-digits"></strong>
+            <button type="button" class="btn btn-outline yape-copy" id="checkout-yape-copy" aria-label="Copiar número de Yape" title="Copiar número de Yape">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <rect x="8" y="8" width="12" height="12" rx="2"/>
+                <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>
+              </svg>
+            </button>
+          </div>
+          <div id="checkout-yape-copy-status" role="status"></div>
+        </div>
         <p id="checkout-yape-status" role="status"></p>
         <p class="checkout-yape-instruction">Paga el monto indicado y adjunta tu captura en WhatsApp.</p>
         <a id="checkout-whatsapp" class="btn btn-accent btn-wide" target="_blank" rel="noopener noreferrer" hidden>Ya pagué · Enviar captura</a>

@@ -1087,8 +1087,26 @@ main > [hidden] { display: none !important; }
 
 #checkout-yape-number {
   margin: .5rem 0;
-  font-weight: 800;
+}
+
+.yape-number-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .65rem;
   font-size: 1.1rem;
+}
+
+.yape-copy.btn {
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+#checkout-yape-copy-status {
+  font-size: .85rem;
 }
 
 .checkout-modal .checkout-yape-instruction {
