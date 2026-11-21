@@ -15,8 +15,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/vortex.css?v=contador-borde">
-  <script src="/vortex.js?v=ruleta" defer></script>
+  <link rel="stylesheet" href="/vortex.css?v=ruleta-flotante">
+  <script src="/vortex.js?v=ruleta-flotante" defer></script>
+  <link rel="stylesheet" href="/ruleta.css?v=flotante">
+  <script src="/ruleta.js?v=flotante" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -61,7 +63,7 @@
         <a class="active" href="#inicio">INICIO</a>
         <a href="#tienda">RECARGAS</a>
         <a href="#verificador">VERIFICAR UID</a>
-        <a href="/ruleta.html">RULETA</a>
+        <a href="/ruleta" data-open-roulette>RULETA</a>
       </nav>
       <div class="header-actions">
         <button type="button" class="header-icon" id="favorites-trigger" aria-label="Ver favoritos"><svg><use href="#icon-heart"/></svg><span class="mini-count" id="favorites-count" hidden>0</span></button>
@@ -71,7 +73,7 @@
       </div>
     </div>
     <nav id="mobile-nav" class="mobile-nav" aria-label="Navegación móvil" hidden>
-      <a href="#inicio">Inicio</a><a href="#tienda">Recargas</a><a href="#verificador">Verificar UID</a><a href="/ruleta.html">Ruleta</a>
+      <a href="#inicio">Inicio</a><a href="#tienda">Recargas</a><a href="#verificador">Verificar UID</a><a href="/ruleta" data-open-roulette>Ruleta</a>
     </nav>
   </header>
 
@@ -120,12 +122,20 @@
 
     <section class="shop-section shell" id="tienda">
       <div class="section-intro">
-        <div><h2 id="catalog-heading">Catálogo de <span>recargas</span></h2><p id="catalog-description">Elige una categoría de Free Fire.</p></div>
+        <div><h2 id="catalog-heading">Catálogo de <span>recargas</span></h2><p id="catalog-description">Elige una categoría de Free Fire.</p>
+          <p class="catalog-roulette-offer">Cada compra, una oportunidad para ganar un premio.</p>
+        </div>
+        <div class="catalog-promo-actions">
         <!-- Animated light concept from Uiverse.io by Spacious74 -->
         <div class="diamond-counter">
           <span class="diamond-counter-dot" aria-hidden="true"></span>
           <strong class="diamond-counter-value"><span id="diamond-counter-total">15k</span> <span aria-hidden="true">💎</span></strong>
           <span class="diamond-counter-unit">Diamantes</span>
+        </div>
+        <a class="catalog-roulette-trigger" href="/ruleta" data-open-roulette aria-haspopup="dialog" aria-controls="roulette-dialog">
+          <span class="catalog-roulette-wheel" aria-hidden="true"></span>
+          <span>Ruleta</span>
+        </a>
         </div>
       </div>
       <div class="catalog-categories" role="group" aria-label="Categorías de recargas">
@@ -361,7 +371,7 @@
           <label for="checkout-roulette-code">Código para la ruleta</label>
           <input id="checkout-roulette-code" readonly>
           <button id="checkout-roulette-copy" type="button" class="btn btn-outline">Copiar código</button>
-          <a href="/ruleta.html" target="_blank" rel="noopener">Abrir ruleta</a>
+          <a href="/ruleta" data-open-roulette data-roulette-checkout>Abrir ruleta</a>
           <button id="checkout-roulette-new" type="button" class="btn btn-outline">Iniciar otro pedido</button>
         </div>
         <p id="checkout-roulette-status" role="status"></p>
@@ -390,6 +400,28 @@
      target="_blank" rel="noopener noreferrer" aria-label="Abrir chat de consultas por WhatsApp">
     WhatsApp
   </a>
+
+  <dialog id="roulette-dialog" class="roulette-dialog roulette-game" aria-labelledby="roulette-dialog-title">
+    <form method="dialog" class="roulette-close"><button aria-label="Cerrar ruleta">×</button></form>
+    <h2 id="roulette-dialog-title">Ruleta Vortex</h2>
+    <p>Ingresa tu código de giro. Si lo recibiste al pagar por Yape, podrás usarlo cuando confirmemos tu pago.</p>
+    <div class="wheel-frame" aria-hidden="true">
+      <div class="pointer"></div>
+      <canvas id="wheel" width="640" height="640"></canvas>
+    </div>
+    <form id="spin">
+      <label for="code">Código de giro</label>
+      <input id="code" placeholder="VX-…" maxlength="35" required autocomplete="off" spellcheck="false">
+      <button>Girar ruleta</button>
+    </form>
+    <p id="status" role="status"></p>
+    <section id="reward" hidden>
+      <h2 id="prize"></h2>
+      <label for="coupon">Cupón para canjear por WhatsApp</label>
+      <input id="coupon" readonly>
+      <button id="copy" type="button">Copiar cupón</button>
+    </section>
+  </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 </body>

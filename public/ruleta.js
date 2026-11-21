@@ -1,5 +1,6 @@
 'use strict';
-const get = id => document.getElementById(id);
+const game = document.querySelector('.roulette-game');
+const get = id => game.querySelector('#' + id);
 const canvas = get('wheel');
 const context = canvas.getContext('2d');
 const status = get('status');
@@ -92,3 +93,27 @@ get('copy').addEventListener('click',async () => {
     coupon.select();
   }
 });
+
+if (game instanceof HTMLDialogElement) {
+  let opener;
+  document.querySelectorAll('[data-open-roulette]').forEach(link => {
+    link.addEventListener('click', event => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey ||
+          typeof game.showModal !== 'function') return;
+      event.preventDefault();
+      opener = link;
+      if (link.hasAttribute('data-roulette-checkout') && !button.disabled) {
+        const code = document.getElementById('checkout-roulette-code').value;
+        if (code !== get('code').value) {
+          get('reward').hidden = true;
+          status.textContent = '';
+        }
+        get('code').value = code;
+      }
+      game.showModal();
+    });
+  });
+  game.addEventListener('close', () => {
+    if (opener?.getClientRects().length) opener.focus();
+  });
+}

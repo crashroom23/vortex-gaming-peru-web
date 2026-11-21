@@ -1468,3 +1468,72 @@ body.overlay-open .whatsapp-support { display: none; }
 @media (prefers-reduced-motion: reduce) {
   .diamond-counter-dot { animation: none; }
 }
+
+#tienda .catalog-roulette-offer {
+  color: #eddcff;
+  font-size: .94rem;
+  font-weight: 750;
+}
+
+.catalog-promo-actions {
+  display: flex;
+  align-items: stretch;
+  gap: .65rem;
+  flex-shrink: 0;
+  width: min(100%, 342px);
+}
+
+.catalog-promo-actions .diamond-counter {
+  flex: 1;
+  width: auto;
+  min-width: 0;
+}
+
+.catalog-roulette-trigger {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: .45rem;
+  min-width: 4.4rem;
+  padding: .65rem .5rem;
+  border: 1px solid #b787ff;
+  border-radius: .9rem;
+  background: radial-gradient(ellipse at top, #563587, #211439 75%);
+  color: #f7eaff;
+  box-shadow: 0 5px 16px #0004;
+  font-size: .8rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.catalog-roulette-trigger:hover,
+.catalog-roulette-trigger:focus-visible {
+  background: #4c2c78;
+  box-shadow: 0 0 18px #ba8cff66;
+}
+
+.catalog-roulette-wheel {
+  position: relative;
+  width: 2.45rem;
+  aspect-ratio: 1;
+  border: 2px solid #f9d99b;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff4cc 0 13%, transparent 14%),
+    conic-gradient(#e35eae 15%, #9551e9 15% 35%, #5d70f4 35% 55%, #ecad5c 55% 75%, #21b7c0 75% 95%, #e35eae 95%);
+  box-shadow: 0 0 .65rem #bb7bff8c;
+  transition: transform .65s ease-out;
+}
+
+.catalog-roulette-wheel::after {
+  content: '';
+  position: absolute;
+  top: -.31rem;
+  left: calc(50% - .28rem);
+  border: .28rem solid transparent;
+  border-top: .55rem solid #fff4cc;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .catalog-roulette-trigger:hover .catalog-roulette-wheel,
+  .catalog-roulette-trigger:focus-visible .catalog-roulette-wheel { transform: rotate(32deg); }
+}

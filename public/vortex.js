@@ -1040,7 +1040,7 @@
   }));
 
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape') {
+    if (event.key === 'Escape' && !$('#roulette-dialog')?.open) {
       if (activeLayer) closeLayer();
       else if (!$('#mobile-nav').hidden) {
         $('#mobile-nav').hidden = true;
