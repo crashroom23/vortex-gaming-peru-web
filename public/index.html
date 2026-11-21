@@ -15,8 +15,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/vortex.css?v=yape-copy">
-  <script src="/vortex.js?v=ilimitados" defer></script>
+  <link rel="stylesheet" href="/vortex.css?v=contador">
+  <script src="/vortex.js?v=contador" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -120,6 +120,12 @@
     <section class="shop-section shell" id="tienda">
       <div class="section-intro">
         <div><h2 id="catalog-heading">Catálogo de <span>recargas</span></h2><p id="catalog-description">Elige una categoría de Free Fire.</p></div>
+        <!-- Animated light concept from Uiverse.io by Spacious74 -->
+        <div class="diamond-counter">
+          <span class="diamond-counter-label">Simulación de ventas de hoy</span>
+          <strong class="diamond-counter-value"><span id="diamond-counter-total">15k</span> <span aria-hidden="true">💎</span></strong>
+          <span class="diamond-counter-unit">Diamantes</span>
+        </div>
       </div>
       <div class="catalog-categories" role="group" aria-label="Categorías de recargas">
         <button type="button" class="catalog-category active" id="paquetes-diamantes" data-category="diamantes" aria-controls="products-grid empty-state" aria-pressed="true">

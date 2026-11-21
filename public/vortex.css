@@ -1377,3 +1377,74 @@ body.overlay-open .whatsapp-support { display: none; }
     bottom: calc(1rem + env(safe-area-inset-bottom));
   }
 }
+
+#tienda > .section-intro {
+  align-items: center;
+}
+
+.diamond-counter {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  justify-items: center;
+  width: min(100%, 258px);
+  padding: 14px 20px;
+  flex-shrink: 0;
+  border: 1px solid #8463f8;
+  border-radius: 16px;
+  background: radial-gradient(ellipse at top left, #46248a, transparent 75%), #171032;
+  box-shadow: inset 0 0 26px #6d41b334, 0 8px 26px #0005;
+  text-align: center;
+}
+
+.diamond-counter::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 28%, #8ff9ff50 50%, transparent 72%);
+  transform: translateX(-105%);
+  animation: diamond-counter-shine 1.9s ease-out .2s;
+}
+
+@keyframes diamond-counter-shine {
+  to { transform: translateX(105%); }
+}
+
+.diamond-counter-label,
+.diamond-counter-unit {
+  color: #e7dfff;
+  font-size: .82rem;
+  font-weight: 700;
+}
+
+.diamond-counter-value {
+  display: inline-flex;
+  align-items: center;
+  gap: .25em;
+  color: #87fbff;
+  text-shadow: 0 0 18px #3ff2ff70;
+  font: 900 clamp(2.6rem, 5vw, 3.4rem)/1 'Barlow Condensed', Impact, sans-serif;
+  margin: 3px 0;
+}
+
+.diamond-counter-value span:last-child {
+  font-size: .56em;
+}
+
+@media (max-width: 650px) {
+  #tienda > .section-intro {
+    align-items: start;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .diamond-counter {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .diamond-counter::before { animation: none; }
+}
