@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/vortex.css?v=customer-panel">
-  <script src="/vortex.js?v=customer-panel" defer></script>
+  <link rel="stylesheet" href="/vortex.css?v=account-overlay">
+  <script src="/vortex.js?v=account-overlay" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -269,17 +269,44 @@
       <button type="submit" class="btn btn-accent btn-wide" id="account-submit">Iniciar sesión</button>
       <button type="button" class="btn btn-outline btn-wide" id="account-mode">Crear una cuenta</button>
     </form>
-    <section id="account-dashboard" hidden>
-      <div class="account-cards">
-        <div><h3>Saldo disponible</h3><strong id="account-balance">—</strong></div>
-        <div><h3>Mis datos</h3><p id="account-profile"></p><p id="account-last-uid"></p></div>
+    <section id="account-dashboard" hidden data-view="summary">
+      <aside class="account-sidebar">
+        <div class="account-identity">
+          <span id="account-initial" aria-hidden="true"></span>
+          <strong id="account-display-name"></strong>
+        </div>
+        <nav aria-label="Menú de Mi cuenta">
+          <button type="button" data-account-view="summary" aria-pressed="true">Resumen</button>
+          <button type="button" data-account-view="orders" aria-pressed="false">Mis compras</button>
+          <button type="button" data-account-view="profile" aria-pressed="false">Mis datos</button>
+        </nav>
+        <button type="button" class="btn btn-outline btn-wide" id="account-logout" hidden>Cerrar sesión</button>
+      </aside>
+      <div class="account-content">
+        <section class="account-balance-card" aria-labelledby="account-greeting">
+          <div>
+            <h3 id="account-greeting"></h3>
+            <p>Saldo disponible</p>
+            <strong id="account-balance">—</strong>
+          </div>
+          <button type="button" class="btn btn-accent" id="account-topup">Recargar saldo</button>
+        </section>
+        <section class="account-detail-card" id="account-purchases" aria-labelledby="account-purchases-title">
+          <header>
+            <h3 id="account-purchases-title">Compras recientes</h3>
+            <button type="button" class="btn btn-outline" id="account-view-history">Ver historial</button>
+          </header>
+          <p id="account-history-status" role="status"></p>
+          <ul id="account-orders"></ul>
+          <button type="button" class="btn btn-outline btn-wide" id="account-more" hidden>Ver más compras</button>
+        </section>
+        <section class="account-detail-card" id="account-details" hidden>
+          <h3>Mis datos</h3>
+          <p id="account-profile"></p>
+          <p id="account-last-uid"></p>
+        </section>
       </div>
-      <h3>Compras con saldo</h3>
-      <p id="account-history-status" role="status"></p>
-      <ul id="account-orders"></ul>
-      <button type="button" class="btn btn-outline btn-wide" id="account-more" hidden>Ver más compras</button>
     </section>
-    <button type="button" class="btn btn-outline btn-wide" id="account-logout" hidden>Cerrar sesión</button>
   </div>
 
   <div class="modal checkout-modal" id="topup-modal" role="dialog" aria-modal="true" aria-labelledby="topup-title" aria-hidden="true" inert>

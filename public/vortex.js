@@ -618,14 +618,18 @@
   const topupStatus = $('#topup-status');
   const topupSend = $('#topup-send');
   let topupUsername;
+  let topupReturnLayer = 'checkout-modal';
 
   function showWalletTopUp(username) {
     topupUsername = username;
     topupButton.hidden = false;
   }
 
-  topupButton.addEventListener('click', () => {
-    if (!topupUsername) return;
+  function openTopUp(username, returnLayer) {
+    if (!username) return;
+    topupUsername = username;
+    topupReturnLayer = returnLayer;
+    $('#topup-back').textContent = returnLayer === 'account-modal' ? 'Volver a Mi cuenta' : 'Volver al pedido';
     $('#topup-user').textContent = 'Usuario: ' + topupUsername;
     topupAmount.value = '10';
     topupSend.disabled = true;
@@ -652,7 +656,9 @@
       topupQr.removeAttribute('src');
     }
     openLayer('topup-modal');
-  });
+  }
+
+  topupButton.addEventListener('click', () => openTopUp(topupUsername, 'checkout-modal'));
 
   $('#topup-form').addEventListener('submit', event => {
     event.preventDefault();
@@ -664,8 +670,8 @@
   });
 
   $('#topup-back').addEventListener('click', () => {
-    openLayer('checkout-modal');
-    topupButton.focus();
+    openLayer(topupReturnLayer);
+    (topupReturnLayer === 'account-modal' ? $('#account-topup') : topupButton).focus();
   });
 
   async function showCheckoutOptions(product, uid, verified) {
@@ -995,6 +1001,27 @@
   const accountHistoryStatus = $('#account-history-status');
   let accountVersion = 0;
   let historyCursor;
+  let accountUsername;
+
+  function showAccountView(view) {
+    accountDashboard.dataset.view = view;
+    accountDashboard.querySelectorAll('[data-account-view]').forEach(button => {
+      button.setAttribute('aria-pressed', String(button.dataset.accountView === view));
+    });
+    $('#account-purchases').hidden = view === 'profile';
+    $('#account-details').hidden = view !== 'profile';
+    $('#account-view-history').hidden = view !== 'summary';
+    $('#account-purchases-title').textContent = view === 'summary' ? 'Compras recientes' : 'Compras con saldo';
+  }
+
+  accountDashboard.querySelectorAll('[data-account-view]').forEach(button => {
+    button.addEventListener('click', () => showAccountView(button.dataset.accountView));
+  });
+  $('#account-view-history').addEventListener('click', () => {
+    showAccountView('orders');
+    $('[data-account-view="orders"]').focus();
+  });
+  $('#account-topup').addEventListener('click', () => openTopUp(accountUsername, 'account-modal'));
 
   function historyProduct(id) {
     const diamond = byId.get(id);
@@ -1049,6 +1076,8 @@
     accountForm.hidden = Boolean(username);
     accountLogout.hidden = !username;
     accountDashboard.hidden = !username;
+    $('#account-modal').classList.toggle('has-account', Boolean(username));
+    accountUsername = username;
     $('#account-preview-note').hidden = Boolean(username);
     accountMessage.textContent = '';
     accountOrders.replaceChildren();
@@ -1056,7 +1085,10 @@
     historyCursor = null;
     if (username) {
       $('#account-profile').textContent = 'Usuario: ' + username;
-      $('#account-profile').dataset.username = username;
+      $('#account-display-name').textContent = username;
+      $('#account-initial').textContent = username[0].toUpperCase();
+      $('#account-greeting').textContent = 'Hola, ' + username;
+      showAccountView('summary');
       $('#account-balance').textContent = '—';
       $('#account-last-uid').textContent = '';
       void loadAccountHistory(username, version);
@@ -1064,7 +1096,7 @@
   }
 
   accountMore.addEventListener('click', () => {
-    if (historyCursor) void loadAccountHistory($('#account-profile').dataset.username, accountVersion, historyCursor);
+    if (historyCursor) void loadAccountHistory(accountUsername, accountVersion, historyCursor);
   });
 
   let accountBusy = false;
