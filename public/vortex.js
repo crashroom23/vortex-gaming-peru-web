@@ -426,6 +426,20 @@
     (topupReturnLayer === 'account-modal' ? $('#account-topup') : topupButton).focus();
   });
 
+  const yapeCopyStatus = $('#checkout-yape-copy-status');
+
+  $('#checkout-yape-copy').addEventListener('click', async () => {
+    const number = storeYapeNumber;
+    if (!/^9\d{8}$/.test(number)) return;
+    yapeCopyStatus.textContent = '';
+    try {
+      await navigator.clipboard.writeText(number);
+      yapeCopyStatus.textContent = 'Número copiado';
+    } catch {
+      yapeCopyStatus.textContent = 'Mantén pulsado el número o selecciónalo para copiarlo.';
+    }
+  });
+
   async function showCheckoutOptions(product, uid, verified) {
     const previous = walletSelection;
     const selection = previous?.uid === uid && previous.productId === product.id && !previous.complete
@@ -442,7 +456,8 @@
     yape.hidden = !hasYape;
     const yapeNumber = $('#checkout-yape-number');
     yapeNumber.hidden = !/^9\d{8}$/.test(storeYapeNumber);
-    yapeNumber.textContent = 'Número de Yape: ' + storeYapeNumber.replace(/(\d{3})(?=\d)/g, '$1 ');
+    $('#checkout-yape-digits').textContent = storeYapeNumber.replace(/(\d{3})(?=\d)/g, '$1 ');
+    yapeCopyStatus.textContent = '';
     $('#checkout-yape-unavailable').hidden = hasYape;
     whatsapp.hidden = true;
     qr.hidden = true;
