@@ -436,8 +436,6 @@
     const qr = $('#checkout-yape-qr');
     const whatsapp = $('#checkout-whatsapp');
     const qrStatus = $('#checkout-yape-status');
-    setWhatsAppLink($('#checkout-contact'), 'Hola, quiero hacer un pedido en VortexGamer.' +
-      '\nPaquete: ' + $('#checkout-package').textContent + '\nUID: ' + uid + '\nMonto: ' + price(product.price));
     const hasYape = Boolean(storeYapeQr && setWhatsAppLink(whatsapp,
       'Hola, ya pagué por Yape en VortexGamer.\nPaquete: ' + $('#checkout-package').textContent +
       '\nUID: ' + uid + '\nMonto: ' + price(product.price) + '\nAdjunto mi captura de pago.'));
