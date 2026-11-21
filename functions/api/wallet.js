@@ -107,6 +107,19 @@ async function customer(request, db, url, body) {
   if (!user) return reply({username:null, message:'Inicia sesión para pagar con saldo.'}, 401);
 
   const productId = request.method === 'GET' ? Number(url.searchParams.get('product')) : body?.productId;
+  if (request.method === 'GET' && url.searchParams.has('history')) {
+    const before = Number(url.searchParams.get('before') ?? Number.MAX_SAFE_INTEGER);
+    if (!Number.isSafeInteger(before) || before < 1) return reply({message:'Página inválida.'}, 400);
+    const {results} = await db.prepare(`
+      SELECT rowid AS cursor, code, product_id AS productId, uid, cents, created_at AS createdAt
+      FROM preview_wallet_movements
+      WHERE username = ? AND kind = 'purchase' AND rowid < ?
+      ORDER BY rowid DESC LIMIT 21
+    `).bind(user.username, before).all();
+    const page = results.slice(0, 20);
+    return reply({...user, orders:page.map(({cursor, ...order}) => order),
+      next:results.length > page.length ? page.at(-1).cursor : null});
+  }
   if (request.method === 'GET' && !url.searchParams.has('product')) return reply(user);
   const {uid, code, cents:expectedCents} = body || {};
   if (request.method === 'POST' && (!validCode(code) || typeof uid !== 'string' || !/^\d{8,12}$/.test(uid) || !validCents(expectedCents))) {

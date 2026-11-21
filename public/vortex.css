@@ -1134,3 +1134,38 @@ main > [hidden] { display: none !important; }
   margin-bottom: .85rem;
   border-radius: 14px;
 }
+
+.account-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+  gap: .75rem;
+  margin-bottom: 1.2rem;
+}
+.account-cards > div,
+#account-orders li {
+  padding: .85rem 1rem;
+  background: #211437;
+  border: 1px solid #624391;
+  border-radius: 12px;
+}
+.account-cards h3,
+.account-cards p,
+#account-orders p {
+  margin: 0 0 .35rem;
+}
+#account-balance {
+  color: #72e9ff;
+  font-size: 1.65rem;
+}
+#account-orders {
+  display: grid;
+  gap: .55rem;
+  list-style: none;
+  padding: 0;
+}
+#account-orders li {
+  overflow-wrap: anywhere;
+}
+#account-history-status:empty {
+  display: none;
+}

@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/vortex.css?v=wallet-receipt">
-  <script src="/vortex.js?v=wallet-receipt" defer></script>
+  <link rel="stylesheet" href="/vortex.css?v=customer-panel">
+  <script src="/vortex.js?v=customer-panel" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -269,6 +269,16 @@
       <button type="submit" class="btn btn-accent btn-wide" id="account-submit">Iniciar sesión</button>
       <button type="button" class="btn btn-outline btn-wide" id="account-mode">Crear una cuenta</button>
     </form>
+    <section id="account-dashboard" hidden>
+      <div class="account-cards">
+        <div><h3>Saldo disponible</h3><strong id="account-balance">—</strong></div>
+        <div><h3>Mis datos</h3><p id="account-profile"></p><p id="account-last-uid"></p></div>
+      </div>
+      <h3>Compras con saldo</h3>
+      <p id="account-history-status" role="status"></p>
+      <ul id="account-orders"></ul>
+      <button type="button" class="btn btn-outline btn-wide" id="account-more" hidden>Ver más compras</button>
+    </section>
     <button type="button" class="btn btn-outline btn-wide" id="account-logout" hidden>Cerrar sesión</button>
   </div>
 

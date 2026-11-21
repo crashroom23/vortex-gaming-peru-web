@@ -989,19 +989,83 @@
     return result;
   }
 
-  function renderAccount(username) {
-    accountForm.hidden = Boolean(username);
-    accountLogout.hidden = !username;
-    $('#account-preview-note').hidden = Boolean(username);
-    accountMessage.textContent = username ? 'Sesión iniciada como ' + username + '.' : '';
-    if (username) {
-      walletRequest('GET').then(info => {
-        if (info?.username === username && accountMessage.textContent === 'Sesión iniciada como ' + username + '.') {
-          accountMessage.textContent += ' Saldo disponible: ' + price(info.balance_cents / 100) + '.';
-        }
-      }).catch(() => {});
+  const accountDashboard = $('#account-dashboard');
+  const accountOrders = $('#account-orders');
+  const accountMore = $('#account-more');
+  const accountHistoryStatus = $('#account-history-status');
+  let accountVersion = 0;
+  let historyCursor;
+
+  function historyProduct(id) {
+    const diamond = byId.get(id);
+    if (diamond) return diamond.amount + ' + ' + diamond.bonus + ' diamantes';
+    const card = individualCards.get(id);
+    if (card) return card.title;
+    const offerName = {30003:'Oferta de 3 tarjetas', 30005:'Aumento de nivel', 30006:'Pase Booyah'}[id];
+    if (offerName) return offerName;
+    const group = Math.floor(id / 1000000);
+    const quantity = id % 1000000;
+    if (group === 1 || group === 2) return quantity + (group === 1 ? ' cajas EVO' : ' tokens EVO');
+    return 'Paquete ' + id;
+  }
+
+  async function loadAccountHistory(username, version, before) {
+    accountMore.disabled = true;
+    accountHistoryStatus.textContent = 'Cargando compras…';
+    try {
+      const response = await fetch('/api/wallet?history=1' + (before ? '&before=' + before : ''), {cache:'no-store'});
+      const data = await response.json();
+      if (version !== accountVersion) return;
+      if (!response.ok || data.username !== username) throw new Error(data.message);
+      $('#account-balance').textContent = price(data.balance_cents / 100);
+      if (!before) {
+        const uid = data.orders[0]?.uid;
+        $('#account-last-uid').textContent = uid ? 'Último ID de Free Fire: ' + uid : 'Último ID de Free Fire: —';
+      }
+      for (const order of data.orders) {
+        const item = document.createElement('li');
+        const title = document.createElement('strong');
+        title.textContent = historyProduct(order.productId) + ' · ' + price(order.cents / 100);
+        const detail = document.createElement('p');
+        detail.textContent = 'ID: ' + order.uid + ' · Entrega pendiente';
+        const date = new Date(order.createdAt.replace(' ', 'T') + 'Z').toLocaleString('es-PE', {timeZone:'America/Lima'});
+        const reference = document.createElement('small');
+        reference.textContent = date + ' · Pedido ' + order.code;
+        item.append(title, detail, reference);
+        accountOrders.append(item);
+      }
+      historyCursor = data.next;
+      accountMore.hidden = !historyCursor;
+      accountHistoryStatus.textContent = accountOrders.children.length ? '' : 'Aún no tienes compras con saldo.';
+    } catch {
+      if (version === accountVersion) accountHistoryStatus.textContent = 'No se pudieron cargar tus compras. Vuelve a abrir Mi cuenta.';
+    } finally {
+      if (version === accountVersion) accountMore.disabled = false;
     }
   }
+
+  function renderAccount(username) {
+    const version = ++accountVersion;
+    accountForm.hidden = Boolean(username);
+    accountLogout.hidden = !username;
+    accountDashboard.hidden = !username;
+    $('#account-preview-note').hidden = Boolean(username);
+    accountMessage.textContent = '';
+    accountOrders.replaceChildren();
+    accountMore.hidden = true;
+    historyCursor = null;
+    if (username) {
+      $('#account-profile').textContent = 'Usuario: ' + username;
+      $('#account-profile').dataset.username = username;
+      $('#account-balance').textContent = '—';
+      $('#account-last-uid').textContent = '';
+      void loadAccountHistory(username, version);
+    }
+  }
+
+  accountMore.addEventListener('click', () => {
+    if (historyCursor) void loadAccountHistory($('#account-profile').dataset.username, accountVersion, historyCursor);
+  });
 
   let accountBusy = false;
   async function updateAccount(method, data) {
@@ -1026,7 +1090,7 @@
     openLayer('account-modal');
     if (accountBusy) return;
     setAccountMode('login');
-    accountForm.hidden = accountLogout.hidden = true;
+    accountForm.hidden = accountLogout.hidden = accountDashboard.hidden = true;
     void updateAccount('GET');
   });
   accountMode.addEventListener('click', () => {
