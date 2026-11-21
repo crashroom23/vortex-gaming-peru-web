@@ -76,8 +76,26 @@
 .roulette-game input { border: 1px solid #9a75ba; background: #1d1529; color: inherit; }
 .roulette-game button { border: 0; background: #dfb7ff; color: #261438; font-weight: 750; margin-top: .65rem; cursor: pointer; }
 .roulette-game button:disabled { opacity: .65; cursor: wait; }
-.roulette-game #reward { border: 1px solid #9a75ba; padding: 1rem; border-radius: .75rem; background: #211735; }
-.roulette-game #reward h2 { margin-top: 0; }
+body:has(#reward[open]) { overflow: hidden; }
+
+.roulette-game #reward {
+  box-sizing: border-box;
+  width: min(21rem, calc(100% - 2rem));
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
+  padding: 1.15rem;
+  border: 1px solid #ffcf72;
+  border-radius: 1rem;
+  background: radial-gradient(ellipse at top, #3b2b61, #1a122b 75%);
+  color: #fff5df;
+  box-shadow: 0 1rem 3rem #090213d9;
+  text-align: center;
+}
+
+.roulette-game #reward::backdrop { background: #0a0618b0; }
+.roulette-game #reward h2 { margin: 0; color: #ffd477; font-size: 1rem; }
+.roulette-game #prize { font-size: 1.5rem; font-weight: 800; margin: .5rem 0 .75rem; }
+.roulette-game #roulette-coupon input { text-align: center; }
 @media (prefers-reduced-motion: reduce) { .roulette-game canvas { transition: none; } }
 
 body:has(.roulette-dialog[open]) { overflow: hidden; }

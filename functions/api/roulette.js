@@ -11,6 +11,13 @@ const reply = (data, status = 200) => Response.json(data, {
   status, headers:{'Cache-Control':'no-store'}
 });
 const miss = 'Sigue intentando';
+const unavailableSectors = [
+  'S/ 2 de descuento · 0 %',
+  'S/ 4 de descuento · 0 %',
+  'S/ 8 de descuento · 0 %',
+  '6,000 diamantes · 0 %',
+  'Tu próxima compra gratis · 0 %'
+];
 const discount = 'S/ 1 de descuento (desde 1,000 diamantes)';
 const isDiscount = label => label === discount || /^S\/ 1\.00 DESCUENTO \(de 1k para arriba\)$/i.test(label.trim());
 const isMiss = label => ['sigue intentando', 'sera para la proxima'].includes(
@@ -51,10 +58,11 @@ function addUnavailableSectors(wheel) {
   const display = [...wheel];
   const firstWin = display.indexOf(discount);
   const firstMiss = display.indexOf(miss);
-  if (display.length < 4) display.length = 4;
+  display.length = Math.max(display.length, unavailableSectors.length + 2);
   const replaceable = Array.from(display.keys()).filter(index => index !== firstWin && index !== firstMiss);
-  display[replaceable.at(-2)] = '6,000 diamantes · No disponible';
-  display[replaceable.at(-1)] = 'Tu próxima compra gratis · No disponible';
+  unavailableSectors.forEach((label,index) => {
+    display[replaceable[replaceable.length - unavailableSectors.length + index]] = label;
+  });
   return display;
 }
 

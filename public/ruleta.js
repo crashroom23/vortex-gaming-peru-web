@@ -12,7 +12,8 @@ let touched = false;
 let currentPrizes = [];
 const options = get('roulette-options');
 const detail = get('roulette-detail');
-const unavailable = label => label.endsWith(' · No disponible');
+const reward = get('reward');
+const unavailable = label => label.endsWith(' · 0 %') || label.endsWith(' · No disponible');
 const sectorColor = (label,index) => unavailable(label) ? '#515064' : colors[index];
 const sectorNumber = (label,index) => String(index + 1) + (unavailable(label) ? '×' : '');
 
@@ -113,7 +114,7 @@ form.addEventListener('submit',async event => {
   touched = true;
   button.disabled = true;
   button.textContent = '…';
-  get('reward').hidden = true;
+  reward.close();
   status.textContent = 'Validando código…';
   try {
     const code = get('code').value.trim().toUpperCase();
@@ -131,7 +132,8 @@ form.addEventListener('submit',async event => {
     get('prize').textContent = result.prize;
     get('coupon').value = result.coupon || '';
     get('roulette-coupon').hidden = !result.coupon;
-    get('reward').hidden = false;
+    get('roulette-test-result').hidden = !result.test;
+    if (!(game instanceof HTMLDialogElement) || game.open) reward.showModal();
   } catch (error) {
     status.textContent = error.message;
   } finally {
@@ -162,7 +164,7 @@ if (game instanceof HTMLDialogElement) {
       if (link.hasAttribute('data-roulette-checkout') && !button.disabled) {
         const code = document.getElementById('checkout-roulette-code').value;
         if (code !== get('code').value) {
-          get('reward').hidden = true;
+          reward.close();
           status.textContent = '';
         }
         get('code').value = code;
