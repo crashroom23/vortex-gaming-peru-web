@@ -11,6 +11,7 @@ const reply = (data, status = 200) => Response.json(data, {
   status, headers:{'Cache-Control':'no-store'}
 });
 const miss = 'Será para la próxima';
+const isMiss = label => label.trim().normalize('NFD').replace(/\p{M}/gu, '').toLowerCase() === 'sera para la proxima';
 const token = prefix => prefix + crypto.randomUUID().replaceAll('-', '').toUpperCase();
 const isCode = (code, prefix) => typeof code === 'string' && code.startsWith(prefix) &&
   /^[A-F0-9]{32}$/.test(code.slice(prefix.length));
@@ -20,7 +21,7 @@ async function admin(db, body) {
   if (action === 'prizes') {
     const prizes = body.prizes;
     if (!Array.isArray(prizes) || prizes.length < 2 || prizes.length > 8 ||
-        prizes.some(label => typeof label !== 'string' || !label.trim() || label.length > 40 || label.trim().toLowerCase() === miss.toLowerCase()))
+        prizes.some(label => typeof label !== 'string' || !label.trim() || label.length > 40 || isMiss(label)))
       return reply({message:'Ingresa de 2 a 8 premios de hasta 40 caracteres. «Será para la próxima» se agrega automáticamente.'},400);
     await db.prepare('INSERT INTO roulette_settings VALUES (1,?) ON CONFLICT(id) DO UPDATE SET prizes=excluded.prizes')
       .bind(JSON.stringify(prizes.map(label => label.trim()))).run();
@@ -96,7 +97,7 @@ async function spin(db, code, prizes) {
       .bind(wheel[sector],sector ? token('VP-') : null,JSON.stringify(wheel),sector,code).run();
     row = await db.prepare('SELECT prize, coupon, wheel, sector FROM roulette_entries WHERE code=?').bind(code).first();
   }
-  return reply({prize:row.prize,coupon:row.coupon,prizes:JSON.parse(row.wheel),sector:row.sector,existing});
+  return reply({prize:row.prize,coupon:isMiss(row.prize) ? null : row.coupon,prizes:JSON.parse(row.wheel),sector:row.sector,existing});
 }
 
 export async function onRequest({request, env}) {
@@ -128,7 +129,7 @@ export async function onRequest({request, env}) {
     if (isAdmin && body) return await admin(db,body);
     if (body?.action === 'order') return await createOrder(db,body);
     const saved = await db.prepare('SELECT prizes FROM roulette_settings WHERE id=1').first();
-    const prizes = saved ? JSON.parse(saved.prizes) : [];
+    const prizes = saved ? JSON.parse(saved.prizes).filter(label => !isMiss(label)) : [];
     if (request.method === 'GET') return reply({prizes,wheel:prizes.length ? [miss, ...prizes] : []});
     if (body?.action === 'spin') return await spin(db,body.code,prizes);
     return reply({message:'Acción inválida.'},400);
