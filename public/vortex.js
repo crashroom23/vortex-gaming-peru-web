@@ -611,10 +611,62 @@
     return result;
   }
 
+  const topupButton = $('#checkout-topup');
+  const topupAmount = $('#topup-amount');
+  const topupQr = $('#topup-qr');
+  const topupYape = $('#topup-yape');
+  const topupStatus = $('#topup-status');
+  const topupSend = $('#topup-send');
+  let topupUsername;
+
   function showWalletTopUp(username) {
-    setWhatsAppLink($('#checkout-topup'),
-      'Hola, quiero recargar saldo en VortexGamer (mínimo S/ 5). Mi usuario es ' + username + '.');
+    topupUsername = username;
+    topupButton.hidden = false;
   }
+
+  topupButton.addEventListener('click', () => {
+    if (!topupUsername) return;
+    $('#topup-user').textContent = 'Usuario: ' + topupUsername;
+    topupAmount.value = '10';
+    topupSend.disabled = true;
+    topupYape.hidden = true;
+    const configured = Boolean(storeYapeQr && whatsAppLink(''));
+    topupStatus.textContent = configured ? 'Cargando QR de Yape…' : 'La recarga por Yape no está disponible.';
+    if (configured) {
+      $('#topup-number').textContent = /^9\d{8}$/.test(storeYapeNumber)
+        ? 'Yape: ' + storeYapeNumber.replace(/(\d{3})(?=\d)/g, '$1 ') : '';
+      topupQr.onload = () => {
+        topupYape.hidden = false;
+        topupSend.disabled = false;
+        topupStatus.textContent = '';
+      };
+      topupQr.onerror = () => {
+        topupYape.hidden = true;
+        topupSend.disabled = true;
+        topupStatus.textContent = 'No se pudo cargar el QR de Yape.';
+      };
+      topupQr.src = storeYapeQr;
+      if (topupQr.complete && topupQr.naturalWidth) topupQr.onload();
+    } else {
+      topupQr.onload = topupQr.onerror = null;
+      topupQr.removeAttribute('src');
+    }
+    openLayer('topup-modal');
+  });
+
+  $('#topup-form').addEventListener('submit', event => {
+    event.preventDefault();
+    if (topupSend.disabled || !topupUsername || !topupAmount.reportValidity()) return;
+    const href = whatsAppLink('Hola, ya pagué por Yape y quiero recargar saldo en VortexGamer.' +
+      '\nUsuario: ' + topupUsername + '\nMonto: ' + price(topupAmount.valueAsNumber) +
+      '\nAdjunto mi captura de pago.');
+    if (href) window.open(href, '_blank', 'noopener,noreferrer');
+  });
+
+  $('#topup-back').addEventListener('click', () => {
+    openLayer('checkout-modal');
+    topupButton.focus();
+  });
 
   async function showCheckoutOptions(product, uid, verified) {
     const previous = walletSelection;

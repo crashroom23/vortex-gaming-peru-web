@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/vortex.css?v=yape-visible">
-  <script src="/vortex.js?v=yape-visible" defer></script>
+  <link rel="stylesheet" href="/vortex.css?v=wallet-topup">
+  <script src="/vortex.js?v=wallet-topup" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -272,6 +272,31 @@
     <button type="button" class="btn btn-outline btn-wide" id="account-logout" hidden>Cerrar sesión</button>
   </div>
 
+  <div class="modal checkout-modal" id="topup-modal" role="dialog" aria-modal="true" aria-labelledby="topup-title" aria-hidden="true" inert>
+    <button type="button" class="close-button modal-close" data-close aria-label="Cerrar recarga de saldo">×</button>
+    <h2 id="topup-title">Recargar <span>saldo</span></h2>
+    <p id="topup-user"></p>
+    <form id="topup-form">
+      <label for="topup-amount">Monto en soles (mínimo S/ 10)</label>
+      <input id="topup-amount" type="number" inputmode="decimal" min="10" step="0.01" list="topup-presets" value="10" required>
+      <datalist id="topup-presets">
+        <option value="10"></option>
+        <option value="20"></option>
+        <option value="30"></option>
+        <option value="50"></option>
+        <option value="100"></option>
+      </datalist>
+      <section id="topup-yape" aria-label="Pago con Yape" hidden>
+        <img id="topup-qr" alt="QR de Yape de VortexGamer" width="224" height="224">
+        <p id="topup-number"></p>
+        <p>Paga el monto indicado y adjunta tu captura en WhatsApp. Acreditaremos el saldo cuando confirmemos el pago.</p>
+      </section>
+      <p id="topup-status" role="status"></p>
+      <button type="submit" id="topup-send" class="btn btn-accent btn-wide" disabled>Ya pagué · Abrir WhatsApp</button>
+    </form>
+    <button type="button" id="topup-back" class="btn btn-outline btn-wide">Volver al pedido</button>
+  </div>
+
   <div class="modal checkout-modal" id="checkout-modal" role="dialog" aria-modal="true" aria-labelledby="checkout-title" aria-hidden="true" inert>
     <button type="button" class="close-button modal-close" data-close aria-label="Cerrar ventana de pago">×</button>
     <span class="modal-kicker">PASO 03 / MÉTODO DE PAGO</span>
@@ -293,7 +318,7 @@
       <p id="checkout-yape-unavailable" hidden>El pago por Yape estará disponible cuando se configure el QR y WhatsApp.</p>
       <p id="checkout-wallet-message" role="status"></p>
       <button type="button" id="checkout-wallet" class="btn btn-accent btn-wide" hidden>Pagar con saldo</button>
-      <a id="checkout-topup" class="btn btn-outline btn-wide" target="_blank" rel="noopener noreferrer" hidden>Recargar saldo</a>
+      <button type="button" id="checkout-topup" class="btn btn-outline btn-wide" hidden>Recargar saldo</button>
       <p id="checkout-wallet-receipt" hidden></p>
     </div>
     <div id="checkout-demo">
