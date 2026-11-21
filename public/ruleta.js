@@ -26,9 +26,9 @@ function showOption(index, showDetail = true) {
 }
 
 function showWheel(prizes) {
-  currentPrizes = prizes;
-  draw(prizes);
-  options.replaceChildren(...prizes.map((label,index) => {
+  currentPrizes = prizes.map(label => label.replace(/ · 0 %$/, ' · No disponible'));
+  draw(currentPrizes);
+  options.replaceChildren(...currentPrizes.map((label,index) => {
     const option = document.createElement('button');
     option.type = 'button';
     const number = document.createElement('span');
