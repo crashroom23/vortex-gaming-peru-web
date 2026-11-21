@@ -13,8 +13,7 @@ let currentPrizes = [];
 const options = get('roulette-options');
 const detail = get('roulette-detail');
 const reward = get('reward');
-const unavailable = label => label.endsWith(' · 0 %') || label.endsWith(' · No disponible');
-const sectorNumber = (label,index) => String(index + 1) + (unavailable(label) ? '×' : '');
+const sectorNumber = index => String(index + 1);
 
 function showOption(index, showDetail = true) {
   if (button.disabled) return;
@@ -33,7 +32,7 @@ function showWheel(prizes) {
     option.type = 'button';
     const number = document.createElement('span');
     number.className = 'roulette-option-number';
-    number.textContent = sectorNumber(label,index);
+    number.textContent = sectorNumber(index);
     number.style.setProperty('--sector-color', colors[index]);
     const description = document.createElement('span');
     description.textContent = label;
@@ -82,7 +81,7 @@ function draw(prizes) {
     context.textAlign = 'center';
     context.textBaseline = 'middle';
     context.fillStyle = '#191327';
-    context.fillText(currentPrizes.length ? sectorNumber(label,index) : label,205,0,185);
+    context.fillText(currentPrizes.length ? sectorNumber(index) : label,205,0,185);
     context.restore();
   }
   context.beginPath();
