@@ -14,7 +14,6 @@ const options = get('roulette-options');
 const detail = get('roulette-detail');
 const reward = get('reward');
 const unavailable = label => label.endsWith(' · 0 %') || label.endsWith(' · No disponible');
-const sectorColor = (label,index) => unavailable(label) ? '#515064' : colors[index];
 const sectorNumber = (label,index) => String(index + 1) + (unavailable(label) ? '×' : '');
 
 function showOption(index, showDetail = true) {
@@ -35,7 +34,7 @@ function showWheel(prizes) {
     const number = document.createElement('span');
     number.className = 'roulette-option-number';
     number.textContent = sectorNumber(label,index);
-    number.style.setProperty('--sector-color', sectorColor(label,index));
+    number.style.setProperty('--sector-color', colors[index]);
     const description = document.createElement('span');
     description.textContent = label;
     option.append(number,description);
@@ -71,7 +70,7 @@ function draw(prizes) {
     context.beginPath();
     context.moveTo(center,center);
     context.arc(center,center,center,middle-step/2,middle+step/2);
-    context.fillStyle = sectorColor(label,index);
+    context.fillStyle = colors[index];
     context.fill();
     context.strokeStyle = '#211632';
     context.lineWidth = 3;
@@ -82,7 +81,7 @@ function draw(prizes) {
     context.font = 'bold 38px system-ui';
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    context.fillStyle = unavailable(label) ? '#fff' : '#191327';
+    context.fillStyle = '#191327';
     context.fillText(currentPrizes.length ? sectorNumber(label,index) : label,205,0,185);
     context.restore();
   }
