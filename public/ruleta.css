@@ -8,21 +8,68 @@
 .roulette-page main { width: min(32rem, calc(100% - 2rem)); margin: auto; padding: 2rem 0; }
 .roulette-game a { color: #dfc7ff; }
 .roulette-game h1 { margin: .75rem 0 0; }
-.roulette-game .wheel-frame { position: relative; width: min(100%, 23rem); margin: 1.75rem auto; }
+.roulette-game .wheel-frame {
+  position: relative;
+  width: min(100%, 20rem);
+  margin: 1.4rem auto 1.25rem;
+  isolation: isolate;
+}
+.roulette-game .wheel-frame::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: auto 6% -.9rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, #000b, transparent 68%);
+}
+.roulette-game .roulette-spin-button {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 50%;
+  width: clamp(2.9rem, 27%, 5rem);
+  aspect-ratio: 1;
+  transform: translate(-50%,-50%);
+  margin: 0;
+  padding: 0;
+  border: 3px solid #ffd477;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 20%, #382554, #151022 72%);
+  box-shadow: 0 2px 12px #11061bcc;
+  color: #fff5d9;
+  font-size: clamp(.88rem, 3vw, 1.13rem);
+  font-weight: 850;
+}
+.roulette-game .roulette-spin-button:not(:disabled):hover {
+  box-shadow: 0 0 18px #ffcc6f99;
+}
+.roulette-game .roulette-spin-button:disabled { opacity: 1; }
 .roulette-game canvas {
   display: block;
   width: 100%;
   border-radius: 50%;
-  box-shadow: 0 0 0 2px #d7a2ff, 0 0 2rem #9a51cc99;
+  box-shadow: 0 0 0 2px #ffcf72, 0 0 1.5rem #bb5de877, 0 .45rem 1rem #090210bb;
   transition: transform 4s cubic-bezier(.12,.65,.18,1);
 }
 .roulette-game .pointer {
   position: absolute;
-  z-index: 1;
-  top: -.55rem;
-  left: calc(50% - .7rem);
-  border: .7rem solid transparent;
-  border-top: 1.55rem solid #ffdd78;
+  z-index: 3;
+  pointer-events: none;
+  top: -.65rem;
+  left: 50%;
+  width: 2.3rem;
+  height: 1.9rem;
+  transform: translateX(-50%);
+  background: #ffd477;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+.roulette-game .pointer::after {
+  content: '';
+  position: absolute;
+  inset: 3px 5px 6px;
+  background: #231330;
+  clip-path: inherit;
 }
 .roulette-game label { display: block; margin-bottom: .35rem; }
 .roulette-game input, .roulette-game button { font: inherit; box-sizing: border-box; width: 100%; border-radius: .55rem; padding: .65rem .8rem; }
@@ -61,7 +108,7 @@ body:has(.roulette-dialog[open]) { overflow: hidden; }
   background: #4a306a;
   color: #fff;
 }
-.roulette-dialog .wheel-frame { width: min(100%, 15rem, 39dvh); margin: 1.25rem auto; }
+.roulette-dialog .wheel-frame { width: min(100%, 17rem, 42dvh); margin: 1.25rem auto; }
 
 .roulette-options:not([hidden]) {
   display: grid;
@@ -93,7 +140,8 @@ body:has(.roulette-dialog[open]) { overflow: hidden; }
   flex: 0 0 2.2rem;
   min-height: 1.7rem;
   border-radius: .35rem;
-  background: var(--sector-color);
+  border: 2px solid var(--sector-color);
+  background: #171025;
   font-variant-numeric: tabular-nums;
   font-weight: 800;
 }

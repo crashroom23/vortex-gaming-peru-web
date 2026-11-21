@@ -17,8 +17,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/vortex.css?v=ruleta-recuadro">
   <script src="/vortex.js?v=ruleta-recuadro" defer></script>
-  <link rel="stylesheet" href="/ruleta.css?v=lista">
-  <script src="/ruleta.js?v=lista" defer></script>
+  <link rel="stylesheet" href="/ruleta.css?v=boton-central">
+  <script src="/ruleta.js?v=boton-central" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -399,16 +399,16 @@
     <form method="dialog" class="roulette-close"><button aria-label="Cerrar ruleta">×</button></form>
     <h2 id="roulette-dialog-title">Ruleta Vortex</h2>
     <p>Ingresa tu código de giro. Si lo recibiste al pagar por Yape, podrás usarlo cuando confirmemos tu pago.</p>
-    <div class="wheel-frame" aria-hidden="true">
-      <div class="pointer"></div>
-      <canvas id="wheel" width="640" height="640"></canvas>
-    </div>
-    <p id="roulette-detail" class="roulette-detail" role="status" hidden></p>
     <form id="spin">
       <label for="code">Código de giro</label>
       <input id="code" placeholder="VX-…" maxlength="35" required autocomplete="off" spellcheck="false">
-      <button>Girar ruleta</button>
     </form>
+    <div class="wheel-frame">
+      <div class="pointer" aria-hidden="true"></div>
+      <canvas id="wheel" width="640" height="640" aria-hidden="true"></canvas>
+      <button id="roulette-spin-button" class="roulette-spin-button" type="submit" form="spin" aria-label="Girar ruleta">Girar</button>
+    </div>
+    <p id="roulette-detail" class="roulette-detail" role="status" hidden></p>
     <p id="status" role="status"></p>
     <section id="reward" hidden>
       <h2 id="prize"></h2>

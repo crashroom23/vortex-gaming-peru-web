@@ -5,8 +5,8 @@ const canvas = get('wheel');
 const context = canvas.getContext('2d');
 const status = get('status');
 const form = get('spin');
-const button = form.querySelector('button');
-const colors = ['#593698','#852265','#2f478a','#176367','#67409a','#983e55','#3b5596','#385e41','#613d31','#6d2855','#244660','#6b4d27'];
+const button = get('roulette-spin-button');
+const colors = ['#fbaf32','#f3d246','#32baf6','#32c6a1','#f45875','#4cdbdf','#db66bc','#8660e8','#f48255','#90cf52','#7192ec','#c982e8'];
 let angle = 0;
 let touched = false;
 let currentPrizes = [];
@@ -72,13 +72,16 @@ function draw(prizes) {
     context.arc(center,center,center,middle-step/2,middle+step/2);
     context.fillStyle = sectorColor(label,index);
     context.fill();
+    context.strokeStyle = '#211632';
+    context.lineWidth = 3;
+    context.stroke();
     context.save();
     context.translate(center,center);
     context.rotate(middle);
     context.font = 'bold 38px system-ui';
     context.textAlign = 'center';
     context.textBaseline = 'middle';
-    context.fillStyle = '#fff';
+    context.fillStyle = unavailable(label) ? '#fff' : '#191327';
     context.fillText(currentPrizes.length ? sectorNumber(label,index) : label,205,0,185);
     context.restore();
   }
@@ -109,6 +112,7 @@ form.addEventListener('submit',async event => {
   if (button.disabled) return;
   touched = true;
   button.disabled = true;
+  button.textContent = '…';
   get('reward').hidden = true;
   status.textContent = 'Validando código…';
   try {
@@ -132,6 +136,7 @@ form.addEventListener('submit',async event => {
     status.textContent = error.message;
   } finally {
     button.disabled = false;
+    button.textContent = 'Girar';
   }
 });
 
