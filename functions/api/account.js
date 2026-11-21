@@ -99,8 +99,8 @@ export async function onRequest({request, env}) {
     const password = body?.password;
     const action = body?.action;
     if (!['register', 'login'].includes(action) || !/^[a-z0-9_]{3,24}$/.test(username) ||
-        typeof password !== 'string' || password.length < 12 || password.length > 128) {
-      return reply({message: 'Usa un usuario de 3 a 24 letras, números o guiones bajos y una contraseña de 12 a 128 caracteres.'}, 400);
+        typeof password !== 'string' || password.length < 6 || password.length > 128) {
+      return reply({message: 'Usa un usuario de 3 a 24 letras, números o guiones bajos y una contraseña de 6 a 128 caracteres.'}, 400);
     }
 
     const clientHash = await digest(pepper + ':' + (request.headers.get('CF-Connecting-IP') || 'unknown'));

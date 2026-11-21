@@ -854,7 +854,7 @@
     accountPassword.autocomplete = action === 'register' ? 'new-password' : 'current-password';
     accountSubmit.textContent = action === 'register' ? 'Registrarme' : 'Iniciar sesión';
     accountMode.textContent = action === 'register' ? 'Ya tengo cuenta' : 'Crear una cuenta';
-    accountMessage.textContent = action === 'register' ? 'Elige un usuario y una contraseña de al menos 12 caracteres.' : '';
+    accountMessage.textContent = action === 'register' ? 'Elige un usuario y una contraseña de al menos 6 caracteres.' : '';
   }
 
   async function accountRequest(method, data) {

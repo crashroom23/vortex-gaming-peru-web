@@ -55,8 +55,8 @@ async function administer(request, db, env, body) {
   if (!/^[a-z0-9_]{3,24}$/.test(username)) return reply({message:'Usa de 3 a 24 letras, números o guiones bajos.'}, 400);
 
   if (action === 'create') {
-    if (typeof password !== 'string' || password.length < 12 || password.length > 128) {
-      return reply({message:'La contraseña debe tener entre 12 y 128 caracteres.'}, 400);
+    if (typeof password !== 'string' || password.length < 6 || password.length > 128) {
+      return reply({message:'La contraseña debe tener entre 6 y 128 caracteres.'}, 400);
     }
     const salt = randomHex(16);
     const hash = await hashPassword(password, salt, env.PREVIEW_ACCOUNT_PEPPER);

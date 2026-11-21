@@ -76,7 +76,7 @@ function walletInput(box, label, properties) {
 function renderWalletAdmin() {
   const create = group('Crear usuario');
   const username = walletInput(create, 'Nombre de usuario', {maxLength:24, autocomplete:'off'});
-  const password = walletInput(create, 'Contraseña inicial (mínimo 12 caracteres)',
+  const password = walletInput(create, 'Contraseña inicial (mínimo 6 caracteres)',
     {type:'password', maxLength:128, autocomplete:'new-password'});
 
   const credit = group('Acreditar saldo');
