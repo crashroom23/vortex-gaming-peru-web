@@ -10,6 +10,7 @@ const hosts = new Set([
 const reply = (data, status = 200) => Response.json(data, {
   status, headers:{'Cache-Control':'no-store'}
 });
+const miss = 'Será para la próxima';
 const token = prefix => prefix + crypto.randomUUID().replaceAll('-', '').toUpperCase();
 const isCode = (code, prefix) => typeof code === 'string' && code.startsWith(prefix) &&
   /^[A-F0-9]{32}$/.test(code.slice(prefix.length));
@@ -19,8 +20,8 @@ async function admin(db, body) {
   if (action === 'prizes') {
     const prizes = body.prizes;
     if (!Array.isArray(prizes) || prizes.length < 2 || prizes.length > 8 ||
-        prizes.some(label => typeof label !== 'string' || !label.trim() || label.length > 40))
-      return reply({message:'Ingresa de 2 a 8 premios, de hasta 40 caracteres cada uno.'},400);
+        prizes.some(label => typeof label !== 'string' || !label.trim() || label.length > 40 || label.trim().toLowerCase() === miss.toLowerCase()))
+      return reply({message:'Ingresa de 2 a 8 premios de hasta 40 caracteres. «Será para la próxima» se agrega automáticamente.'},400);
     await db.prepare('INSERT INTO roulette_settings VALUES (1,?) ON CONFLICT(id) DO UPDATE SET prizes=excluded.prizes')
       .bind(JSON.stringify(prizes.map(label => label.trim()))).run();
     return reply({message:'Premios guardados.'});
@@ -81,15 +82,18 @@ async function spin(db, code, prizes) {
   let row = await db.prepare('SELECT confirmed_at, prize, coupon, wheel, sector FROM roulette_entries WHERE code=?').bind(code).first();
   if (!row) return reply({message:'Código de giro no encontrado.'},404);
   if (!row.confirmed_at) return reply({message:'El código se activa cuando confirmemos tu pago.'},409);
-  const existing = Boolean(row.coupon);
+  const existing = Boolean(row.prize);
   if (!existing) {
     if (!prizes.length) return reply({message:'La ruleta todavía no tiene premios configurados.'},503);
-    const limit = 2 ** 32 - (2 ** 32 % prizes.length);
+    const wheel = [miss, ...prizes];
+    const tickets = 5 * prizes.length;
+    const limit = 2 ** 32 - (2 ** 32 % tickets);
     const random = new Uint32Array(1);
     do { crypto.getRandomValues(random); } while (random[0] >= limit);
-    const sector = random[0] % prizes.length;
-    await db.prepare('UPDATE roulette_entries SET prize=?,coupon=?,wheel=?,sector=? WHERE code=? AND coupon IS NULL')
-      .bind(prizes[sector],token('VP-'),JSON.stringify(prizes),sector,code).run();
+    const ticket = random[0] % tickets;
+    const sector = ticket < prizes.length ? ticket + 1 : 0;
+    await db.prepare('UPDATE roulette_entries SET prize=?,coupon=?,wheel=?,sector=? WHERE code=? AND prize IS NULL')
+      .bind(wheel[sector],sector ? token('VP-') : null,JSON.stringify(wheel),sector,code).run();
     row = await db.prepare('SELECT prize, coupon, wheel, sector FROM roulette_entries WHERE code=?').bind(code).first();
   }
   return reply({prize:row.prize,coupon:row.coupon,prizes:JSON.parse(row.wheel),sector:row.sector,existing});
@@ -125,7 +129,7 @@ export async function onRequest({request, env}) {
     if (body?.action === 'order') return await createOrder(db,body);
     const saved = await db.prepare('SELECT prizes FROM roulette_settings WHERE id=1').first();
     const prizes = saved ? JSON.parse(saved.prizes) : [];
-    if (request.method === 'GET') return reply({prizes});
+    if (request.method === 'GET') return reply({prizes,wheel:prizes.length ? [miss, ...prizes] : []});
     if (body?.action === 'spin') return await spin(db,body.code,prizes);
     return reply({message:'Acción inválida.'},400);
   } catch {

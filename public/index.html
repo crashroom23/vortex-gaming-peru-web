@@ -17,8 +17,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/vortex.css?v=ruleta-recuadro">
   <script src="/vortex.js?v=ruleta-recuadro" defer></script>
-  <link rel="stylesheet" href="/ruleta.css?v=flotante">
-  <script src="/ruleta.js?v=flotante" defer></script>
+  <link rel="stylesheet" href="/ruleta.css?v=premios">
+  <script src="/ruleta.js?v=premios" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -403,6 +403,8 @@
       <div class="pointer"></div>
       <canvas id="wheel" width="640" height="640"></canvas>
     </div>
+    <div id="roulette-options" class="roulette-options" role="group" aria-label="Opciones de la ruleta" hidden></div>
+    <p id="roulette-detail" class="roulette-detail" role="status" hidden></p>
     <form id="spin">
       <label for="code">Código de giro</label>
       <input id="code" placeholder="VX-…" maxlength="35" required autocomplete="off" spellcheck="false">
@@ -411,9 +413,11 @@
     <p id="status" role="status"></p>
     <section id="reward" hidden>
       <h2 id="prize"></h2>
-      <label for="coupon">Cupón para canjear por WhatsApp</label>
-      <input id="coupon" readonly>
-      <button id="copy" type="button">Copiar cupón</button>
+      <div id="roulette-coupon">
+        <label for="coupon">Cupón para canjear por WhatsApp</label>
+        <input id="coupon" readonly>
+        <button id="copy" type="button">Copiar cupón</button>
+      </div>
     </section>
   </dialog>
 

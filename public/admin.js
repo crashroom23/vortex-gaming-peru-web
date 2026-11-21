@@ -257,7 +257,7 @@ function renderRouletteAdmin() {
   const prizes = element('textarea');
   prizes.rows = 5;
   prizes.setAttribute('aria-label','Premios, uno por línea');
-  box.append(element('p','Escribe entre 2 y 8 premios, uno por línea. Todos tienen la misma probabilidad.'),prizes);
+  box.append(element('p','Escribe entre 2 y 8 premios, uno por línea. «Será para la próxima» sale el 80 % de las veces. Los premios comparten el 20 % restante.'),prizes);
   const codes = group('Códigos y cupones');
   const input = walletInput(codes,'Código VX de giro o cupón VP de premio',{maxLength:35});
   const output = walletInput(codes,'Código generado',{readOnly:true});

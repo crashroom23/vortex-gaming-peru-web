@@ -6,9 +6,51 @@ const context = canvas.getContext('2d');
 const status = get('status');
 const form = get('spin');
 const button = form.querySelector('button');
-const colors = ['#593698','#852265','#2f478a','#176367','#67409a','#983e55','#3b5596','#385e41'];
+const colors = ['#593698','#852265','#2f478a','#176367','#67409a','#983e55','#3b5596','#385e41','#613d31'];
 let angle = 0;
 let touched = false;
+let currentPrizes = [];
+const options = get('roulette-options');
+const detail = get('roulette-detail');
+
+function showOption(index) {
+  if (button.disabled) return;
+  for (const [position, option] of Array.from(options.children).entries()) {
+    option.setAttribute('aria-pressed', String(position === index));
+  }
+  detail.textContent = currentPrizes[index];
+  detail.hidden = false;
+}
+
+function showWheel(prizes) {
+  currentPrizes = prizes;
+  draw(prizes);
+  options.replaceChildren(...prizes.map((label,index) => {
+    const option = document.createElement('button');
+    option.type = 'button';
+    option.textContent = String(index + 1);
+    option.style.setProperty('--sector-color', colors[index]);
+    option.setAttribute('aria-label', label);
+    option.setAttribute('aria-pressed', 'false');
+    option.addEventListener('click', () => showOption(index));
+    return option;
+  }));
+  options.hidden = false;
+  detail.hidden = true;
+}
+
+canvas.addEventListener('click', event => {
+  if (!currentPrizes.length || button.disabled) return;
+  const bounds = canvas.parentElement.getBoundingClientRect();
+  const x = event.clientX - bounds.left - bounds.width / 2;
+  const y = event.clientY - bounds.top - bounds.height / 2;
+  const distance = Math.hypot(x,y);
+  if (distance < bounds.width * .06 || distance > bounds.width / 2) return;
+  const step = 360 / currentPrizes.length;
+  const direction = Math.atan2(y,x) * 180 / Math.PI + 90 - angle;
+  const normalized = ((direction + step / 2) % 360 + 360) % 360;
+  showOption(Math.floor(normalized / step));
+});
 
 function draw(prizes) {
   const center = canvas.width / 2;
@@ -24,11 +66,11 @@ function draw(prizes) {
     context.save();
     context.translate(center,center);
     context.rotate(middle);
-    context.font = 'bold 25px system-ui';
+    context.font = 'bold 38px system-ui';
     context.textAlign = 'center';
     context.textBaseline = 'middle';
     context.fillStyle = '#fff';
-    context.fillText(label,205,0,185);
+    context.fillText(currentPrizes.length ? String(index + 1) : label,205,0,185);
     context.restore();
   }
   context.beginPath();
@@ -47,8 +89,8 @@ async function request(body) {
 }
 
 draw(['Vortex','Ruleta','Vortex','Ruleta']);
-request().then(({prizes}) => {
-  if (!touched && prizes.length) draw(prizes);
+request().then(({wheel}) => {
+  if (!currentPrizes.length && wheel?.length) showWheel(wheel);
 }).catch(() => {
   if (!touched) status.textContent = 'La ruleta no está disponible en este momento.';
 });
@@ -63,7 +105,7 @@ form.addEventListener('submit',async event => {
   try {
     const code = get('code').value.trim().toUpperCase();
     const result = await request({action:'spin',code});
-    draw(result.prizes);
+    showWheel(result.prizes);
     const target = (360 - result.sector * 360 / result.prizes.length) % 360;
     const animate = !result.existing && !matchMedia('(prefers-reduced-motion: reduce)').matches;
     canvas.style.transition = animate ? '' : 'none';
@@ -74,7 +116,8 @@ form.addEventListener('submit',async event => {
       await new Promise(resolve => setTimeout(resolve,4000));
     status.textContent = 'Resultado del código ' + code;
     get('prize').textContent = result.prize;
-    get('coupon').value = result.coupon;
+    get('coupon').value = result.coupon || '';
+    get('roulette-coupon').hidden = !result.coupon;
     get('reward').hidden = false;
   } catch (error) {
     status.textContent = error.message;
