@@ -95,13 +95,16 @@ async function admin(db, body) {
     return reply({code,message:'Código activo. Ya puedes enviarlo al cliente.'});
   }
   if (action === 'inspect' && isCode(code,'VX-')) {
-    const row = await db.prepare('SELECT uid, product_id, cents, confirmed_at, prize FROM roulette_entries WHERE code=?')
+    const row = await db.prepare(`SELECT uid, product_id, cents, confirmed_at, prize,
+      EXISTS(SELECT 1 FROM roulette_payment_reports WHERE code=roulette_entries.code) AS reported
+      FROM roulette_entries WHERE code=?`)
       .bind(code).first();
     if (!row) return reply({message:'Código de giro no encontrado.'},404);
-    const status = row.prize ? 'Girado' : row.confirmed_at ? 'Activo' : 'Pendiente de confirmación';
+    const status = row.prize ? 'Girado' : (row.confirmed_at || row.reported) ? 'Activo' : 'Pendiente de confirmación';
     const detail = row.uid ? 'UID ' + row.uid + ' · Paquete #' + row.product_id +
       ' · S/ ' + (row.cents / 100).toFixed(2) : 'Código manual';
-    return reply({message:detail + ' · ' + status});
+    const paymentStatus = row.reported && !row.confirmed_at ? ' · Pago por verificar' : '';
+    return reply({message:detail + ' · ' + status + paymentStatus});
   }
   if (action === 'confirm' && isCode(code,'VX-')) {
     const row = await db.prepare(
@@ -112,15 +115,15 @@ async function admin(db, body) {
   }
   if (action === 'redeem' && isCode(code,'VP-')) {
     const row = await db.prepare(
-      'UPDATE roulette_entries SET redeemed_at=CURRENT_TIMESTAMP WHERE coupon=? AND redeemed_at IS NULL RETURNING prize'
+      'UPDATE roulette_entries SET redeemed_at=CURRENT_TIMESTAMP WHERE coupon=? AND redeemed_at IS NULL AND confirmed_at IS NOT NULL RETURNING prize'
     ).bind(code).first();
     return row ? reply({message:'Cupón canjeado. Aplica el premio: ' + row.prize}) :
-      reply({message:'Cupón no encontrado o ya canjeado.'},409);
+      reply({message:'Cupón no encontrado, ya canjeado o pendiente de confirmar el pago.'},409);
   }
   return reply({message:'Revisa la acción y el código.'},400);
 }
 
-async function createOrder(db, {order, uid, productId, cents}) {
+async function createOrder(db, {action, order, uid, productId, cents}) {
   if (typeof order !== 'string' || !/^[a-f0-9-]{36}$/.test(order) ||
       typeof uid !== 'string' || !/^\d{8,12}$/.test(uid) || !Number.isSafeInteger(productId) ||
       !Number.isSafeInteger(cents) || cents <= 0)
@@ -137,6 +140,10 @@ async function createOrder(db, {order, uid, productId, cents}) {
   }
   if (row.uid !== uid || row.product_id !== productId || row.cents !== cents)
     return reply({message:'Ese código de pedido corresponde a otro pago.'},409);
+  if (action === 'report-payment') {
+    await db.prepare('INSERT INTO roulette_payment_reports (code) VALUES (?) ON CONFLICT(code) DO NOTHING')
+      .bind(row.code).run();
+  }
   return reply({code:row.code});
 }
 
@@ -144,9 +151,11 @@ async function spin(db, code, wheel) {
   const test = isTestCode(code);
   if (!test && !isCode(code,'VX-')) return reply({message:'Escribe un código de giro válido.'},400);
   if (test) await registerTestCode(db, code);
-  let row = await db.prepare('SELECT confirmed_at, prize, coupon, wheel, sector FROM roulette_entries WHERE code=?').bind(code).first();
+  let row = await db.prepare(`SELECT confirmed_at, prize, coupon, wheel, sector,
+    EXISTS(SELECT 1 FROM roulette_payment_reports WHERE code=roulette_entries.code) AS reported
+    FROM roulette_entries WHERE code=?`).bind(code).first();
   if (!row) return reply({message:'Código de giro no encontrado o vencido.'},404);
-  if (!row.confirmed_at) return reply({message:'El código se activa cuando confirmemos tu pago.'},409);
+  if (!row.confirmed_at && !row.reported) return reply({message:'Abre el aviso de pago por WhatsApp para activar el código.'},409);
   const existing = Boolean(row.prize);
   if (!existing) {
     const wins = [];
@@ -189,10 +198,11 @@ export async function onRequest({request, env}) {
       db.prepare(`CREATE TABLE IF NOT EXISTS roulette_entries (
         code TEXT PRIMARY KEY, order_token TEXT UNIQUE, uid TEXT, product_id INTEGER, cents INTEGER,
         confirmed_at TEXT, prize TEXT, coupon TEXT UNIQUE, wheel TEXT, sector INTEGER, redeemed_at TEXT)`),
-      db.prepare('CREATE TABLE IF NOT EXISTS roulette_settings (id INTEGER PRIMARY KEY, prizes TEXT NOT NULL)')
+      db.prepare('CREATE TABLE IF NOT EXISTS roulette_settings (id INTEGER PRIMARY KEY, prizes TEXT NOT NULL)'),
+      db.prepare('CREATE TABLE IF NOT EXISTS roulette_payment_reports (code TEXT PRIMARY KEY)')
     ]);
     if (isAdmin && body) return await admin(db,body);
-    if (body?.action === 'order') return await createOrder(db,body);
+    if (body?.action === 'order' || body?.action === 'report-payment') return await createOrder(db,body);
     const saved = await db.prepare('SELECT prizes FROM roulette_settings WHERE id=1').first();
     const prizes = saved ? JSON.parse(saved.prizes) : [];
     const active = buildWheel(prizes);

@@ -160,14 +160,6 @@ if (game instanceof HTMLDialogElement) {
           typeof game.showModal !== 'function') return;
       event.preventDefault();
       opener = link;
-      if (link.hasAttribute('data-roulette-checkout') && !button.disabled) {
-        const code = document.getElementById('checkout-roulette-code').value;
-        if (code !== get('code').value) {
-          reward.close();
-          status.textContent = '';
-        }
-        get('code').value = code;
-      }
       game.showModal();
     });
   });

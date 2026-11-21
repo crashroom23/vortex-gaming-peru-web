@@ -16,9 +16,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/vortex.css?v=ruleta-recuadro">
-  <script src="/vortex.js?v=ruleta-recuadro" defer></script>
+  <script src="/vortex.js?v=codigo-whatsapp" defer></script>
   <link rel="stylesheet" href="/ruleta.css?v=resultado">
-  <script src="/ruleta.js?v=sectores-color" defer></script>
+  <script src="/ruleta.js?v=codigo-whatsapp" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -361,15 +361,9 @@
         </div>
         <p id="checkout-yape-status" role="status"></p>
         <p class="checkout-yape-instruction">Paga el monto indicado y adjunta tu captura en WhatsApp.</p>
-        <div id="checkout-roulette" hidden>
-          <label for="checkout-roulette-code">Código para la ruleta</label>
-          <input id="checkout-roulette-code" readonly>
-          <button id="checkout-roulette-copy" type="button" class="btn btn-outline">Copiar código</button>
-          <a href="/ruleta" data-open-roulette data-roulette-checkout>Abrir ruleta</a>
-          <button id="checkout-roulette-new" type="button" class="btn btn-outline">Iniciar otro pedido</button>
-        </div>
         <p id="checkout-roulette-status" role="status"></p>
-        <a id="checkout-whatsapp" class="btn btn-accent btn-wide" target="_blank" rel="noopener noreferrer" hidden>Ya pagué · Enviar captura</a>
+        <button id="checkout-whatsapp" type="button" class="btn btn-accent btn-wide" hidden>Ya pagué · Enviar captura</button>
+        <button id="checkout-roulette-new" type="button" class="btn btn-outline" hidden>Iniciar otro pedido</button>
       </section>
       <p id="checkout-yape-unavailable" hidden>El pago por Yape estará disponible cuando se configure el QR y WhatsApp.</p>
       <p id="checkout-wallet-message" role="status"></p>
@@ -398,7 +392,7 @@
   <dialog id="roulette-dialog" class="roulette-dialog roulette-game" aria-labelledby="roulette-dialog-title">
     <form method="dialog" class="roulette-close"><button aria-label="Cerrar ruleta">×</button></form>
     <h2 id="roulette-dialog-title">Ruleta Vortex</h2>
-    <p>Ingresa tu código de giro. Si lo recibiste al pagar por Yape, podrás usarlo cuando confirmemos tu pago.</p>
+    <p>Ingresa tu código de giro. Si pagaste por Yape, encontrarás tu código activo en el mensaje de WhatsApp.</p>
     <form id="spin">
       <label for="code">Código de giro</label>
       <input id="code" placeholder="VX-…" maxlength="35" required autocomplete="off" spellcheck="false">

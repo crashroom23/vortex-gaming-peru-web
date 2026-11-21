@@ -356,14 +356,6 @@
       : '';
   }
 
-  function setWhatsAppLink(link, message) {
-    const href = whatsAppLink(message);
-    link.hidden = !href;
-    if (href) link.href = href;
-    else link.removeAttribute('href');
-    return Boolean(href);
-  }
-
   async function walletRequest(method, productId, data) {
     const response = await fetch('/api/wallet' + (productId ? '?product=' + productId : ''), {
       method, cache:'no-store',
@@ -456,7 +448,7 @@
     }
   });
 
-  async function prepareRouletteOrder(selection, amount) {
+  async function activateRouletteOrder(selection, amount) {
     const cents = Math.round(amount * 100);
     if (selection.rouletteCents !== cents) {
       selection.rouletteCents = cents;
@@ -472,24 +464,13 @@
     }
     const response = await fetch('/api/roulette', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({action:'order',order:selection.rouletteOrder,
+      body:JSON.stringify({action:'report-payment',order:selection.rouletteOrder,
         uid:selection.uid,productId:selection.productId,cents})
     });
     const data = await response.json();
     if (!response.ok || !data.code) throw new Error(data.message);
     return data.code;
   }
-
-  $('#checkout-roulette-copy').addEventListener('click', async () => {
-    const input = $('#checkout-roulette-code');
-    try {
-      await navigator.clipboard.writeText(input.value);
-      $('#checkout-roulette-status').textContent = 'Código copiado. Se activa al confirmar el pago.';
-    } catch {
-      input.focus();
-      input.select();
-    }
-  });
 
   async function showCheckoutOptions(product, uid, verified) {
     currentCheckout = [product,uid,verified];
@@ -506,27 +487,38 @@
       $('#checkout-package').textContent + '\nUID: ' + uid + '\nMonto: ' + price(product.price);
     const receiptMessage = '\nAdjunto mi captura de pago.';
     const hasYape = Boolean(storeYapeQr && whatsAppLink(paymentMessage));
-    const roulette = $('#checkout-roulette');
     const rouletteStatus = $('#checkout-roulette-status');
-    roulette.hidden = true;
+    const newOrder = $('#checkout-roulette-new');
     rouletteStatus.textContent = '';
-    whatsapp.removeAttribute('href');
-    if (hasYape) {
-      rouletteStatus.textContent = 'Preparando tu código de ruleta…';
-      void prepareRouletteOrder(selection, product.price).then(code => {
-        if (selection !== walletSelection) return;
-        $('#checkout-roulette-code').value = code;
-        roulette.hidden = false;
-        rouletteStatus.textContent = 'Tu código se activa cuando confirmemos el pago.';
-        setWhatsAppLink(whatsapp, paymentMessage + '\nCódigo de ruleta: ' + code + receiptMessage);
-        whatsapp.hidden = qr.hidden;
-      }).catch(() => {
-        if (selection !== walletSelection) return;
-        rouletteStatus.textContent = 'El código de ruleta no está disponible. Puedes enviar tu comprobante y pedir tu código por WhatsApp.';
-        setWhatsAppLink(whatsapp, paymentMessage + receiptMessage);
-        whatsapp.hidden = qr.hidden;
-      });
-    }
+    newOrder.hidden = true;
+    whatsapp.disabled = false;
+    const reportPayment = async () => {
+      if (!hasYape || qr.hidden || whatsapp.disabled) return;
+      const tab = window.open('about:blank', '_blank');
+      if (tab) tab.opener = null;
+      whatsapp.disabled = true;
+      rouletteStatus.textContent = 'Activando tu código de ruleta…';
+      try {
+        const code = await activateRouletteOrder(selection, product.price);
+        if (whatsapp.onclick !== reportPayment) {
+          tab?.close();
+          return;
+        }
+        const href = whatsAppLink(paymentMessage + '\nCódigo activo para la ruleta: ' + code + receiptMessage);
+        if (!href) throw new Error('WhatsApp no está disponible.');
+        rouletteStatus.textContent = 'Tu código activo está en el mensaje de WhatsApp.';
+        newOrder.hidden = false;
+        if (tab && !tab.closed) tab.location.replace(href);
+        else window.location.assign(href);
+      } catch {
+        tab?.close();
+        if (whatsapp.onclick === reportPayment)
+          rouletteStatus.textContent = 'No pudimos preparar el mensaje con tu código. Intenta nuevamente.';
+      } finally {
+        if (whatsapp.onclick === reportPayment) whatsapp.disabled = false;
+      }
+    };
+    whatsapp.onclick = reportPayment;
     yape.hidden = !hasYape;
     const yapeNumber = $('#checkout-yape-number');
     yapeNumber.hidden = !/^9\d{8}$/.test(storeYapeNumber);
@@ -537,7 +529,7 @@
     qr.hidden = true;
     qr.onload = () => {
       qr.hidden = false;
-      whatsapp.hidden = !whatsapp.hasAttribute('href');
+      whatsapp.hidden = false;
       qrStatus.textContent = '';
     };
     qr.onerror = () => {
