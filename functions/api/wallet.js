@@ -5,6 +5,7 @@ import {readSettings} from '../lib/site-settings.js';
 
 const previewHost = 'preview-gamer-aura-v2.vortex-gaming-peru-web.pages.dev';
 const reply = (body, status = 200) => Response.json(body, {status, headers:{'Cache-Control':'no-store'}});
+const walletPurchasesEnabled = false;
 const validCents = (cents) => Number.isSafeInteger(cents) && cents > 0 && cents <= 9999999;
 const validCode = (code) => typeof code === 'string' && /^[a-f0-9-]{36}$/.test(code);
 
@@ -98,6 +99,9 @@ async function administer(request, db, env, body) {
 }
 
 async function customer(request, db, url, body) {
+  if (request.method === 'POST' && !walletPurchasesEnabled) {
+    return reply({code:'WALLET_PURCHASES_DISABLED', message:'Por ahora, haz tu pedido por WhatsApp.'}, 403);
+  }
   const token = await readSessionToken(request);
   const user = token && await db.prepare(`
     SELECT a.username, a.balance_cents FROM preview_sessions s

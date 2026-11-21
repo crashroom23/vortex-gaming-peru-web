@@ -578,6 +578,7 @@
   let storeWhatsApp = '';
   let storeYapeQr = '';
   let storeYapeNumber = '';
+  const walletPurchasesEnabled = false;
   let walletSelection;
   const walletButton = $('#checkout-wallet');
   const walletMessage = $('#checkout-wallet-message');
@@ -684,6 +685,8 @@
     const qr = $('#checkout-yape-qr');
     const whatsapp = $('#checkout-whatsapp');
     const qrStatus = $('#checkout-yape-status');
+    setWhatsAppLink($('#checkout-contact'), 'Hola, quiero hacer un pedido en VortexGamer.' +
+      '\nPaquete: ' + $('#checkout-package').textContent + '\nUID: ' + uid + '\nMonto: ' + price(product.price));
     const hasYape = Boolean(storeYapeQr && setWhatsAppLink(whatsapp,
       'Hola, ya pagué por Yape en VortexGamer.\nPaquete: ' + $('#checkout-package').textContent +
       '\nUID: ' + uid + '\nMonto: ' + price(product.price) + '\nAdjunto mi captura de pago.'));
@@ -709,6 +712,10 @@
       if (qr.complete && qr.naturalWidth) qr.onload();
     } else {
       qr.removeAttribute('src');
+    }
+    if (!walletPurchasesEnabled) {
+      walletMessage.textContent = 'Confirma tu pedido por WhatsApp. La entrega se realiza después de verificar el pago.';
+      return;
     }
     if (!verified) {
       walletMessage.textContent = 'Verifica tu UID para pagar con saldo.';
@@ -812,7 +819,7 @@
 
   walletButton.addEventListener('click', async () => {
     const selection = walletSelection;
-    if (!selection || selection.complete || walletButton.disabled) return;
+    if (!walletPurchasesEnabled || !selection || selection.complete || walletButton.disabled) return;
     if (selection.uid !== $('#uid').value.trim()) {
       walletMessage.textContent = 'Vuelve a verificar tu UID.';
       return;
@@ -1144,7 +1151,27 @@
   });
   $('#wallet-trigger').addEventListener('click', () => $('#account-trigger').click());
   $('#overlay').addEventListener('click', () => closeLayer());
-  $('#demo-checkout').addEventListener('click', () => showInfo('COMPRAS EN PREPARACIÓN', 'Tu selección es una simulación. No se generó ningún pedido ni se cobró dinero. El proceso se habilitará cuando integremos y probemos el sistema de pagos, saldo y recargas.'));
+  $('#demo-checkout').addEventListener('click', () => {
+    const uidInput = $('#uid');
+    const uid = uidInput.value.trim();
+    if (!/^\d{8,12}$/.test(uid) || playerSession?.demo) {
+      closeLayer();
+      notify('Escribe el UID de tu cuenta de Free Fire para enviar el pedido.');
+      uidInput.focus();
+      return;
+    }
+    const items = Object.entries(cart)
+      .map(([id, quantity]) => ({product:byId.get(Number(id)), quantity}))
+      .filter(({product, quantity}) => product && product.visible !== false && quantity > 0);
+    if (!items.length) return;
+    const packages = items.map(({product, quantity}) =>
+      quantity + ' × ' + product.amount + ' + ' + product.bonus + ' diamantes');
+    const total = items.reduce((sum, {product, quantity}) => sum + product.price * quantity, 0);
+    const href = whatsAppLink('Hola, quiero hacer un pedido en VortexGamer.\nUID: ' + uid +
+      '\n' + packages.join('\n') + '\nTotal: ' + price(total));
+    if (href) window.open(href, '_blank', 'noopener,noreferrer');
+    else notify('WhatsApp no está disponible en este momento.');
+  });
   $('#clear-cart').addEventListener('click', () => { cart = {}; refresh(); notify('Carrito de prueba vaciado'); });
   function openCategoryFromHash(hash = location.hash) {
     const id = hash.slice(1);
