@@ -69,7 +69,7 @@ export async function onRequestGet({ request, env }) {
     return json({ ok: true, source: "Free Fire Mania", player: profile.player });
   }
   if (profile.code === "REGION_UNSUPPORTED") {
-    return json({ ok: false, code: profile.code, message: "Este perfil pertenece a otra región. La tienda atiende Sur LATAM." }, 422);
+    return json({ ok: false, code: profile.code, message: "Este perfil pertenece a otra región." }, 422);
   }
   if (!env.FREE_FIRE_API_KEY) {
     const unavailable = profile.code !== "PROFILE_NOT_FOUND";

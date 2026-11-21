@@ -2,12 +2,12 @@
   'use strict';
 
   const PRODUCTS = [
-    { id: 100, providerProductId: 5, providerSku: 'ADS005', amount: '100', bonus: '10', price: 3.50, category: 'starter', tag: 'BONUS +10', type: 'PACK INICIAL' },
-    { id: 310, providerProductId: 6, providerSku: 'ADS006', amount: '310', bonus: '31', price: 9.80, category: 'starter', tag: 'BONUS +31', type: 'PACK POPULAR' },
-    { id: 520, providerProductId: 7, providerSku: 'ADS007', amount: '520', bonus: '52', price: 15.00, category: 'starter', tag: 'BONUS +52', type: 'PACK AVANZADO' },
-    { id: 1060, providerProductId: 8, providerSku: 'ADS008', amount: '1,060', bonus: '106', price: 27.00, category: 'premium', tag: 'PACK PRO', type: 'PACK ÉLITE' },
-    { id: 2180, providerProductId: 9, providerSku: 'ADS009', amount: '2,180', bonus: '218', price: 52.00, category: 'premium', tag: 'PACK PRO', type: 'PACK LEGENDARIO' },
-    { id: 5600, providerProductId: 10, providerSku: 'ADS010', amount: '5,600', bonus: '560', price: 130.00, category: 'premium', tag: 'MAX PACK', type: 'PACK MÁXIMO' }
+    { id: 100, imageNumber: 1, amount: '100', bonus: '10', price: 3.50, category: 'starter', tag: 'BONUS +10', type: 'PACK INICIAL' },
+    { id: 310, imageNumber: 2, amount: '310', bonus: '31', price: 9.80, category: 'starter', tag: 'BONUS +31', type: 'PACK POPULAR' },
+    { id: 520, imageNumber: 3, amount: '520', bonus: '52', price: 15.00, category: 'starter', tag: 'BONUS +52', type: 'PACK AVANZADO' },
+    { id: 1060, imageNumber: 4, amount: '1,060', bonus: '106', price: 27.00, category: 'premium', tag: 'PACK PRO', type: 'PACK ÉLITE' },
+    { id: 2180, imageNumber: 5, amount: '2,180', bonus: '218', price: 52.00, category: 'premium', tag: 'PACK PRO', type: 'PACK LEGENDARIO' },
+    { id: 5600, imageNumber: 6, amount: '5,600', bonus: '560', price: 130.00, category: 'premium', tag: 'MAX PACK', type: 'PACK MÁXIMO' }
   ];
   const byId = new Map(PRODUCTS.map(product => [product.id, product]));
   let offerSettings = null;
@@ -116,7 +116,7 @@
       '<div class="card-media">',
       '<span class="card-badge', isPro ? ' premium' : '', '">', product.tag, '</span>',
       '<button type="button" class="favorite-btn', saved ? ' saved' : '', '" data-action="favorite" data-id="', product.id, '" aria-label="', saved ? 'Quitar de' : 'Añadir a', ' favoritos: ', product.amount, ' diamantes" aria-pressed="', saved, '">', heartSVG, '</button>',
-      '<img class="card-gem pack-photo" src="', product.image || '/images/pack-' + (product.providerProductId - 4) + '.png?v=6a62bac', '" alt="" loading="lazy" decoding="async">',
+      '<img class="card-gem pack-photo" src="', product.image || '/images/pack-' + product.imageNumber + '.png?v=6a62bac', '" alt="" loading="lazy" decoding="async">',
       '</div><div class="card-body">',
       '<span class="card-type">', product.type, ' / FREE FIRE</span>',
       '<h3 class="card-title">', product.amount, ' <span>DIAMANTES</span></h3>',
@@ -1237,7 +1237,6 @@
     result.className = 'verify-result';
     result.textContent = 'Consultando el servidor de verificación…';
     try {
-      // Recargas América es el verificador preferido cuando el dueño lo habilite.
       // Si aún no está configurado, se conserva el verificador independiente anterior.
       let response = await fetch('/api/recargas/validate', {
         method: 'POST',
@@ -1245,13 +1244,10 @@
         body: JSON.stringify({ uid, turnstileToken: uidTurnstileToken })
       });
       let data = await response.json();
-      let verificationSource = 'Recargas América';
       if (response.status === 503 && data.code === 'NOT_READY') {
-        verificationSource = 'Verificador alternativo';
         response = await fetch('/api/freefire/verify?' + new URLSearchParams({ uid, region }).toString(), { headers: { Accept: 'application/json' } });
         data = await response.json();
         if (!response.ok || !data.ok) throw new Error(data.message || 'No fue posible verificar el UID.');
-        verificationSource = data.source || verificationSource;
       } else {
         if (!response.ok || !data.ok) throw new Error(data.message || 'No fue posible validar el UID.');
         if (data.supported !== true || data.verified !== true) {
@@ -1263,7 +1259,7 @@
       const name = document.createElement('strong');
       name.textContent = data.player.nickname ? 'Jugador: ' + data.player.nickname : 'Nombre del jugador no disponible';
       const details = document.createElement('div');
-      details.textContent = 'UID: ' + data.player.uid + ' · Región de tienda: Sur LATAM · ' + verificationSource + (data.player.level == null ? '' : ' · Nivel: ' + data.player.level);
+      details.textContent = 'UID: ' + data.player.uid;
       result.append(name, details);
       playerSession = {
         uid,

@@ -8,9 +8,7 @@ export function onRequestGet({ env }) {
     Number.isSafeInteger(productId) && productId > 0;
   return new Response(JSON.stringify({
     ok: true,
-    service: "RecargasAmerica",
     catalogConfigured: configured,
-    sandboxKeyDetected: configured && String(env.RA_API_KEY).trim().startsWith("ra_test_"),
     validationReady: enabled,
     turnstileConfigured,
     turnstileSiteKey: enabled ? String(env.RA_TURNSTILE_SITE_KEY) : null,

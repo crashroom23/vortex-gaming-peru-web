@@ -9,8 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/vortex.css?v=whatsapp-orders">
-  <script src="/vortex.js?v=whatsapp-orders" defer></script>
+  <link rel="stylesheet" href="/vortex.css?v=uid-clean">
+  <script src="/vortex.js?v=uid-clean" defer></script>
 </head>
 <body>
   <svg xmlns="http://www.w3.org/2000/svg" class="svg-assets" aria-hidden="true">
@@ -102,7 +102,6 @@
           <div class="verify-card-head"><div class="verify-logo" aria-hidden="true">◈</div><h2>Verifica tu ID de Free Fire</h2></div>
           <label for="uid">UID DE FREE FIRE</label>
           <input id="uid" name="uid" inputmode="numeric" autocomplete="off" placeholder="Ingresa tu UID" minlength="8" maxlength="12" pattern="[0-9]{8,12}" required>
-          <div class="fixed-region" aria-label="Región de la tienda: Sur LATAM"><span>🌎</span> SERVIDOR DE LA TIENDA: <strong>SUR LATAM</strong></div>
           <div id="uid-turnstile" class="uid-turnstile" hidden aria-label="Comprobación de seguridad"></div>
           <button type="submit" id="verify-btn" class="btn btn-accent btn-wide">VERIFICAR UID <svg><use href="#icon-arrow"/></svg></button><button type="button" id="simulate-verify" class="btn btn-ghost btn-wide demo-verify-button">Probar flujo demo</button>
           <div class="verify-result" id="verify-result" role="status" aria-live="polite" hidden></div><div class="verified-status" id="verified-status" hidden></div>

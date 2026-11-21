@@ -25,7 +25,7 @@ export async function onRequestPost({ request, env }) {
       !env.RA_TURNSTILE_SITE_KEY || !env.RA_TURNSTILE_SECRET ||
       !/^\d{8,12}$/.test(testUid) ||
       !Number.isSafeInteger(productId) || productId <= 0) {
-    return reply({ ok: false, code: "NOT_READY", message: "La validación de Recargas América todavía no está habilitada." }, 503);
+    return reply({ ok: false, code: "NOT_READY", message: "La verificación de jugadores todavía no está habilitada." }, 503);
   }
 
   let body;
@@ -113,12 +113,12 @@ export async function onRequestPost({ request, env }) {
     if (nickname?.toLowerCase() === "sandbox user") {
       return reply({
         ok: true, supported: true, verified: false, code: "SANDBOX_RESULT",
-        message: "Recargas América devolvió un usuario de prueba. El nombre real del jugador sigue sin confirmar."
+        message: "La verificación devolvió un usuario de prueba. El nombre real del jugador sigue sin confirmar."
       });
     }
     return reply({
       ok: true, supported: true, verified: true,
-      player: { uid, nickname, regionLabel: "Sur LATAM (etiqueta de tienda, no región verificada)" }
+      player: { uid, nickname }
     });
   } catch (_) {
     return reply({ ok: false, code: "NETWORK_ERROR", message: "La validación no respondió." }, 502);

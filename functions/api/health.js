@@ -11,7 +11,6 @@ export async function onRequestGet({ env }) {
     app: "VortexGamer",
     platform: "Cloudflare Pages Functions",
     freeFireVerificationConfigured: Boolean(env.FREE_FIRE_API_KEY),
-    recargasAmericaConnected: false,
     paymentsEnabled: false
   });
 }

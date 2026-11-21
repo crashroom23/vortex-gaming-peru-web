@@ -1,23 +1,16 @@
-// Catálogo público sin costos de proveedor. La clave privada permanece en Cloudflare.
+import {authorized} from "../site-settings.js";
+
+// Catálogo de diagnóstico para administración. La clave privada permanece en Cloudflare.
 // La respuesta expone solamente productos de Free Fire, nunca precios mayoristas.
 const BASE = "https://panel.recargasamerica.com/api/v1";
-const headers = { "content-type": "application/json; charset=utf-8", "cache-control": "public, max-age=60, s-maxage=300", "x-content-type-options": "nosniff" };
+const headers = { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-content-type-options": "nosniff" };
 const reply = (data, status = 200) => new Response(JSON.stringify(data), {
   status, headers: status === 200 ? headers : { ...headers, "cache-control": "no-store" }
 });
 
-export async function onRequestGet({ request, env, ctx }) {
-  if (!env.RA_API_KEY) return reply({ ok: false, code: "NOT_CONFIGURED", message: "El catálogo de Recargas América aún no está configurado." }, 503);
-
-  // Cachea solo la versión filtrada y sin datos sensibles.
-  const cache = typeof caches !== "undefined" ? caches.default : null;
-  const cacheKey = new Request(new URL(request.url).origin + "/api/recargas/catalog", { method: "GET" });
-  if (cache) {
-    try {
-      const hit = await cache.match(cacheKey);
-      if (hit) return hit;
-    } catch (_) {}
-  }
+export async function onRequestGet({ request, env }) {
+  if (!await authorized(request, env.VORTEX_ADMIN_KEY)) return reply({ ok: false, message: "Acceso no autorizado." }, 401);
+  if (!env.RA_API_KEY) return reply({ ok: false, code: "NOT_CONFIGURED", message: "El catálogo aún no está configurado." }, 503);
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
@@ -48,11 +41,7 @@ export async function onRequestGet({ request, env, ctx }) {
       type: "recharge",
       required_fields: Array.isArray(item.required_fields) ? item.required_fields.filter(x => ["player_id", "zone_id", "server_id"].includes(x)) : []
     }));
-    const response = reply({ ok: true, products, note: "Solo se muestran datos públicos del catálogo; los precios de compra no se exponen." });
-    if (cache && ctx?.waitUntil) {
-      ctx.waitUntil(cache.put(cacheKey, response.clone()).catch(() => {}));
-    }
-    return response;
+    return reply({ ok: true, products });
   } catch (_) {
     return reply({ ok: false, code: "NETWORK_ERROR", message: "No se pudo contactar al proveedor." }, 502);
   } finally {
