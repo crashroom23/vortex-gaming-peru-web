@@ -3,11 +3,17 @@
 
   const PRODUCTS = [
     { id: 100, imageNumber: 1, amount: '100', bonus: '10', price: 3.50, category: 'starter', tag: 'BONUS +10', type: 'PACK INICIAL' },
-    { id: 310, imageNumber: 2, amount: '310', bonus: '31', price: 9.80, category: 'starter', tag: 'BONUS +31', type: 'PACK POPULAR' },
+    { id: 220, imageNumber: 1, amount: '220', price: 6.80, category: 'starter', tag: 'ILIMITADOS', type: 'PACK ILIMITADO' },
+    { id: 310, imageNumber: 2, amount: '310', bonus: '31', price: 9.81, category: 'starter', tag: 'BONUS +31', type: 'PACK POPULAR' },
+    { id: 441, imageNumber: 2, amount: '441', price: 13.20, category: 'starter', tag: 'ILIMITADOS', type: 'PACK ILIMITADO' },
     { id: 520, imageNumber: 3, amount: '520', bonus: '52', price: 15.00, category: 'starter', tag: 'BONUS +52', type: 'PACK AVANZADO' },
+    { id: 792, imageNumber: 3, amount: '792', price: 22.00, category: 'premium', tag: 'ILIMITADOS', type: 'PACK ILIMITADO' },
     { id: 1060, imageNumber: 4, amount: '1,060', bonus: '106', price: 27.00, category: 'premium', tag: 'PACK PRO', type: 'PACK ÉLITE' },
     { id: 2180, imageNumber: 5, amount: '2,180', bonus: '218', price: 52.00, category: 'premium', tag: 'PACK PRO', type: 'PACK LEGENDARIO' },
-    { id: 5600, imageNumber: 6, amount: '5,600', bonus: '560', price: 130.00, category: 'premium', tag: 'MAX PACK', type: 'PACK MÁXIMO' }
+    { id: 4796, imageNumber: 5, amount: '4,796', price: 103.00, category: 'premium', tag: 'ILIMITADOS', type: 'PACK ILIMITADO' },
+    { id: 5600, imageNumber: 6, amount: '5,600', bonus: '560', price: 128.00, category: 'premium', tag: 'MAX PACK', type: 'PACK MÁXIMO' },
+    { id: 10956, imageNumber: 6, amount: '10,956', price: 232.00, category: 'premium', tag: 'ILIMITADOS', type: 'PACK ILIMITADO' },
+    { id: 21912, imageNumber: 6, amount: '21,912', price: 464.00, category: 'premium', tag: 'ILIMITADOS', type: 'PACK ILIMITADO' }
   ];
   const byId = new Map(PRODUCTS.map(product => [product.id, product]));
   let offerSettings = null;
@@ -117,7 +123,8 @@
       '</div><div class="card-body">',
       '<span class="card-type">', product.type, ' / FREE FIRE</span>',
       '<h3 class="card-title">', product.amount, ' <span>DIAMANTES</span></h3>',
-      '<p class="card-bonus">✦ + ', product.bonus, ' DIAMANTES DE BONO</p>',
+      product.bonus ? '<p class="card-bonus">✦ + ' + product.bonus + ' DIAMANTES DE BONO</p>'
+        : '<p class="card-bonus">✦ TOTAL DE DIAMANTES</p>',
       '<div class="card-bottom"><div><div class="card-price-label">PRECIO DEL PAQUETE</div><div class="card-price">', price(product.price), '</div></div></div>',
       '<div class="card-buttons"><button class="btn btn-accent" type="button" data-action="pay" data-id="', product.id, '">PAGAR ', arrowSVG, '</button>',
       '<button class="quick-view" type="button" data-action="detail" data-id="', product.id, '" aria-label="Ver detalles de ', product.amount, ' diamantes">＋</button></div>',
@@ -238,7 +245,7 @@
       '<div class="panel-item">' +
         '<div class="panel-item-img">' + miniGemSVG + '</div>' +
         '<div class="panel-item-details"><strong>' + product.amount + ' DIAMANTES</strong>' +
-        '<small>+ ' + product.bonus + ' DIAMANTES DE BONO</small>' +
+        (product.bonus ? '<small>+ ' + product.bonus + ' DIAMANTES DE BONO</small>' : '') +
         '<span>' + price(product.price * quantity) + '</span>' +
         '<div class="qty-control"><button type="button" data-action="decrease" data-id="' + product.id + '" aria-label="Reducir cantidad">−</button><span>' + quantity + '</span><button type="button" data-action="increase" data-id="' + product.id + '" aria-label="Aumentar cantidad">+</button></div></div>' +
         '<button type="button" class="remove-item" data-action="remove" data-id="' + product.id + '" aria-label="Eliminar paquete">×</button>' +
@@ -253,7 +260,8 @@
     $('#favorites-items').innerHTML = products.length ? products.map(product =>
       '<div class="panel-item">' +
       '<div class="panel-item-img">' + miniGemSVG + '</div>' +
-      '<div class="panel-item-details"><strong>' + product.amount + ' DIAMANTES</strong><small>+ ' + product.bonus + ' DE BONO</small><span>' + price(product.price) + '</span>' +
+      '<div class="panel-item-details"><strong>' + product.amount + ' DIAMANTES</strong>' +
+      (product.bonus ? '<small>+ ' + product.bonus + ' DE BONO</small>' : '') + '<span>' + price(product.price) + '</span>' +
       '<div class="card-buttons"><button class="btn btn-accent" data-action="pay" data-id="' + product.id + '">PAGAR</button></div></div>' +
       '<button type="button" class="remove-item" data-action="favorite" data-id="' + product.id + '" aria-label="Quitar de favoritos">×</button></div>'
     ).join('') :
@@ -612,6 +620,10 @@
     }
   });
 
+  function diamondPackageName(product) {
+    return product.amount + (product.bonus ? ' + ' + product.bonus : '') + ' diamantes';
+  }
+
   function requestCheckout(product) {
     if (!product || product.visible === false || document.documentElement.dataset.draft === 'true') return;
     const currentUID = $('#uid').value.trim();
@@ -623,7 +635,7 @@
     }
     const currentPlayer = playerSession?.uid === currentUID ? playerSession : null;
     $('#checkout-player').textContent = (currentPlayer ? currentPlayer.nickname + ' · ' : 'UID · ') + currentUID;
-    $('#checkout-package').textContent = product.title ?? (product.amount + ' + ' + product.bonus + ' diamantes');
+    $('#checkout-package').textContent = product.title ?? diamondPackageName(product);
     $('#checkout-price').textContent = price(product.price);
     openLayer('checkout-modal');
     void showCheckoutOptions(product, currentUID, Boolean(currentPlayer));
@@ -644,7 +656,7 @@
         case 'remove': delete cart[id]; refresh(); notify('Paquete eliminado del carrito'); break;
         case 'detail':
           showInfo(product.amount + ' DIAMANTES',
-            'Incluye ' + product.amount + ' diamantes y ' + product.bonus + ' adicionales de bono por ' + price(product.price) + '. Haz tu pedido por WhatsApp.');
+            'Incluye ' + diamondPackageName(product) + ' por ' + price(product.price) + '. Haz tu pedido por WhatsApp.');
           break;
       }
       return;
@@ -768,7 +780,7 @@
 
   function historyProduct(id) {
     const diamond = byId.get(id);
-    if (diamond) return diamond.amount + ' + ' + diamond.bonus + ' diamantes';
+    if (diamond) return diamondPackageName(diamond);
     const card = individualCards.get(id);
     if (card) return card.title;
     const offerName = {30003:'Oferta de 3 tarjetas', 30005:'Aumento de nivel', 30006:'Pase Booyah'}[id];
@@ -899,7 +911,7 @@
       .filter(({product, quantity}) => product && product.visible !== false && quantity > 0);
     if (!items.length) return;
     const packages = items.map(({product, quantity}) =>
-      quantity + ' × ' + product.amount + ' + ' + product.bonus + ' diamantes');
+      quantity + ' × ' + diamondPackageName(product));
     const total = items.reduce((sum, {product, quantity}) => sum + product.price * quantity, 0);
     const href = whatsAppLink('Hola, quiero hacer un pedido en VortexGamer.\nUID: ' + uid +
       '\n' + packages.join('\n') + '\nTotal: ' + price(total));
@@ -1109,6 +1121,7 @@
     }
     for (const product of PRODUCTS) {
       const options = settings.products[product.id];
+      if (!options) continue;
       product.price = options.cents / 100;
       product.visible = options.visible;
       product.image = /^(?:\/images\/[\w.-]+(?:\?v=[\w-]+)?|data:image\/(?:webp|png|jpeg);base64,[A-Za-z0-9+/]+={0,2})$/.test(options.image) ? options.image : '';

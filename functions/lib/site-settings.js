@@ -1,4 +1,7 @@
-export const priceDefaults = {100:350,310:980,520:1500,1060:2700,2180:5200,5600:13000};
+export const priceDefaults = {
+  100:350, 220:680, 310:981, 441:1320, 520:1500, 792:2200,
+  1060:2700, 2180:5200, 4796:10300, 5600:12800, 10956:23200, 21912:46400
+};
 export const categories = ['diamantes','fragmentos','pase','tarjetas','nivel'];
 export const bannerDefaults = {
   diamantes:{title:'Diamantes',image:'/images/vortex-banner.webp?v=6a62bac',category:'diamantes'},
@@ -51,9 +54,16 @@ export async function readSettings(db) {
   const entry = await db.prepare('SELECT revision, value FROM site_settings WHERE id=1').first();
   if (!entry) return {revision:0,settings:defaults};
   const saved = JSON.parse(entry.value);
+  const products = {...defaults.products, ...saved.products};
+  if (!saved.products?.[220]) {
+    for (const id of [310, 5600]) {
+      products[id] = {...products[id], cents:priceDefaults[id]};
+    }
+  }
   return {revision:entry.revision,settings:{
     fragments:fragmentDefaults,
     ...saved,
+    products,
     offers:{pase:passDefault,...saved.offers},
     payment:{yapeNumber:'',...saved.payment}
   }};

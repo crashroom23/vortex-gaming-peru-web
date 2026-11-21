@@ -1,4 +1,4 @@
-import {readSettings} from '../lib/site-settings.js';
+import {priceDefaults, readSettings} from '../lib/site-settings.js';
 const prices = new Map([[100,[10,350]],[310,[31,980]],[520,[52,1500]],[1060,[106,2700]],[2180,[218,5200]],[5600,[560,13000]]]);
 const cardOfferId = 30003;
 const levelOfferId = 30005;
@@ -53,7 +53,7 @@ export async function onRequest({request, env}) {
     if (method === 'POST') {
       const {uid, productId, paymentMethod} = body;
       const fragment = decodeFragment(productId);
-      if (typeof uid !== 'string' || !/^\d{8,12}$/.test(uid) || (!prices.has(productId) && productId !== cardOfferId && productId !== levelOfferId && productId !== passOfferId && !individualCards.has(productId) && !fragment) ||
+      if (typeof uid !== 'string' || !/^\d{8,12}$/.test(uid) || (!(Number.isSafeInteger(productId) && Object.hasOwn(priceDefaults, productId)) && productId !== cardOfferId && productId !== levelOfferId && productId !== passOfferId && !individualCards.has(productId) && !fragment) ||
           !['yape','binance'].includes(paymentMethod)) return reply({message:'Revisa el UID, paquete y método.'},400);
       const player = typeof body.player === 'string' ? body.player.trim().slice(0,100) : '';
       const existing = await db.prepare('SELECT code FROM demo_orders WHERE code=?').bind(code).first();
@@ -84,12 +84,12 @@ export async function onRequest({request, env}) {
     const isLevelOffer = row.product_id === levelOfferId;
     const isCardOffer = row.product_id === cardOfferId;
     const individualCard = individualCards.get(row.product_id);
-    const [bonus,originalCents] = prices.get(row.product_id) ?? [0, individualCard?.cents ?? (isPassOffer ? 500 : isLevelOffer ? 1400 : 4000)];
+    const [bonus,originalCents] = prices.get(row.product_id) ?? [0, priceDefaults[row.product_id] ?? individualCard?.cents ?? (isPassOffer ? 500 : isLevelOffer ? 1400 : 4000)];
     const fragment = decodeFragment(row.product_id);
     const fragmentName = fragment && (fragment.quantity + ' ' + fragment.kind + (fragment.kind === 'cajas' ? ' evolutivas' : ' evolutivos'));
     const packageName = isPassOffer ? 'Pase Booyah' : isLevelOffer ? 'Aumento de nivel' : fragmentName || (individualCard?.title ?? (isCardOffer
       ? 'Oferta de 3 tarjetas'
-      : row.product_id.toLocaleString('en-US') + ' + ' + bonus + ' diamantes'));
+      : row.product_id.toLocaleString('en-US') + (bonus ? ' + ' + bonus : '') + ' diamantes'));
     const cents = storedPrice?.cents ?? originalCents;
     return reply({order:{
       code:row.code, uid:row.uid, player:row.player, stage:row.stage, createdAt:row.created_at,
