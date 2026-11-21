@@ -21,32 +21,6 @@
   const $$ = selector => [...document.querySelectorAll(selector)];
   const price = amount => 'S/ ' + amount.toFixed(2);
 
-  const diamondCounter = $('#diamond-counter-total');
-  const limaOffset = 5 * 60 * 60 * 1000;
-  const dayLength = 24 * 60 * 60 * 1000;
-  const counterInterval = 20 * 60 * 1000;
-  const counterLaunch = Date.parse('2026-11-21T09:22:00Z');
-
-  function updateDiamondCounter() {
-    const now = Date.now();
-    const limaMidnight = Math.floor((now - limaOffset) / dayLength) * dayLength + limaOffset;
-    const start = Math.max(counterLaunch, limaMidnight);
-    const elapsed = Math.max(0, now - start);
-    const value = (15 + 2 * Math.floor(elapsed / counterInterval)) + 'k';
-    if (diamondCounter.textContent !== value) {
-      diamondCounter.textContent = value;
-      if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        diamondCounter.animate([
-          {transform:'scale(.85)', opacity:.55},
-          {transform:'scale(1)', opacity:1}
-        ], {duration:420, easing:'ease-out'});
-      }
-    }
-    const nextUpdate = now < start ? start + counterInterval : now + counterInterval - elapsed % counterInterval;
-    setTimeout(updateDiamondCounter, Math.min(nextUpdate, limaMidnight + dayLength) - now);
-  }
-
-  updateDiamondCounter();
   const storageKeyCart = 'vortex-preview-cart-v2';
   const storageKeyFav = 'vortex-preview-favorites-v2';
 
