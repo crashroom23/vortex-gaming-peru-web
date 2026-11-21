@@ -1,6 +1,5 @@
-// Validación de UID con Recargas América: nunca genera compras ni toca billeteras.
-// Protegida con Turnstile y desactivada si falta cualquier configuración.
-// Para uso público, configurar además Rate Limiting/WAF en Cloudflare.
+import {takeAttempt} from "../account.js";
+
 const BASE = "https://panel.recargasamerica.com/api/v1";
 const VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 const reply = (data, status = 200) => new Response(JSON.stringify(data), {
@@ -20,10 +19,8 @@ export async function onRequestPost({ request, env }) {
   }
 
   const productId = Number(env.RA_FF_PRECHECK_PRODUCT_ID || 5);
-  const testUid = String(env.RA_VALIDATE_TEST_UID || "").trim();
-  if (!env.RA_API_KEY || env.RA_VALIDATE_ENABLED !== "true" ||
+  if (!env.ORDERS_DB || !env.RA_API_KEY || env.RA_VALIDATE_ENABLED !== "true" ||
       !env.RA_TURNSTILE_SITE_KEY || !env.RA_TURNSTILE_SECRET ||
-      !/^\d{8,12}$/.test(testUid) ||
       !Number.isSafeInteger(productId) || productId <= 0) {
     return reply({ ok: false, code: "NOT_READY", message: "La verificación de jugadores todavía no está habilitada." }, 503);
   }
@@ -42,20 +39,16 @@ export async function onRequestPost({ request, env }) {
   if (!/^\d{8,12}$/.test(uid)) {
     return reply({ ok: false, code: "INVALID_UID", message: "El UID de Free Fire debe tener de 8 a 12 dígitos." }, 422);
   }
-  // En esta fase solo permite el UID de prueba; sin un UID de prueba válido falla cerrado.
-  if (uid !== testUid) {
-    return reply({ ok: false, code: "TEST_ONLY", message: "La verificación está limitada al UID autorizado para pruebas." }, 403);
-  }
   if (!token || token.length > 2048) {
     return reply({ ok: false, code: "CHALLENGE_REQUIRED", message: "Completa la comprobación de seguridad e inténtalo nuevamente." }, 403);
   }
 
   // No enviar consultas al proveedor sin validar primero Turnstile en el servidor.
+  const ip = request.headers.get("CF-Connecting-IP");
   const challengeController = new AbortController();
   const challengeTimer = setTimeout(() => challengeController.abort(), 8000);
   try {
     const payload = new URLSearchParams({ secret: env.RA_TURNSTILE_SECRET, response: token });
-    const ip = request.headers.get("CF-Connecting-IP");
     if (ip) payload.set("remoteip", ip);
     const challengeResponse = await fetch(VERIFY_URL, {
       method: "POST",
@@ -76,6 +69,19 @@ export async function onRequestPost({ request, env }) {
     return reply({ ok: false, code: "CHALLENGE_UNAVAILABLE", message: "No se pudo comprobar el desafío de seguridad." }, 503);
   } finally {
     clearTimeout(challengeTimer);
+  }
+
+  try {
+    const now = Math.floor(Date.now() / 1000);
+    const key = new TextEncoder().encode(env.RA_API_KEY + ":" + (ip || "unknown"));
+    const hash = new Uint8Array(await crypto.subtle.digest("SHA-256", key));
+    const scope = Array.from(hash, byte => byte.toString(16).padStart(2, "0")).join("");
+    if (!await takeAttempt(env.ORDERS_DB, "uid:client:" + scope, now, 12) ||
+        !await takeAttempt(env.ORDERS_DB, "uid:global", now, 120)) {
+      return reply({ ok: false, code: "RATE_LIMIT", message: "Límite temporal de verificaciones. Inténtalo más tarde." }, 429);
+    }
+  } catch {
+    return reply({ ok: false, code: "LIMIT_UNAVAILABLE", message: "La verificación no está disponible en este momento." }, 503);
   }
 
   const controller = new AbortController();

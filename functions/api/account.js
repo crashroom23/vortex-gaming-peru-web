@@ -32,7 +32,7 @@ function equalHash(left, right) {
   return difference === 0;
 }
 
-async function takeAttempt(db, scope, now, limit) {
+export async function takeAttempt(db, scope, now, limit) {
   const result = await db.prepare(`
     INSERT INTO preview_auth_attempts (scope, expires_at, count) VALUES (?, ?, 1)
     ON CONFLICT(scope) DO UPDATE SET
