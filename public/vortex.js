@@ -366,6 +366,13 @@
   let storeYapeNumber = '';
   const walletPurchasesEnabled = false;
   let walletSelection;
+  let currentCheckout;
+  $('#checkout-roulette-new').addEventListener('click', () => {
+    if (!currentCheckout) return;
+    try { sessionStorage.removeItem('vortex-yape-order'); } catch {}
+    walletSelection = undefined;
+    void showCheckoutOptions(...currentCheckout);
+  });
   const walletButton = $('#checkout-wallet');
   const walletMessage = $('#checkout-wallet-message');
 
@@ -475,7 +482,43 @@
     }
   });
 
+  async function prepareRouletteOrder(selection, amount) {
+    const cents = Math.round(amount * 100);
+    if (selection.rouletteCents !== cents) {
+      selection.rouletteCents = cents;
+      const storageKey = 'vortex-yape-order';
+      const identity = [selection.uid,selection.productId,cents].join(':');
+      try {
+        const last = JSON.parse(sessionStorage.getItem(storageKey));
+        selection.rouletteOrder = last?.identity === identity ? last.order : crypto.randomUUID();
+        sessionStorage.setItem(storageKey,JSON.stringify({identity,order:selection.rouletteOrder}));
+      } catch {
+        selection.rouletteOrder = crypto.randomUUID();
+      }
+    }
+    const response = await fetch('/api/roulette', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'order',order:selection.rouletteOrder,
+        uid:selection.uid,productId:selection.productId,cents})
+    });
+    const data = await response.json();
+    if (!response.ok || !data.code) throw new Error(data.message);
+    return data.code;
+  }
+
+  $('#checkout-roulette-copy').addEventListener('click', async () => {
+    const input = $('#checkout-roulette-code');
+    try {
+      await navigator.clipboard.writeText(input.value);
+      $('#checkout-roulette-status').textContent = 'Código copiado. Se activa al confirmar el pago.';
+    } catch {
+      input.focus();
+      input.select();
+    }
+  });
+
   async function showCheckoutOptions(product, uid, verified) {
+    currentCheckout = [product,uid,verified];
     const previous = walletSelection;
     const selection = previous?.uid === uid && previous.productId === product.id && !previous.complete
       ? previous : {uid, productId:product.id, code:crypto.randomUUID()};
@@ -485,9 +528,31 @@
     const qr = $('#checkout-yape-qr');
     const whatsapp = $('#checkout-whatsapp');
     const qrStatus = $('#checkout-yape-status');
-    const hasYape = Boolean(storeYapeQr && setWhatsAppLink(whatsapp,
-      'Hola, ya pagué por Yape en VortexGamer.\nPaquete: ' + $('#checkout-package').textContent +
-      '\nUID: ' + uid + '\nMonto: ' + price(product.price) + '\nAdjunto mi captura de pago.'));
+    const paymentMessage = 'Hola, ya pagué por Yape en VortexGamer.\nPaquete: ' +
+      $('#checkout-package').textContent + '\nUID: ' + uid + '\nMonto: ' + price(product.price);
+    const receiptMessage = '\nAdjunto mi captura de pago.';
+    const hasYape = Boolean(storeYapeQr && whatsAppLink(paymentMessage));
+    const roulette = $('#checkout-roulette');
+    const rouletteStatus = $('#checkout-roulette-status');
+    roulette.hidden = true;
+    rouletteStatus.textContent = '';
+    whatsapp.removeAttribute('href');
+    if (hasYape) {
+      rouletteStatus.textContent = 'Preparando tu código de ruleta…';
+      void prepareRouletteOrder(selection, product.price).then(code => {
+        if (selection !== walletSelection) return;
+        $('#checkout-roulette-code').value = code;
+        roulette.hidden = false;
+        rouletteStatus.textContent = 'Tu código se activa cuando confirmemos el pago.';
+        setWhatsAppLink(whatsapp, paymentMessage + '\nCódigo de ruleta: ' + code + receiptMessage);
+        whatsapp.hidden = qr.hidden;
+      }).catch(() => {
+        if (selection !== walletSelection) return;
+        rouletteStatus.textContent = 'El código de ruleta no está disponible. Puedes enviar tu comprobante y pedir tu código por WhatsApp.';
+        setWhatsAppLink(whatsapp, paymentMessage + receiptMessage);
+        whatsapp.hidden = qr.hidden;
+      });
+    }
     yape.hidden = !hasYape;
     const yapeNumber = $('#checkout-yape-number');
     yapeNumber.hidden = !/^9\d{8}$/.test(storeYapeNumber);
@@ -498,7 +563,7 @@
     qr.hidden = true;
     qr.onload = () => {
       qr.hidden = false;
-      whatsapp.hidden = false;
+      whatsapp.hidden = !whatsapp.hasAttribute('href');
       qrStatus.textContent = '';
     };
     qr.onerror = () => {

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ruleta Vortex</title>
+  <link rel="stylesheet" href="/ruleta.css">
+  <script src="/ruleta.js" defer></script>
+</head>
+<body>
+  <main>
+    <a href="/">Volver a la tienda</a>
+    <h1>Ruleta Vortex</h1>
+    <p>Ingresa tu código de giro. Si lo recibiste al pagar por Yape, podrás usarlo cuando confirmemos tu pago.</p>
+    <div class="wheel-frame" aria-hidden="true">
+      <div class="pointer"></div>
+      <canvas id="wheel" width="640" height="640"></canvas>
+    </div>
+    <form id="spin">
+      <label for="code">Código de giro</label>
+      <input id="code" placeholder="VX-…" maxlength="35" required autocomplete="off" spellcheck="false">
+      <button>Girar ruleta</button>
+    </form>
+    <p id="status" role="status"></p>
+    <section id="reward" hidden>
+      <h2 id="prize"></h2>
+      <label for="coupon">Cupón para canjear por WhatsApp</label>
+      <input id="coupon" readonly>
+      <button id="copy" type="button">Copiar cupón</button>
+    </section>
+  </main>
+</body>
+</html>

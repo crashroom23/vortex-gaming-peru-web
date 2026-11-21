@@ -3,7 +3,7 @@ const $ = selector => document.querySelector(selector);
 const status = $('#status');
 const fields = $('#fields');
 const categoryLabels = {diamantes:'Diamantes',fragmentos:'Fragmentos',pase:'Pase',tarjetas:'Tarjetas',nivel:'Aumento de nivel'};
-const tabs = {banners:'Banners',products:'Diamantes',fragments:'Fragmentos',offers:'Ofertas',design:'Diseño',payment:'Pagos',users:'Usuarios y saldo'};
+const tabs = {banners:'Banners',products:'Diamantes',fragments:'Fragmentos',offers:'Ofertas',design:'Diseño',payment:'Pagos',users:'Usuarios y saldo',roulette:'Ruleta'};
 let key = '';
 let revision = 0;
 let settings;
@@ -252,6 +252,57 @@ function imageField(box,label,item,property,{qr=false}={}) {
   wrapper.append(file);
   box.append(photo,wrapper);
 }
+function renderRouletteAdmin() {
+  const box = group('Premios de la ruleta');
+  const prizes = element('textarea');
+  prizes.rows = 5;
+  prizes.setAttribute('aria-label','Premios, uno por línea');
+  box.append(element('p','Escribe entre 2 y 8 premios, uno por línea. Todos tienen la misma probabilidad.'),prizes);
+  const codes = group('Códigos y cupones');
+  const input = walletInput(codes,'Código VX de giro o cupón VP de premio',{maxLength:35});
+  const output = walletInput(codes,'Código generado',{readOnly:true});
+  const message = element('p');
+  message.setAttribute('role','status');
+
+  async function send(data) {
+    const response = await fetch('/api/roulette?admin=1', {
+      method:'POST',headers:{Authorization:'Bearer '+key,'Content-Type':'application/json'},
+      body:JSON.stringify(data)
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.message);
+    message.textContent = result.message;
+    if (data.action === 'create') {
+      output.value = result.code;
+      output.select();
+    }
+  }
+  function button(label, data) {
+    const control = action(label,async () => {
+      control.disabled = true;
+      try { await send(data()); }
+      catch (error) { message.textContent = error.message; }
+      finally { control.disabled = false; }
+    });
+    return control;
+  }
+  box.append(button('Guardar premios',() => ({
+    action:'prizes',prizes:prizes.value.split('\n').map(label => label.trim()).filter(Boolean)
+  })));
+  codes.append(
+    button('Consultar código',() => ({action:'inspect',code:input.value.trim().toUpperCase()})),
+    button('Confirmar pago y activar código',() => ({action:'confirm',code:input.value.trim().toUpperCase()})),
+    button('Generar código activo',() => ({action:'create'})),
+    button('Marcar premio como canjeado',() => ({action:'redeem',code:input.value.trim().toUpperCase()})),
+    message
+  );
+  fetch('/api/roulette').then(async response => {
+    if (!response.ok) throw new Error('No se pudieron cargar los premios.');
+    const data = await response.json();
+    if (!prizes.value) prizes.value = data.prizes.join('\n');
+  }).catch(error => { message.textContent = error.message; });
+}
+
 function render() {
   $('nav').replaceChildren(...Object.entries(tabs).map(([id,label]) => {
     const button = action(label,() => { section=id; render(); });
@@ -341,6 +392,7 @@ function render() {
     box.append(element('p','El número abre WhatsApp desde el pago normal y la solicitud de recarga de saldo.'));
   }
   if (section === 'users') renderWalletAdmin();
+  if (section === 'roulette') renderRouletteAdmin();
   syncPreview();
 }
 
