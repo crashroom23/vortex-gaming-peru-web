@@ -1,5 +1,5 @@
 (() => {
-  const button = document.getElementById('install-app');
+  const buttons = document.querySelectorAll('[data-install-app]');
   const guide = document.getElementById('install-guide');
   let installPrompt;
 
@@ -10,10 +10,10 @@
 
   window.addEventListener('appinstalled', () => {
     installPrompt = null;
-    button.hidden = true;
+    buttons.forEach(button => { button.hidden = true; });
   });
 
-  button.addEventListener('click', async () => {
+  async function install() {
     if (!installPrompt) {
       guide.showModal();
       return;
@@ -25,7 +25,9 @@
     } catch {
       guide.showModal();
     }
-  });
+  }
+
+  buttons.forEach(button => button.addEventListener('click', install));
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/app-worker.js').catch(() => {

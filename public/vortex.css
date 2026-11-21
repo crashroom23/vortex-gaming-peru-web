@@ -1304,11 +1304,28 @@ main > [hidden] { display: none !important; }
 }
 #install-guide::backdrop { background: #0a071dcc; }
 #install-guide p { margin: .85rem 0; }
-@media (max-width: 650px) {
-  .header-inner { gap: .35rem; }
-  .install-app-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  .install-app-button { padding: .45rem .65rem; font-size: 1rem; }
+#install-app-floating { display: none; }
+@media (max-width: 768px), (pointer: coarse) {
+  #install-app { display: none; }
+  #install-app-floating:not([hidden]) {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    position: fixed;
+    z-index: 35;
+    left: 50%;
+    bottom: calc(.85rem + env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    max-width: calc(100% - 24px);
+    min-height: 44px;
+    padding: .7rem 1rem;
+    background: linear-gradient(105deg, #6b34bd, #44247f);
+    border-color: #b494ff;
+    box-shadow: 0 6px 22px #080515aa;
+    font-size: .85rem;
+  }
+  body.overlay-open #install-app-floating:not([hidden]) { display: none; }
 }
 @media (display-mode: standalone) {
-  #install-app { display: none; }
+  #install-app, #install-app-floating:not([hidden]) { display: none; }
 }
