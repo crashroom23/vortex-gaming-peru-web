@@ -55,8 +55,8 @@ function field(box,label,item,property,{type='text',max=180,options,integer=fals
   wrapper.append(input);
   box.append(wrapper);
 }
-async function walletAdminRequest(method, body) {
-  const response = await fetch('/api/wallet?admin=1', {
+async function walletAdminRequest(method, body, query = '') {
+  const response = await fetch('/api/wallet?admin=1' + query, {
     method, headers:{Authorization:'Bearer '+key,'Content-Type':'application/json'},
     body:body ? JSON.stringify(body) : undefined
   });
@@ -73,6 +73,8 @@ function walletInput(box, label, properties) {
   return input;
 }
 
+let walletToastTimer;
+
 function renderWalletAdmin() {
   const create = group('Crear usuario');
   const username = walletInput(create, 'Nombre de usuario', {maxLength:24, autocomplete:'off'});
@@ -82,6 +84,46 @@ function renderWalletAdmin() {
   const credit = group('Acreditar saldo');
   const target = walletInput(credit, 'Usuario', {maxLength:24, autocomplete:'off'});
   const amount = walletInput(credit, 'Importe en soles', {type:'number', step:'.01', min:'.01', max:'99999.99'});
+
+  const matches = element('div');
+  matches.className = 'wallet-user-matches';
+  matches.setAttribute('role', 'group');
+  matches.setAttribute('aria-label', 'Usuarios encontrados');
+  matches.hidden = true;
+  target.parentElement.after(matches);
+  target.placeholder = 'Escribe parte del nombre';
+  let searchTimer;
+  let searchVersion = 0;
+  const soles = cents => 'S/ ' + (cents / 100).toFixed(2);
+
+  function selectUser(name) {
+    searchVersion++;
+    matches.hidden = true;
+    target.value = name;
+    amount.focus();
+  }
+
+  target.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    const version = ++searchVersion;
+    const query = target.value.trim().toLowerCase();
+    matches.hidden = true;
+    if (!query) return;
+    searchTimer = setTimeout(async () => {
+      try {
+        const {users} = await walletAdminRequest('GET', null, '&users=' + encodeURIComponent(query));
+        if (version !== searchVersion || !matches.isConnected) return;
+        const choices = users.map(user => action(user.username + ' · ' + soles(user.balance_cents),
+          () => selectUser(user.username)));
+        matches.replaceChildren(...(choices.length ? choices : [element('p', 'No se encontraron usuarios.')]));
+        matches.hidden = false;
+      } catch (error) {
+        if (version !== searchVersion || !matches.isConnected) return;
+        matches.replaceChildren(element('p', error.message));
+        matches.hidden = false;
+      }
+    }, 180);
+  });
 
   const pricing = group('Precio especial con saldo');
   const product = walletInput(pricing, 'Código del paquete (por ejemplo, 100 para 100 + 10 diamantes)',
@@ -98,12 +140,11 @@ function renderWalletAdmin() {
     try {
       const {users, orders, prices} = await walletAdminRequest('GET');
       if (!summary.isConnected || !key) return;
-      const soles = cents => 'S/ ' + (cents/100).toFixed(2);
       const usersList = element('ul');
       for (const user of users) {
         const row = element('li');
         row.append(document.createTextNode(user.username + ' · ' + soles(user.balance_cents) + ' '),
-          action('Acreditar', () => {target.value = user.username; amount.focus();}));
+          action('Acreditar', () => selectUser(user.username)));
         usersList.append(row);
       }
       const pricesList = element('ul');
@@ -123,8 +164,9 @@ function renderWalletAdmin() {
     const button = action(label, async () => {
       button.disabled = true;
       try {
-        const result = await walletAdminRequest('POST', data());
-        if (box.isConnected) status.textContent = success(result);
+        const payload = data();
+        const result = await walletAdminRequest('POST', payload);
+        if (box.isConnected) status.textContent = success(result, payload);
         await refreshWalletAdmin();
       } catch (error) {
         if (box.isConnected) status.textContent = error.message;
@@ -155,10 +197,15 @@ function renderWalletAdmin() {
       creditDraft = {action:'credit', username:name, cents, code:crypto.randomUUID()};
     }
     return creditDraft;
-  }, result => {
+  }, (result, payload) => {
     creditDraft = null;
     amount.value = '';
-    return 'Saldo de ' + result.username + ': S/ ' + (result.balance_cents/100).toFixed(2);
+    const message = result.username + ' · +' + soles(payload.cents) + ' · Saldo actual: ' + soles(result.balance_cents);
+    const toast = $('#wallet-toast');
+    toast.replaceChildren(element('strong', '✓ Saldo acreditado'), element('span', message));
+    clearTimeout(walletToastTimer);
+    walletToastTimer = setTimeout(() => toast.replaceChildren(), 6500);
+    return message;
   });
   addOperation(pricing, 'Guardar precio con saldo', () => ({
     action:'price', productId:product.valueAsNumber,

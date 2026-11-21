@@ -36,3 +36,36 @@ img { display:block; max-width:100%; max-height:150px; object-fit:contain; borde
 #builder-layout li button { margin: 3px; padding: 5px 8px }
 #store-preview { display:block; max-width:100%; margin-inline:auto }
 #inline-fields textarea { width:100%; font:inherit; color:inherit; background:#150d24; border:1px solid #7452a4; border-radius:8px; padding:8px; }
+
+.wallet-user-matches:not([hidden]) {
+  display: grid;
+  gap: .35rem;
+  margin: -.3rem 0 .65rem;
+}
+.wallet-user-matches button {
+  text-align: left;
+}
+.wallet-user-matches button:hover,
+.wallet-user-matches button:focus-visible {
+  background: #4b3075;
+}
+#wallet-toast:not(:empty) {
+  position: fixed;
+  z-index: 100;
+  right: 1rem;
+  bottom: 1rem;
+  width: min(25rem, calc(100% - 2rem));
+  box-sizing: border-box;
+  padding: 1rem 1.15rem;
+  display: grid;
+  gap: .35rem;
+  color: #edfff5;
+  background: #153a2b;
+  border: 1px solid #65e4a2;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px #0008;
+}
+#wallet-toast strong {
+  color: #9ff6c8;
+  font-size: 1.12rem;
+}

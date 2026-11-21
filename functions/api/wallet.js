@@ -27,6 +27,16 @@ async function movement(db, data) {
 async function administer(request, db, env, body) {
   if (!await authorized(request, env.VORTEX_ADMIN_KEY)) return reply({message:'Clave de administrador inválida.'}, 401);
   if (request.method === 'GET') {
+    const query = new URL(request.url).searchParams.get('users');
+    if (query !== null) {
+      if (!/^[a-z0-9_]{1,24}$/.test(query)) return reply({users:[]});
+      const users = await db.prepare(`
+        SELECT username, balance_cents FROM preview_accounts
+        WHERE instr(username, ?) > 0
+        ORDER BY instr(username, ?), username LIMIT 8
+      `).bind(query, query).all();
+      return reply({users:users.results});
+    }
     const [users, orders, prices] = await db.batch([
       db.prepare('SELECT username, balance_cents FROM preview_accounts ORDER BY username LIMIT 200'),
       db.prepare("SELECT code, username, cents, product_id, uid, created_at FROM preview_wallet_movements WHERE kind = 'purchase' ORDER BY rowid DESC LIMIT 50"),
