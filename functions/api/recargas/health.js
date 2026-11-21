@@ -8,6 +8,8 @@ export function onRequestGet({ env }) {
   return new Response(JSON.stringify({
     ok: true,
     catalogConfigured: configured,
+    testCredentialDetected: String(env.RA_API_KEY || "").trim().startsWith("ra_test_"),
+    customVerificationProduct: productId !== 5,
     validationReady: enabled,
     turnstileConfigured,
     turnstileSiteKey: enabled ? String(env.RA_TURNSTILE_SITE_KEY) : null,
