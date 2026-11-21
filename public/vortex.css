@@ -597,13 +597,11 @@ img,svg{max-width:100%}
 
 
 /* Storefront banners and catalog offers */
-.storefront-banner { padding: 0 0 14px; }
-.storefront-banner > .shell { width: 100%; max-width: none; }
+.storefront-banner { padding: clamp(12px, 2vw, 24px) 0 18px; }
 .storefront-promos {
   display: grid;
-  grid-template-columns: 2.35fr 1fr 1fr;
-  gap: 10px;
-  padding: 10px clamp(10px, 2vw, 28px) 0;
+  grid-template-columns: minmax(0, 2.8fr) repeat(2, minmax(0, 1fr));
+  gap: clamp(8px, 1.15vw, 14px);
 }
 .storefront-banner .storefront-banner-title,
 .storefront-promo {
@@ -614,20 +612,21 @@ img,svg{max-width:100%}
   animation: none;
 }
 .storefront-banner-title::after { display: none; }
-.storefront-banner-title a { display: block; height: 100%; }
+.storefront-banner-title a { display: block; aspect-ratio: 1920 / 819; }
 .storefront-banner-title a:focus-visible { outline-offset: -3px; }
-.storefront-banner-title img { height: 100%; object-fit: contain; }
+.storefront-banner-title img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .storefront-promo {
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
   min-width: 0;
-  height: clamp(174px, 20vw, 284px);
+  min-height: 0;
   overflow: hidden;
   transition: border-color .18s, transform .18s;
 }
+.storefront-promo:not(.managed-main-banner) { contain: size; }
 .storefront-promo:hover { border-color: #e4bcff; }
 .storefront-promo:active { transform: scale(.98); }
-.storefront-promo img { width: 100%; height: 100%; object-fit: contain; }
+.storefront-promo img { display: block; width: 100%; height: 100%; min-height: 0; object-fit: contain; }
 .storefront-promo span { padding: 6px 8px; text-align: center; }
 .storefront-promo strong, .storefront-promo small { display: block; }
 .storefront-promo strong { font-size: 13px; color: #fff; }
@@ -648,11 +647,14 @@ img,svg{max-width:100%}
 .catalog-offer h3 { margin: 0; }
 .catalog-offer p { margin: 6px 0; color: #d1bee8; }
 .catalog-offer strong { color: #ddc5ff; }
-@media (max-width: 650px) {
-  .storefront-promos { grid-template-columns: 1fr 1fr; }
-  .storefront-banner .storefront-banner-title { grid-column: 1 / -1; }
-  .storefront-banner-title img { height: auto; }
-  .storefront-promo { height: clamp(142px, 43vw, 230px); }
+.storefront-promos > .managed-main-banner {
+  aspect-ratio: 1920 / 819;
+}
+@media (max-width: 760px) {
+  .storefront-promos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .storefront-banner .storefront-banner-title,
+  .storefront-promos > .managed-main-banner { grid-column: 1 / -1; }
+  .storefront-promo:not(.managed-main-banner) { height: clamp(142px, 42vw, 230px); }
 }
 
 .storefront-banner-actions {
@@ -962,7 +964,6 @@ img,svg{max-width:100%}
 }
 
 .storefront-promos[hidden], .activity-ticker[hidden] { display: none; }
-@media (max-width:650px) { .managed-main-banner { grid-column: 1 / -1; } }
 .recharge-area .btn-accent { background: linear-gradient(110deg, var(--store-accent,#a06aff), #7335dd); }
 .catalog-category.active { border-color: var(--store-accent,#c69dff); }
 
