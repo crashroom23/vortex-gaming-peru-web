@@ -1389,7 +1389,7 @@ body.overlay-open .whatsapp-support { display: none; }
   display: grid;
   justify-items: center;
   width: min(100%, 258px);
-  padding: 14px 20px;
+  padding: 24px 20px;
   flex-shrink: 0;
   border: 1px solid #8463f8;
   border-radius: 16px;
@@ -1398,18 +1398,38 @@ body.overlay-open .whatsapp-support { display: none; }
   text-align: center;
 }
 
+/* Light ray and animated border inspired by Uiverse.io / Spacious74. */
 .diamond-counter::before {
   content: '';
   position: absolute;
   z-index: -1;
   inset: 0;
-  background: linear-gradient(110deg, transparent 28%, #8ff9ff50 50%, transparent 72%);
-  transform: translateX(-105%);
-  animation: diamond-counter-shine 1.9s ease-out .2s;
+  background:
+    linear-gradient(144deg, #bc9bff87, transparent 55%) top 12px left 12px / 70% 50% no-repeat,
+    linear-gradient(90deg, #bfa6ff80, #60449655) top 12px center / 100% 1px no-repeat,
+    linear-gradient(90deg, #60449655, #67f4ff70) bottom 12px center / 100% 1px no-repeat,
+    linear-gradient(#bfa6ff80, #60449655) top left 12px / 1px 100% no-repeat,
+    linear-gradient(#60449655, #67f4ff70) top right 12px / 1px 100% no-repeat;
 }
 
-@keyframes diamond-counter-shine {
-  to { transform: translateX(105%); }
+.diamond-counter-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  top: 12px;
+  left: calc(100% - 12px);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: #d7ffff;
+  box-shadow: 0 0 11px 2px #67f4ff;
+  animation: diamond-counter-orbit 6s linear infinite;
+}
+
+@keyframes diamond-counter-orbit {
+  0%, 100% { top: 12px; left: calc(100% - 12px); }
+  25% { top: 12px; left: 12px; }
+  50% { top: calc(100% - 12px); left: 12px; }
+  75% { top: calc(100% - 12px); left: calc(100% - 12px); }
 }
 
 .diamond-counter-label,
@@ -1446,5 +1466,5 @@ body.overlay-open .whatsapp-support { display: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .diamond-counter::before { animation: none; }
+  .diamond-counter-dot { animation: none; }
 }
