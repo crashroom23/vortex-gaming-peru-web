@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="manifest" href="/app.webmanifest">
+  <link rel="apple-touch-icon" href="/images/app-icon-192.png">
+  <script src="/install-app.js" defer></script>
   <meta name="theme-color" content="#0a0719">
   <meta name="description" content="Venta de diamantes en Perú. Buen precio y ofertas en diamantes Free Fire. Pedidos por WhatsApp.">
   <meta property="og:type" content="website">
@@ -12,7 +15,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/vortex.css?v=mascot-brand">
+  <link rel="stylesheet" href="/vortex.css?v=install-app">
   <script src="/vortex.js?v=payment-capture" defer></script>
 </head>
 <body>
@@ -46,10 +49,15 @@
 
   <header class="site-header">
     <div class="shell header-inner">
+      <div class="header-brand-group">
       <a class="brand" href="#inicio" aria-label="vortex.store, inicio">
         <img class="brand-mascot" src="/images/vortex-mascot.webp" width="57" height="49" alt="">
         <strong class="brand-name">vortex<span>.store</span></strong>
       </a>
+      <button class="install-app-button" id="install-app" type="button" aria-label="Instalar app">
+        <span aria-hidden="true">↓</span> <span class="install-app-label">Instalar app</span>
+      </button>
+      </div>
       <nav class="desktop-nav" aria-label="Navegación principal">
         <a class="active" href="#inicio">INICIO</a>
         <a href="#tienda">RECARGAS</a>
@@ -340,6 +348,13 @@
       <div id="checkout-wallet-receipt" hidden></div>
     </div>
   </div>
+
+  <dialog id="install-guide" aria-labelledby="install-guide-title">
+    <h2 id="install-guide-title">Instalar vortex.store</h2>
+    <p><strong>Android:</strong> abre este enlace en Chrome y toca <strong>⋮ → Instalar aplicación</strong> o <strong>Agregar a pantalla principal</strong>.</p>
+    <p><strong>iPhone:</strong> abre el enlace en Safari y toca <strong>Compartir → Agregar a pantalla de inicio</strong>.</p>
+    <form method="dialog"><button class="btn btn-accent" type="submit">Entendido</button></form>
+  </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 </body>

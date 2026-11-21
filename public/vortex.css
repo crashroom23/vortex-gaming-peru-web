@@ -1276,3 +1276,39 @@ main > [hidden] { display: none !important; }
     padding: .5rem .25rem;
   }
 }
+
+.header-brand-group {
+  display: flex;
+  gap: .45rem;
+  align-items: center;
+}
+.install-app-button {
+  padding: .45rem .55rem;
+  border: 1px solid #8668d0;
+  border-radius: 9px;
+  background: #291943;
+  color: #f1eaff;
+  font: 750 .78rem/1 Inter, sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.install-app-button:hover { background: #473071; }
+.install-app-button[hidden] { display: none; }
+#install-guide {
+  width: min(420px, calc(100% - 32px));
+  padding: 1.25rem;
+  border: 1px solid #9569df;
+  border-radius: 14px;
+  background: #1a112c;
+  color: #f4edff;
+}
+#install-guide::backdrop { background: #0a071dcc; }
+#install-guide p { margin: .85rem 0; }
+@media (max-width: 650px) {
+  .header-inner { gap: .35rem; }
+  .install-app-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .install-app-button { padding: .45rem .65rem; font-size: 1rem; }
+}
+@media (display-mode: standalone) {
+  #install-app { display: none; }
+}
