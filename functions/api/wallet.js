@@ -54,12 +54,21 @@ async function administer(request, db, env, body) {
   const username = typeof body?.username === 'string' ? body.username.trim().toLowerCase() : '';
   if (!/^[a-z0-9_]{3,24}$/.test(username)) return reply({message:'Usa de 3 a 24 letras, números o guiones bajos.'}, 400);
 
-  if (action === 'create') {
+  if (action === 'create' || action === 'resetPassword') {
     if (typeof password !== 'string' || password.length < 6 || password.length > 128) {
       return reply({message:'La contraseña debe tener entre 6 y 128 caracteres.'}, 400);
     }
     const salt = randomHex(16);
     const hash = await hashPassword(password, salt, env.PREVIEW_ACCOUNT_PEPPER);
+    if (action === 'resetPassword') {
+      const [updated] = await db.batch([
+        db.prepare('UPDATE preview_accounts SET salt = ?, password_hash = ? WHERE username = ?')
+          .bind(salt, hash, username),
+        db.prepare('DELETE FROM preview_sessions WHERE username = ?').bind(username),
+        db.prepare('DELETE FROM preview_auth_attempts WHERE scope = ?').bind('user:' + username)
+      ]);
+      return updated.meta.changes ? reply({username}) : reply({message:'Usuario no encontrado.'}, 404);
+    }
     const user = await db.prepare(`
       INSERT INTO preview_accounts (username, salt, password_hash) VALUES (?, ?, ?)
       ON CONFLICT(username) DO NOTHING RETURNING username

@@ -141,6 +141,12 @@ function renderWalletAdmin() {
     username.value = password.value = '';
     return 'Usuario creado: ' + result.username;
   });
+  addOperation(create, 'Restablecer contraseña de usuario existente', () => ({
+    action:'resetPassword', username:username.value, password:password.value
+  }), result => {
+    username.value = password.value = '';
+    return 'Contraseña actualizada para ' + result.username + '.';
+  });
   let creditDraft;
   addOperation(credit, 'Acreditar saldo', () => {
     const cents = Math.round(amount.valueAsNumber * 100);
