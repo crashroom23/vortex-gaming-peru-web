@@ -604,8 +604,16 @@
     });
     const result = await response.json();
     if (response.status === 401 && method === 'GET') return null;
-    if (!response.ok) throw new Error(result.message);
+    if (!response.ok) throw Object.assign(new Error(result.message), {
+      code:result.code,
+      username:result.username
+    });
     return result;
+  }
+
+  function showWalletTopUp(username) {
+    setWhatsAppLink($('#checkout-topup'),
+      'Hola, quiero recargar saldo en VortexGamer (mínimo S/ 5). Mi usuario es ' + username + '.');
   }
 
   async function showCheckoutOptions(product, uid, verified) {
@@ -662,8 +670,7 @@
       walletButton.hidden = !enough;
       walletMessage.textContent = 'Saldo disponible: ' + price(info.balance_cents / 100) +
         '. Precio con saldo: ' + price(info.cents / 100) + '.' + (enough ? '' : ' Saldo insuficiente.');
-      if (!enough) setWhatsAppLink($('#checkout-topup'),
-        'Hola, quiero recargar saldo en VortexGamer (mínimo S/ 5). Mi usuario es ' + info.username + '.');
+      if (!enough) showWalletTopUp(info.username);
     } catch {
       if (selection === walletSelection) walletMessage.textContent = 'Pago con saldo temporalmente no disponible.';
     }
@@ -696,7 +703,13 @@
       receipt.replaceChildren(document.createTextNode('Pedido ' + order.code + ' · '), download);
       receipt.hidden = false;
     } catch (error) {
-      if (walletSelection === selection) walletMessage.textContent = error.message || 'No se pudo confirmar el pago.';
+      if (walletSelection === selection) {
+        walletMessage.textContent = error.message || 'No se pudo confirmar el pago.';
+        if (error.code === 'INSUFFICIENT_BALANCE') {
+          walletButton.hidden = true;
+          showWalletTopUp(error.username);
+        }
+      }
     } finally {
       walletButton.disabled = false;
     }

@@ -112,7 +112,11 @@ async function customer(request, db, url, body) {
   if (request.method === 'GET') return reply({...user, cents});
   if (expectedCents !== cents) return reply({message:'El precio cambió. Vuelve a abrir el pedido.'}, 409);
   const order = await movement(db, {code, username:user.username, kind:'purchase', cents, productId, uid});
-  return order ? receipt(order) : reply({message:'Saldo insuficiente. Solicita una recarga de saldo.'}, 409);
+  return order ? receipt(order) : reply({
+    code:'INSUFFICIENT_BALANCE',
+    username:user.username,
+    message:'Saldo insuficiente. Solicita una recarga de saldo.'
+  }, 409);
 }
 
 export async function onRequest({request, env}) {
