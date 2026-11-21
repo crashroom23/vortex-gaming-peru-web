@@ -47,8 +47,6 @@
   let lastFocus = null;
   let toastTimer;
   let playerSession = null;
-  let checkoutProduct = null;
-  let selectedPaymentMethod = 'yape';
 
   // Turnstile valida que el formulario lo envió una persona antes de consultar al proveedor.
   // El sitekey es público; el secreto y la credencial RA permanecen en Cloudflare Pages.
@@ -328,252 +326,6 @@
     }
     refresh();
   }
-
-  function setPaymentMethod(method) {
-    selectedPaymentMethod = method === 'binance' ? 'binance' : 'yape';
-    $$('.payment-tab').forEach(button => {
-      const active = button.dataset.method === selectedPaymentMethod;
-      button.classList.toggle('active', active);
-      button.setAttribute('aria-pressed', String(active));
-    });
-    if (selectedPaymentMethod === 'yape') {
-      $('#payment-name').textContent = 'Yape manual';
-      $('#payment-notice').textContent = '';
-    } else {
-      $('#payment-name').textContent = 'Binance Pay';
-      $('#payment-description').textContent = 'Binance Pay genera un QR o enlace único desde la API Merchant. La conversión a criptomonedas y el importe definitivo se mostrarán únicamente cuando exista una orden real.';
-      $('#payment-notice').textContent = 'Se necesita una cuenta Binance Pay Merchant habilitada, su API y confirmación verificada del pago.';
-    }
-    renderManualPayment();
-  }
-
-  // Orders here exercise the Preview checkout without contacting a payment provider.
-  const demoOrderStorage = 'vortex-demo-order:';
-  const demoOrderStates = ['Pendiente de pago', 'Pago confirmado · simulación', 'Recarga entregada · simulación'];
-  const orderSection = document.createElement('section');
-  orderSection.id = 'seguimiento';
-  orderSection.className = 'faq-section shell';
-  orderSection.innerHTML = `
-    <div class="section-intro"><div><h2>ESTADO DE <span>TU PEDIDO</span></h2>
-      <p>Consulta tu pedido de prueba desde cualquier dispositivo.</p></div></div>
-    <form id="demo-order-search">
-      <label for="demo-order-code">Código de pedido</label>
-      <label class="catalog-search"><input id="demo-order-code" type="text" placeholder="VG-…" autocomplete="off" maxlength="39" required></label>
-      <button type="submit" class="btn btn-outline">BUSCAR PEDIDO</button>
-    </form>
-    <div class="verify-result" id="demo-order-result" role="status" hidden></div>
-    <ol id="demo-order-steps" hidden>
-      <li>Pedido creado</li><li>Pago confirmado</li><li>Recarga entregada</li>
-    </ol>
-    <button type="button" class="btn btn-accent" id="demo-order-advance" hidden></button>
-    <button type="button" class="btn btn-outline" id="demo-order-receipt" hidden>VER / DESCARGAR COMPROBANTE</button>
-    <div id="demo-order-receipt-preview" class="verify-result" hidden></div>`;
-  $('#ayuda').before(orderSection);
-  const orderLink = document.createElement('a');
-  orderLink.href = '#seguimiento';
-  orderLink.textContent = 'Seguir pedido';
-  $('.footer a[href="#ayuda"]').before(orderLink);
-
-  const confirmDemoOrder = $('#payment-demo-confirm');
-  confirmDemoOrder.disabled = false;
-  confirmDemoOrder.textContent = 'CREAR PEDIDO DE PRUEBA';
-  let displayedDemoOrder = null;
-
-  function renderDemoOrder(order, message = '') {
-    displayedDemoOrder = order;
-    const result = $('#demo-order-result');
-    const steps = $('#demo-order-steps');
-    const advance = $('#demo-order-advance');
-    result.hidden = false;
-    result.textContent = message;
-    steps.hidden = !order;
-    advance.hidden = !order || order.stage >= demoOrderStates.length - 1;
-    $('#demo-order-receipt').hidden = !order || order.stage < 1;
-    $('#demo-order-receipt-preview').hidden = true;
-    if (!order) return;
-
-    const title = document.createElement('strong');
-    title.textContent = order.code + ' · ' + demoOrderStates[order.stage];
-    const details = document.createElement('div');
-    details.textContent = order.player + ' · UID ' + order.uid + ' · ' + order.package + ' · ' +
-      price(order.total) + ' · ' + order.method;
-    result.replaceChildren(title, details);
-    Array.from(steps.children).forEach((step, index) => {
-      const current = index === order.stage;
-      if (current) step.setAttribute('aria-current', 'step');
-      else step.removeAttribute('aria-current');
-      step.style.fontWeight = current ? 'bold' : '';
-    });
-    advance.textContent = order.stage === 0 ? 'SIMULAR PAGO' : 'SIMULAR ENTREGA';
-  }
-
-  async function requestDemoOrder(method, data) {
-    const url = '/api/preview-orders' + (method === 'GET' ? '?code=' + encodeURIComponent(data.code) : '');
-    const response = await fetch(url, method === 'GET' ? undefined : {
-      method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
-    });
-    const result = await response.json();
-    if (!response.ok) throw new Error(result.message);
-    return result.order;
-  }
-
-  let draftOrder = null;
-  let updatingOrder = false;
-  const manualPayment = $('#yape-manual');
-  const manualConfirm = $('#manual-payment-confirm');
-  const yapeQr = $('#yape-qr');
-  const whatsappNumber = manualPayment.dataset.whatsapp;
-  const yapeQrPath = manualPayment.dataset.qr;
-  let qrReady = false;
-
-  function draftForCheckout() {
-    const selection = checkoutProduct.id + ':' + playerSession.uid + ':' + selectedPaymentMethod;
-    if (draftOrder?.selection !== selection) {
-      draftOrder = {selection, code:'VG-' + crypto.randomUUID().replaceAll('-', '').toUpperCase()};
-    }
-    return draftOrder;
-  }
-
-  function renderManualPayment() {
-    const isYape = selectedPaymentMethod === 'yape';
-    const ready = isYape && qrReady && /^[1-9]\d{7,14}$/.test(whatsappNumber) && playerSession && !playerSession.demo;
-    manualPayment.hidden = !isYape;
-    $('#payment-preview').hidden = isYape;
-    $('#checkout-warning').hidden = ready;
-    confirmDemoOrder.hidden = ready;
-    yapeQr.hidden = !ready;
-    manualConfirm.disabled = !ready;
-    $('#manual-payment-help').textContent = ready
-      ? 'Escanea el QR y paga el monto exacto. Luego abre WhatsApp y adjunta tu comprobante.'
-      : 'QR y envío por WhatsApp no disponibles en esta prueba.';
-    if (!isYape || !checkoutProduct || !playerSession) return;
-
-    $('#manual-order-code').textContent = draftForCheckout().code;
-    $('#manual-order-uid').textContent = playerSession.uid;
-    manualConfirm.textContent = 'Ya pagué ' + price(checkoutProduct.price) + ' · Enviar por WhatsApp';
-  }
-
-  if (yapeQrPath) {
-    yapeQr.addEventListener('load', () => { qrReady = true; renderManualPayment(); });
-    yapeQr.addEventListener('error', () => { qrReady = false; renderManualPayment(); });
-    yapeQr.src = yapeQrPath;
-  }
-
-  manualConfirm.addEventListener('click', () => {
-    if (manualConfirm.disabled || !checkoutProduct || playerSession?.uid !== $('#uid').value.trim()) return;
-    const {code} = draftForCheckout();
-    const message = [
-      'Hola, reporto un pago por Yape para una recarga de VortexGamer.',
-      'ID de Free Fire: ' + playerSession.uid,
-      'Monto pagado: ' + price(checkoutProduct.price),
-      'Número de orden: ' + code,
-      'Paquete: ' + $('#checkout-package').textContent,
-      'Adjunto mi comprobante para que verifiquen el pago.'
-    ].join('\n');
-    window.open('https://wa.me/' + whatsappNumber + '?text=' + encodeURIComponent(message), '_blank', 'noopener,noreferrer');
-  });
-  confirmDemoOrder.addEventListener('click', async () => {
-    if (updatingOrder) return;
-    if (!checkoutProduct || !playerSession || playerSession.uid !== $('#uid').value.trim()) {
-      notify('Vuelve a verificar el UID antes de crear el pedido.');
-      return;
-    }
-    const draft = draftForCheckout();
-    updatingOrder = true;
-    confirmDemoOrder.disabled = true;
-    try {
-      const order = await requestDemoOrder('POST', {
-        code:draft.code, uid:playerSession.uid, productId:checkoutProduct.id,
-        player:playerSession.demo ? 'Jugador de prueba' : playerSession.nickname,
-        paymentMethod:selectedPaymentMethod, cents:Math.round(checkoutProduct.price * 100)
-      });
-      draftOrder = null;
-      $('#demo-order-code').value = order.code;
-      renderDemoOrder(order);
-      closeLayer();
-      orderSection.scrollIntoView({behavior:'smooth',block:'start'});
-      $('#demo-order-code').focus({preventScroll:true});
-    } catch (error) {
-      notify(error.message || 'No se pudo guardar el pedido de prueba.');
-    } finally {
-      updatingOrder = false;
-      confirmDemoOrder.disabled = false;
-    }
-  });
-
-  $('#demo-order-search').addEventListener('submit', async event => {
-    event.preventDefault();
-    if (updatingOrder) return;
-    const code = $('#demo-order-code').value.trim().toUpperCase();
-    updatingOrder = true;
-    try {
-      renderDemoOrder(await requestDemoOrder('GET', {code}));
-    } catch (error) {
-      try {
-        const legacy = JSON.parse(localStorage.getItem(demoOrderStorage + code));
-        if (legacy?.code === code && Number.isInteger(legacy.stage) && demoOrderStates[legacy.stage]) {
-          renderDemoOrder({...legacy, legacy:true});
-          return;
-        }
-      } catch (_) {}
-      renderDemoOrder(null, error.message || 'No se pudo consultar el pedido.');
-    } finally {
-      updatingOrder = false;
-    }
-  });
-
-  $('#demo-order-advance').addEventListener('click', async event => {
-    const order = displayedDemoOrder;
-    if (updatingOrder || !order || order.stage >= demoOrderStates.length - 1) return;
-    updatingOrder = true;
-    const button = event.currentTarget;
-    button.disabled = true;
-    try {
-      if (order.legacy) {
-        const key = demoOrderStorage + order.code;
-        const saved = JSON.parse(localStorage.getItem(key));
-        if (!saved) throw new Error('No encontramos ese pedido de prueba.');
-        const next = {...saved, stage:saved.stage === order.stage ? saved.stage + 1 : saved.stage};
-        localStorage.setItem(key, JSON.stringify(next));
-        renderDemoOrder({...next, legacy:true});
-      } else {
-        renderDemoOrder(await requestDemoOrder('PATCH', {code:order.code, stage:order.stage}));
-      }
-    } catch (error) {
-      notify(error.message || 'No se pudo guardar el estado del pedido.');
-    } finally {
-      updatingOrder = false;
-      button.disabled = false;
-    }
-  });
-
-  $('#demo-order-receipt').addEventListener('click', () => {
-    const order = displayedDemoOrder;
-    if (!order || order.stage < 1) return;
-    const date = order.createdAt ? new Intl.DateTimeFormat('es-PE', {
-      dateStyle:'medium', timeStyle:'short', timeZone:'America/Lima'
-    }).format(new Date(order.createdAt)) : 'No disponible';
-    const lines = [
-      'VORTEXGAMER · COMPROBANTE DE PRUEBA', 'Operación simulada',
-      'Pedido: ' + order.code, 'Jugador: ' + order.player, 'UID: ' + order.uid,
-      'Paquete: ' + order.package, 'Importe: ' + price(order.total), 'Fecha del pedido: ' + date,
-      'Método simulado: ' + order.method, 'Estado: ' + demoOrderStates[order.stage]
-    ];
-    const preview = $('#demo-order-receipt-preview');
-    preview.replaceChildren();
-    for (const line of lines) {
-      const row = document.createElement('div');
-      row.textContent = line;
-      preview.append(row);
-    }
-    const download = document.createElement('a');
-    download.className = 'btn btn-outline';
-    download.textContent = 'Descargar comprobante (.txt)';
-    download.download = order.code + '.txt';
-    download.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(lines.join('\n'));
-    preview.append(download);
-    preview.hidden = false;
-  });
 
   let storeWhatsApp = '';
   let storeYapeQr = '';
@@ -859,11 +611,9 @@
     }
     const currentPlayer = playerSession?.uid === currentUID ? playerSession : null;
     const demo = Boolean(currentPlayer?.demo);
-    checkoutProduct = product;
     $('#checkout-player').textContent = (demo ? 'DEMO (sin verificar) · ' : currentPlayer ? currentPlayer.nickname + ' · ' : 'UID · ') + currentUID;
     $('#checkout-package').textContent = product.title ?? (product.amount + ' + ' + product.bonus + ' diamantes');
     $('#checkout-price').textContent = price(product.price);
-    if (demo) setPaymentMethod('yape');
     $('#checkout-demo').hidden = !demo;
     $('#checkout-options').hidden = demo;
     openLayer('checkout-modal');
@@ -946,7 +696,6 @@
     });
   });
   $('#cart-trigger').addEventListener('click', () => openLayer('cart-panel'));
-  $$('.payment-tab').forEach(button => button.addEventListener('click', () => setPaymentMethod(button.dataset.method)));
   $('#simulate-verify').addEventListener('click', () => {
     const uidInput = $('#uid');
     const uid = uidInput.value.trim() || '123456789';
@@ -1149,7 +898,6 @@
     setAccountMode('login');
     void updateAccount('DELETE');
   });
-  $('#wallet-trigger').addEventListener('click', () => $('#account-trigger').click());
   $('#overlay').addEventListener('click', () => closeLayer());
   $('#demo-checkout').addEventListener('click', () => {
     const uidInput = $('#uid');
@@ -1352,17 +1100,10 @@
   });
   $('.features-bar').before(activity);
 
-  $('#year').textContent = new Date().getFullYear();
   const editableCopy = {
   "verifyTitle": ".verify-card-head h2",
   "catalogHeading": "#catalog-heading",
   "catalogDescription": "#catalog-description",
-  "midTitle": ".mid-banner h3",
-  "midLabel": ".mid-banner-title small",
-  "midBody": ".mid-banner > p",
-  "walletLabel": "#wallet-trigger",
-  "footer": ".footer-top > div:first-child > p",
-  "faqTitle": ".faq-section#ayuda h2",
   "diamantesTitle": "[data-category=\"diamantes\"] strong",
   "diamantesDesc": "[data-category=\"diamantes\"] small",
   "fragmentosTitle": "[data-category=\"fragmentos\"] strong",
@@ -1377,8 +1118,7 @@
 
   const mainContent = $('main');
   const coreSections = new Map([
-    ['inicio', $('#inicio')], ['beneficios', $('.features-bar')], ['recargas', $('.recharge-area')],
-    ['promocion', $('.mid-banner')], ['seguimiento', orderSection], ['ayuda', $('#ayuda')]
+    ['inicio', $('#inicio')], ['beneficios', $('.features-bar')], ['recargas', $('.recharge-area')]
   ]);
 
   function renderLayout(layout) {
