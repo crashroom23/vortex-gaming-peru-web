@@ -91,11 +91,21 @@ function draw(prizes) {
 }
 
 async function request(body) {
-  const response = await fetch('/api/roulette',body ? {
-    method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)
-  } : undefined);
-  const result = await response.json();
-  if (!response.ok) throw new Error(result.message);
+  const unavailable = 'No pudimos consultar la ruleta. Vuelve a intentarlo con el mismo código.';
+  let response;
+  let result;
+  try {
+    response = await fetch('/api/roulette',{
+      method:body ? 'POST' : 'GET',
+      headers:body ? {Accept:'application/json','Content-Type':'application/json'} : {Accept:'application/json'},
+      body:body ? JSON.stringify(body) : undefined
+    });
+    result = await response.json();
+  } catch {
+    throw new Error(unavailable);
+  }
+  if (!response.ok) throw new Error(result?.message || unavailable);
+  if (!result || typeof result !== 'object') throw new Error(unavailable);
   return result;
 }
 

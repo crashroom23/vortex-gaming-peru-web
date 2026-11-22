@@ -80,7 +80,7 @@ export async function onRequestGet({ request, env }) {
       message: unavailable
         ? "La consulta de perfiles no está disponible. Inténtalo en unos momentos."
         : "No pudimos confirmar el ID con una ficha pública. Revisa el número o inténtalo después."
-    }, unavailable ? 502 : 404);
+    }, unavailable ? 503 : 404);
   }
 
   const base = (env.FREE_FIRE_API_BASE_URL || "https://developers.freefirecommunity.com/api/v1").replace(/\/+$/, "");
@@ -97,7 +97,7 @@ export async function onRequestGet({ request, env }) {
     if (!upstream.ok) {
       return json({ ok: false, message: upstream.status === 429
         ? "El servicio de verificacion alcanzo su limite temporal."
-        : "El proveedor no pudo verificar esta cuenta. Revisa la clave y la region." }, 502);
+        : "El proveedor no pudo verificar esta cuenta. Revisa la clave y la region." }, 503);
     }
     const data = await upstream.json();
     const player = data?.basicInfo || data?.data?.basicInfo || data?.player;
@@ -117,7 +117,7 @@ export async function onRequestGet({ request, env }) {
   } catch (error) {
     return json({ ok: false, message: error.name === "AbortError"
       ? "La consulta tardo demasiado."
-      : "No fue posible contactar al proveedor de verificacion." }, error.name === "AbortError" ? 504 : 502);
+      : "No fue posible contactar al proveedor de verificacion." }, 503);
   } finally {
     clearTimeout(timer);
   }
