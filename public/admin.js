@@ -326,7 +326,7 @@ function renderRouletteAdmin() {
 }
 
 function renderRouletteHistory() {
-  const box = group('Historial de giros');
+  const box = group('Historial de premios');
   const list = element('ul');
   const state = element('p');
   state.setAttribute('role','status');
@@ -335,7 +335,7 @@ function renderRouletteHistory() {
 
   async function load(append) {
     refresh.disabled = more.disabled = true;
-    state.textContent = 'Cargando giros…';
+    state.textContent = 'Cargando premios…';
     try {
       const query = append && cursor ? '&before=' + cursor : '';
       const response = await fetch('/api/roulette?admin=1' + query,{headers:{Authorization:'Bearer '+key}});
@@ -358,7 +358,7 @@ function renderRouletteHistory() {
       list.append(...items);
       cursor = data.next;
       more.hidden = cursor === null;
-      state.textContent = list.children.length ? '' : 'Todavía no hay giros registrados.';
+      state.textContent = list.children.length ? '' : 'Todavía no hay premios registrados.';
     } catch (error) {
       state.textContent = error.message;
     } finally {
@@ -367,7 +367,7 @@ function renderRouletteHistory() {
   }
 
   const refresh = action('Actualizar historial',() => load(false));
-  const more = action('Ver más giros',() => load(true));
+  const more = action('Ver más premios',() => load(true));
   more.hidden = true;
   box.append(refresh,state,list,more);
   load(false);

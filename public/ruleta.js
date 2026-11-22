@@ -123,7 +123,7 @@ form.addEventListener('submit',async event => {
   button.disabled = true;
   button.textContent = '…';
   reward.close();
-  status.textContent = 'Verificando código e ID de Free Fire…';
+  status.textContent = 'Validando código de giro…';
   try {
     const code = get('code').value.trim().toUpperCase();
     const uid = get('roulette-uid').value.trim();
@@ -139,9 +139,6 @@ form.addEventListener('submit',async event => {
       await new Promise(resolve => setTimeout(resolve,4000));
     status.textContent = result.test ? 'Resultado de prueba, sin cupón canjeable.' : 'Resultado del código ' + code;
     get('prize').textContent = result.prize;
-    const player = get('roulette-player');
-    player.hidden = !result.player;
-    player.textContent = result.player ? result.player.nickname + ' · ID ' + result.player.uid : '';
     get('coupon').value = result.coupon || '';
     get('roulette-coupon').hidden = !result.coupon;
     get('roulette-test-result').hidden = !result.test;

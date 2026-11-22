@@ -1,4 +1,3 @@
-import {onRequestGet as verifyFreeFire} from './freefire/verify.js';
 import {authorized} from './site-settings.js';
 import {checkoutPackage} from './preview-orders.js';
 import {readSettings} from '../lib/site-settings.js';
@@ -152,38 +151,29 @@ async function history(db, cursor) {
   const before = cursor === null ? null : Number(cursor);
   if (before !== null && (!Number.isSafeInteger(before) || before < 1))
     return reply({message:'Página de resultados inválida.'},400);
-  const {results} = await db.prepare(`SELECT e.rowid AS id, e.code, e.uid, e.prize, e.coupon, e.redeemed_at,
-    e.confirmed_at, e.order_token IS NOT NULL AS purchased, g.nickname, g.spun_at
+  const {results} = await db.prepare(`SELECT e.rowid AS id, e.code, COALESCE(r.uid,e.uid) AS uid, e.prize, e.coupon, e.redeemed_at,
+    e.confirmed_at, e.order_token IS NOT NULL AS purchased, g.nickname, COALESCE(r.spun_at,g.spun_at) AS spun_at
     FROM roulette_entries e LEFT JOIN roulette_spin_details g ON g.code=e.code
-    WHERE e.prize IS NOT NULL AND e.rowid < COALESCE(?, 9223372036854775807)
+    LEFT JOIN roulette_prize_registrations r ON r.code=e.code
+    WHERE e.coupon IS NOT NULL AND e.rowid < COALESCE(?, 9223372036854775807)
     ORDER BY e.rowid DESC LIMIT 51`).bind(before).all();
   const entries = results.slice(0,50);
   return reply({entries,next:results.length > 50 ? entries.at(-1).id : null});
 }
 
-async function spin(db, {code, uid}, wheel, origin, env) {
+async function spin(db, {code, uid}, wheel) {
   const test = isTestCode(code);
   if (!test && !isCode(code,'VX-')) return reply({message:'Escribe un código de giro válido.'},400);
   if (typeof uid !== 'string' || !/^\d{5,15}$/.test(uid))
     return reply({message:'Escribe el ID de Free Fire (5 a 15 dígitos).'},400);
   if (test) await registerTestCode(db, code);
-  let row = await db.prepare(`SELECT uid, confirmed_at, prize, coupon, wheel, sector,
+  let row = await db.prepare(`SELECT confirmed_at, prize, coupon, wheel, sector,
     EXISTS(SELECT 1 FROM roulette_payment_reports WHERE code=roulette_entries.code) AS reported
     FROM roulette_entries WHERE code=?`).bind(code).first();
   if (!row) return reply({message:'Código de giro no encontrado o vencido.'},404);
   if (!row.confirmed_at && !row.reported) return reply({message:'Abre el aviso de pago por WhatsApp para activar el código.'},409);
-  if (row.uid && row.uid !== uid)
-    return reply({message:'El ID debe coincidir con el jugador asociado al código.'},409);
   const existing = Boolean(row.prize);
   if (!existing) {
-    const verificationUrl = new URL('/api/freefire/verify',origin);
-    verificationUrl.searchParams.set('uid',uid);
-    const verification = await verifyFreeFire({request:new Request(verificationUrl),env});
-    const profile = await verification.json();
-    if (!verification.ok) return reply({message:profile.message},verification.status);
-    const player = profile.player;
-    if (!profile.ok || player?.uid !== uid || !player.nickname?.trim())
-      return reply({message:'No pudimos confirmar el perfil de ese ID.'},422);
     const wins = [];
     const misses = [];
     wheel.forEach((label,index) => {
@@ -193,20 +183,26 @@ async function spin(db, {code, uid}, wheel, origin, env) {
     if (!wins.length) return reply({message:'La ruleta todavía no tiene premios configurados.'},503);
     const pool = randomIndex(5) === 0 ? wins : misses;
     const sector = pool[randomIndex(pool.length)];
+    const prize = wheel[sector];
+    const coupon = !test && !isMiss(prize) ? token('VP-') : null;
     const [,, recorded] = await db.batch([
-      db.prepare(`INSERT INTO roulette_spin_details (code,nickname,spun_at)
-        SELECT code,?,CURRENT_TIMESTAMP FROM roulette_entries WHERE code=? AND prize IS NULL`)
-        .bind(player.nickname.trim().slice(0,100),code),
-      db.prepare('UPDATE roulette_entries SET uid=?,prize=?,coupon=?,wheel=?,sector=? WHERE code=? AND prize IS NULL')
-        .bind(uid,wheel[sector],!test && !isMiss(wheel[sector]) ? token('VP-') : null,JSON.stringify(wheel),sector,code),
-      db.prepare('SELECT uid, prize, coupon, wheel, sector FROM roulette_entries WHERE code=?').bind(code)
+      db.prepare(`INSERT INTO roulette_prize_registrations (code,uid,spun_at)
+        SELECT code,?,CURRENT_TIMESTAMP FROM roulette_entries WHERE code=? AND prize IS NULL AND ? IS NOT NULL`)
+        .bind(uid,code,coupon),
+      db.prepare('UPDATE roulette_entries SET prize=?,coupon=?,wheel=?,sector=? WHERE code=? AND prize IS NULL')
+        .bind(prize,coupon,JSON.stringify(wheel),sector,code),
+      db.prepare('SELECT prize, coupon, wheel, sector FROM roulette_entries WHERE code=?').bind(code)
     ]);
     row = recorded.results[0];
-    if (row.uid !== uid) return reply({message:'El código ya está asociado a otro jugador.'},409);
   }
-  const details = await db.prepare('SELECT nickname FROM roulette_spin_details WHERE code=?').bind(code).first();
+  if (row.coupon) {
+    const winner = await db.prepare(`SELECT COALESCE(r.uid,e.uid) AS uid
+      FROM roulette_entries e LEFT JOIN roulette_prize_registrations r ON r.code=e.code WHERE e.code=?`).bind(code).first();
+    if (winner?.uid && winner.uid !== uid)
+      return reply({message:'Usa el ID que ingresaste al ganar este premio.'},409);
+  }
   return reply({prize:row.prize,coupon:isMiss(row.prize) ? null : row.coupon,prizes:JSON.parse(row.wheel),
-    sector:row.sector,existing,test,player:details ? {uid,nickname:details.nickname} : null});
+    sector:row.sector,existing,test});
 }
 
 export async function onRequest({request, env}) {
@@ -235,7 +231,8 @@ export async function onRequest({request, env}) {
         confirmed_at TEXT, prize TEXT, coupon TEXT UNIQUE, wheel TEXT, sector INTEGER, redeemed_at TEXT)`),
       db.prepare('CREATE TABLE IF NOT EXISTS roulette_settings (id INTEGER PRIMARY KEY, prizes TEXT NOT NULL)'),
       db.prepare('CREATE TABLE IF NOT EXISTS roulette_payment_reports (code TEXT PRIMARY KEY)'),
-      db.prepare('CREATE TABLE IF NOT EXISTS roulette_spin_details (code TEXT PRIMARY KEY, nickname TEXT NOT NULL, spun_at TEXT NOT NULL)')
+      db.prepare('CREATE TABLE IF NOT EXISTS roulette_spin_details (code TEXT PRIMARY KEY, nickname TEXT NOT NULL, spun_at TEXT NOT NULL)'),
+      db.prepare('CREATE TABLE IF NOT EXISTS roulette_prize_registrations (code TEXT PRIMARY KEY, uid TEXT NOT NULL, spun_at TEXT NOT NULL)')
     ]);
     if (isAdmin) return body ? await admin(db,body) : await history(db,url.searchParams.get('before'));
     if (body?.action === 'order' || body?.action === 'report-payment') return await createOrder(db,body);
@@ -244,7 +241,7 @@ export async function onRequest({request, env}) {
     const active = buildWheel(prizes);
     const wheel = addUnavailableSectors(active);
     if (request.method === 'GET') return reply({prizes:active,wheel});
-    if (body?.action === 'spin') return await spin(db,body,wheel,url.origin,env);
+    if (body?.action === 'spin') return await spin(db,body,wheel);
     return reply({message:'Acción inválida.'},400);
   } catch {
     return reply({message:'No pudimos acceder a la ruleta. Intenta de nuevo.'},503);
