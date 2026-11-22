@@ -155,7 +155,10 @@ async function history(db, cursor) {
     e.confirmed_at, e.order_token IS NOT NULL AS purchased, g.nickname, COALESCE(r.spun_at,g.spun_at) AS spun_at
     FROM roulette_entries e LEFT JOIN roulette_spin_details g ON g.code=e.code
     LEFT JOIN roulette_prize_registrations r ON r.code=e.code
-    WHERE e.coupon IS NOT NULL AND e.rowid < COALESCE(?, 9223372036854775807)
+    WHERE e.coupon IS NOT NULL
+      AND LOWER(TRIM(REPLACE(REPLACE(REPLACE(REPLACE(e.prize,'Á','A'),'á','a'),'Ó','O'),'ó','o')))
+        NOT IN ('sigue intentando','sera para la proxima')
+      AND e.rowid < COALESCE(?, 9223372036854775807)
     ORDER BY e.rowid DESC LIMIT 51`).bind(before).all();
   const entries = results.slice(0,50);
   return reply({entries,next:results.length > 50 ? entries.at(-1).id : null});
