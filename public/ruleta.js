@@ -113,10 +113,11 @@ form.addEventListener('submit',async event => {
   button.disabled = true;
   button.textContent = '…';
   reward.close();
-  status.textContent = 'Validando código…';
+  status.textContent = 'Verificando código e ID de Free Fire…';
   try {
     const code = get('code').value.trim().toUpperCase();
-    const result = await request({action:'spin',code});
+    const uid = get('roulette-uid').value.trim();
+    const result = await request({action:'spin',code,uid});
     showWheel(result.prizes);
     const target = (360 - result.sector * 360 / result.prizes.length) % 360;
     const animate = !result.existing && !matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -128,6 +129,9 @@ form.addEventListener('submit',async event => {
       await new Promise(resolve => setTimeout(resolve,4000));
     status.textContent = result.test ? 'Resultado de prueba, sin cupón canjeable.' : 'Resultado del código ' + code;
     get('prize').textContent = result.prize;
+    const player = get('roulette-player');
+    player.hidden = !result.player;
+    player.textContent = result.player ? result.player.nickname + ' · ID ' + result.player.uid : '';
     get('coupon').value = result.coupon || '';
     get('roulette-coupon').hidden = !result.coupon;
     get('roulette-test-result').hidden = !result.test;

@@ -260,7 +260,11 @@ function renderRouletteAdmin() {
   box.append(element('p','Escribe de 2 a 12 casillas, una por línea. Incluye «Sigue intentando» (80 %) y «S/ 1 de descuento (desde 1,000 diamantes)» (20 %). Puedes repetir las casillas.'),prizes);
   const codes = group('Códigos y cupones');
   const input = walletInput(codes,'Código VX de giro o cupón VP de premio',{maxLength:35});
-  const output = walletInput(codes,'Código generado',{readOnly:true});
+  const manual = group('Códigos manuales');
+  manual.append(element('p','Cada código permite un giro y queda activo al generarlo.'));
+  const output = walletInput(manual,'Código generado',{readOnly:true});
+  const manualMessage = element('p');
+  manualMessage.setAttribute('role','status');
   const message = element('p');
   message.setAttribute('role','status');
 
@@ -271,7 +275,7 @@ function renderRouletteAdmin() {
     });
     const result = await response.json();
     if (!response.ok) throw new Error(result.message);
-    message.textContent = result.message;
+    (data.action === 'create' ? manualMessage : message).textContent = result.message;
     if (data.action === 'create') {
       output.value = result.code;
       output.select();
@@ -280,8 +284,9 @@ function renderRouletteAdmin() {
   function button(label, data) {
     const control = action(label,async () => {
       control.disabled = true;
-      try { await send(data()); }
-      catch (error) { message.textContent = error.message; }
+      const payload = data();
+      try { await send(payload); }
+      catch (error) { (payload.action === 'create' ? manualMessage : message).textContent = error.message; }
       finally { control.disabled = false; }
     });
     return control;
@@ -292,15 +297,80 @@ function renderRouletteAdmin() {
   codes.append(
     button('Consultar código',() => ({action:'inspect',code:input.value.trim().toUpperCase()})),
     button('Confirmar pago y activar código',() => ({action:'confirm',code:input.value.trim().toUpperCase()})),
-    button('Generar código activo',() => ({action:'create'})),
     button('Marcar premio como canjeado',() => ({action:'redeem',code:input.value.trim().toUpperCase()})),
     message
   );
+  manual.append(
+    button('Generar código activo',() => ({action:'create'})),
+    action('Copiar código',async () => {
+      if (!output.value) {
+        manualMessage.textContent = 'Primero genera un código.';
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(output.value);
+        manualMessage.textContent = 'Código copiado.';
+      } catch {
+        output.select();
+        manualMessage.textContent = 'Seleccionamos el código para que puedas copiarlo.';
+      }
+    }),
+    manualMessage
+  );
+  renderRouletteHistory();
   fetch('/api/roulette').then(async response => {
     if (!response.ok) throw new Error('No se pudieron cargar los premios.');
     const data = await response.json();
     if (!prizes.value) prizes.value = data.prizes.join('\n');
   }).catch(error => { message.textContent = error.message; });
+}
+
+function renderRouletteHistory() {
+  const box = group('Historial de giros');
+  const list = element('ul');
+  const state = element('p');
+  state.setAttribute('role','status');
+  let cursor = null;
+  const peruDate = new Intl.DateTimeFormat('es-PE',{dateStyle:'short',timeStyle:'short',timeZone:'America/Lima'});
+
+  async function load(append) {
+    refresh.disabled = more.disabled = true;
+    state.textContent = 'Cargando giros…';
+    try {
+      const query = append && cursor ? '&before=' + cursor : '';
+      const response = await fetch('/api/roulette?admin=1' + query,{headers:{Authorization:'Bearer '+key}});
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message);
+      const items = data.entries.map(entry => {
+        const type = entry.code.startsWith('VT-') ? 'Prueba' : entry.purchased ? 'Pedido' : 'Manual';
+        const player = entry.uid ? [entry.nickname,'ID ' + entry.uid].filter(Boolean).join(' · ') : 'Sin ID registrado';
+        const date = entry.spun_at ? peruDate.format(new Date(entry.spun_at.replace(' ','T') + 'Z')) : 'Sin fecha de giro';
+        const item = element('li');
+        item.append(element('strong',entry.prize),element('div',player + ' · ' + date),
+          element('div',type + ' · ' + entry.code));
+        if (entry.coupon) {
+          const status = entry.redeemed_at ? 'Canjeado' : entry.confirmed_at ? 'Pendiente de canje' : 'Pago por confirmar';
+          item.append(element('div',entry.coupon + ' · ' + status));
+        }
+        return item;
+      });
+      if (!append) list.replaceChildren();
+      list.append(...items);
+      cursor = data.next;
+      more.hidden = cursor === null;
+      state.textContent = list.children.length ? '' : 'Todavía no hay giros registrados.';
+    } catch (error) {
+      state.textContent = error.message;
+    } finally {
+      refresh.disabled = more.disabled = false;
+    }
+  }
+
+  const refresh = action('Actualizar historial',() => load(false));
+  const more = action('Ver más giros',() => load(true));
+  more.hidden = true;
+  box.append(refresh,state,list,more);
+  load(false);
 }
 
 function render() {
